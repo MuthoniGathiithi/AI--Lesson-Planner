@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Link } from "react-router-dom"
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -177,12 +178,28 @@ export default function SignUp() {
           </button>
         </form>
 
+        {/* Divider + Social Buttons */}
+        <div style={styles.dividerWrapper}>
+          <div style={styles.divider} />
+          <div style={styles.dividerText}>Or continue with</div>
+          <div style={styles.divider} />
+        </div>
+
+        <div style={styles.socialRow}>
+          <button style={{ ...styles.socialButton }} onClick={() => alert('Google auth placeholder')}>
+            <span style={styles.socialLabel}>Google</span>
+          </button>
+          <button style={{ ...styles.socialButton }} onClick={() => alert('GitHub auth placeholder')}>
+            <span style={styles.socialLabel}>GitHub</span>
+          </button>
+        </div>
+
         {/* Sign In Link */}
         <div style={styles.footer}>
-          Already have an account?{" "}
-          <a href="#signin" style={styles.link}>
-            Sign In
-          </a>
+          Already have an account? {" "}
+          <Link to="/signin" style={styles.link}>
+            Sign in
+          </Link>
         </div>
       </div>
     </div>
@@ -299,4 +316,41 @@ const styles = {
     fontWeight: "600",
     cursor: "pointer",
   },
+  dividerWrapper: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    marginTop: "20px",
+    marginBottom: "14px",
+  },
+  divider: {
+    flex: 1,
+    height: "1px",
+    background: "#E5E7EB",
+  },
+  dividerText: {
+    fontSize: "13px",
+    color: "#9CA3AF",
+    whiteSpace: "nowrap",
+  },
+  socialRow: {
+    display: "flex",
+    gap: "12px",
+    justifyContent: "center",
+    marginTop: "4px",
+  },
+  socialButton: {
+    flex: 1,
+    padding: "10px 14px",
+    borderRadius: "8px",
+    border: "1px solid #E5E7EB",
+    background: "#ffffff",
+    cursor: "pointer",
+    fontWeight: 600,
+  },
+  socialLabel: {
+    color: "#111827",
+  },
 }
+
+
