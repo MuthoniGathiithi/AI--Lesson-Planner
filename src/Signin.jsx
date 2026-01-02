@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Link } from "react-router-dom"
 
 export default function SignIn() {
   const [formData, setFormData] = useState({
@@ -131,9 +132,16 @@ export default function SignIn() {
 
         <div style={styles.footer}>
           Don't have an account?{" "}
-          <a href="#signup" style={styles.link}>
+          <Link to="/signup" style={styles.link}>
             Sign up here
-          </a>
+          </Link>
+        </div>
+
+        {/* Back to Home Link */}
+        <div style={{ textAlign: "center", marginTop: "12px" }}>
+          <Link to="/" style={{ ...styles.link, fontSize: "13px" }}>
+            Back to Home
+          </Link>
         </div>
       </div>
     </div>
