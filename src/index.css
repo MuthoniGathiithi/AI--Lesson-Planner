@@ -1,6 +1,10 @@
 .body {
   background-color: whitesmoke; /* dark background */
-  margin: 0; /* optional: remove default margin */
+}
+
+/* Ensure the page has no default body margin so header/footer span edge-to-edge */
+body {
+  margin: 0;
 }
 
 .App {
