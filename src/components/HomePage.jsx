@@ -511,7 +511,7 @@ export default function HomePage() {
               color: '#6B7280',
               margin: 0
             }}>
-              Create perfect lesson plans in three simple steps
+           Create a CBE-aligned lesson plan in minutes.
             </p>
           </div>
 
@@ -528,9 +528,9 @@ export default function HomePage() {
               gap: '56px'
             }}>
               {[
-                { num: '01', title: 'Enter Your Requirements', desc: 'Tell us about your subject, grade level, learning objectives, and any specific requirements.' },
-                { num: '02', title: 'AI Generates Plan', desc: 'Our advanced AI analyzes your input and generates a comprehensive, standards-aligned lesson plan in minutes.' },
-                { num: '03', title: 'Customize & Download', desc: 'Review, edit, and customize the plan to your needs. Download or share with colleagues instantly.' }
+                { num: '01', title: 'Enter Your Class Details', desc: 'Select grade, subject, strand, sub-strand, and lesson duration..' },
+                { num: '02', title: 'Generate Your Lesson Plan', desc: 'Our AI instantly creates a structured, CBE-aligned lesson plan, including learning outcomes, activities, and assessment.' },
+                { num: '03', title: 'Review, Edit & Download', desc: 'Customize the lesson to suit your teaching style.' }
               ].map((step, i) => (
                 <div key={i} style={{
                   display: 'flex',
