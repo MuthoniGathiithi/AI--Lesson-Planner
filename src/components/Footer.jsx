@@ -108,7 +108,7 @@ export default function Footer() {
           fontSize: '0.85rem',
           color: '#6B7280'
         }}>
-          © 2025 FunzoIQ. All rights reserved.
+          © 2026 FunzoIQ. All rights reserved.
         </div>
       </div>
     </footer>
