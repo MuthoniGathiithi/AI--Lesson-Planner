@@ -148,7 +148,8 @@ export default function Header() {
           color: logoColor,
           letterSpacing: '-0.5px',
           textDecoration: 'none',
-          transition: 'color 0.2s'
+          transition: 'color 0.2s',
+          fontFamily: 'Inter, sans-serif'
         }}>
           FunzoIQ
         </Link>
@@ -158,7 +159,7 @@ export default function Header() {
             background: 'transparent',
             border: 'none',
             color: activeSection === 'home' ? activeColor : inactiveColor,
-            fontSize: '1.05rem',
+            fontSize: '1.25rem',
             fontWeight: 600,
             cursor: 'pointer',
             padding: '6px 6px',
@@ -174,7 +175,7 @@ export default function Header() {
             background: 'transparent',
             border: 'none',
             color: activeSection === 'about' ? activeColor : inactiveColor,
-            fontSize: '1.05rem',
+            fontSize: '1.25rem',
             fontWeight: 600,
             cursor: 'pointer',
             padding: '6px 6px',
@@ -190,7 +191,7 @@ export default function Header() {
             background: 'transparent',
             border: 'none',
             color: activeSection === 'how-it-works' ? activeColor : inactiveColor,
-            fontSize: '1.05rem',
+            fontSize: '1.25rem',
             fontWeight: 600,
             cursor: 'pointer',
             padding: '6px 6px',
@@ -205,7 +206,7 @@ export default function Header() {
           <button onClick={handlePricingClick} style={{
             background: 'transparent',
             border: 'none',
-            fontSize: '1.05rem',
+            fontSize: '1.25rem',
             fontWeight: 600,
             cursor: 'pointer',
             transition: 'color 0.15s',
@@ -215,7 +216,7 @@ export default function Header() {
           }}
           onMouseOver={(e) => e.currentTarget.style.color = activeColor}
           onMouseOut={(e) => e.currentTarget.style.color = activeSection === 'pricing' ? activeColor : inactiveColor}>
-            Pricing
+            Contacts
           </button>
         </div>
 
@@ -224,7 +225,7 @@ export default function Header() {
             background: 'none',
             border: 'none',
             color: isActive('/signin') ? activeColor : inactiveColor,
-            fontSize: '1.05rem',
+            fontSize: '1.25rem',
             fontWeight: 500,
             padding: '8px 20px',
             cursor: 'pointer',
