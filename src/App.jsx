@@ -2,20 +2,26 @@ import React from 'react';
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { useLocation } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import SignIn from "./Signin";
 import SignUp from "./Signup";
+import Dashboard from "./Dashboard";
 
 function App() {
+  const location = useLocation();
+
   return (
     <>
-      <Header />
+      {/* Hide header/footer on dashboard route */}
+      {location.pathname !== '/dashboard' && <Header />}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
-      <Footer />
+      {location.pathname !== '/dashboard' && <Footer />}
     </>
   );
 }
