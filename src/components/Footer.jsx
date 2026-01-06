@@ -1,6 +1,23 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Footer() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const goToSection = (id) => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        el?.scrollIntoView({ behavior: 'smooth' });
+      }, 120);
+    } else {
+      const el = document.getElementById(id);
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer style={{
       padding: '60px 40px 30px',
@@ -40,42 +57,24 @@ export default function Footer() {
             }}>
               Product
             </h4>
-            {['Features', 'Pricing', 'Templates', 'Resources'].map((item, i) => (
-              <div key={i} style={{
-                fontSize: '0.9rem',
-                color: '#9CA3AF',
-                marginBottom: '12px',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => e.target.style.color = '#FFFFFF'}
-              onMouseOut={(e) => e.target.style.color = '#9CA3AF'}>
-                {item}
-              </div>
-            ))}
+            <div
+              style={{ fontSize: '0.9rem', color: '#9CA3AF', marginBottom: '12px', cursor: 'pointer' }}
+              onClick={() => goToSection('about')}
+              onMouseOver={(e) => e.currentTarget.style.color = '#FFFFFF'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#9CA3AF'}
+            >
+              About Us
+            </div>
+            <div
+              style={{ fontSize: '0.9rem', color: '#9CA3AF', marginBottom: '12px', cursor: 'pointer' }}
+              onClick={() => goToSection('how-it-works')}
+              onMouseOver={(e) => e.currentTarget.style.color = '#FFFFFF'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#9CA3AF'}
+            >
+              How It Works
+            </div>
           </div>
           
-          <div>
-            <h4 style={{
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              marginBottom: '16px',
-              color: '#FFFFFF'
-            }}>
-              Company
-            </h4>
-            {['About', 'Blog', 'Careers', 'Contact'].map((item, i) => (
-              <div key={i} style={{
-                fontSize: '0.9rem',
-                color: '#9CA3AF',
-                marginBottom: '12px',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => e.target.style.color = '#FFFFFF'}
-              onMouseOut={(e) => e.target.style.color = '#9CA3AF'}>
-                {item}
-              </div>
-            ))}
-          </div>
           
           <div>
             <h4 style={{
@@ -86,7 +85,7 @@ export default function Footer() {
             }}>
               Legal
             </h4>
-            {['Privacy', 'Terms', 'Security'].map((item, i) => (
+            {['Privacy', 'Terms', ''].map((item, i) => (
               <div key={i} style={{
                 fontSize: '0.9rem',
                 color: '#9CA3AF',
