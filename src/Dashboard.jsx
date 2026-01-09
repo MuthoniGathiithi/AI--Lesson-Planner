@@ -140,14 +140,22 @@ const loadLessons = async () => {
 
 
 const handleViewLesson = (lesson) => {
+  console.log('Viewing lesson:', lesson)
+  console.log('administrativeDetails:', lesson.administrativeDetails)
+  console.log('guidingQuestion:', lesson.guidingQuestion)
+  console.log('learningOutcomes:', lesson.learningOutcomes)
+  console.log('lessonFlow:', lesson.lessonFlow)
+  
   const fullLesson = {
-    administrativeDetails: lesson.administrativeDetails,
-    curriculumAlignment: lesson.curriculumAlignment,
-    learningOutcomes: lesson.learningOutcomes,
-    guidingQuestion: lesson.guidingQuestion,
-    learningResources: lesson.learningResources,
-    lessonFlow: lesson.lessonFlow
+    administrativeDetails: lesson.administrativeDetails || {},
+    curriculumAlignment: lesson.curriculumAlignment || {},
+    learningOutcomes: lesson.learningOutcomes || [],
+    guidingQuestion: lesson.guidingQuestion || "",
+    learningResources: lesson.learningResources || [],
+    lessonFlow: lesson.lessonFlow || {}
   }
+  
+  console.log('Setting lessonPlan to:', fullLesson)
   
   setLessonPlan(fullLesson)
   setCurrentLessonId(lesson.dbId)
