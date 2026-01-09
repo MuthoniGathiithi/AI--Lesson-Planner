@@ -65,10 +65,10 @@ export default function LessonCreator() {
       const generatedPlan = await generateLessonPlan(formData)
       
       setLessonPlan({
-        ...formData,
-        ...generatedPlan,
-        date: new Date().toLocaleDateString(),
-      })
+  ...generatedPlan,   // AI data FIRST
+  ...formData,        // Form data SECOND (won't overwrite)
+  date: new Date().toLocaleDateString(),
+})
       
       setCurrentLessonId(null)
       console.log('Generated lesson plan:', generatedPlan)
