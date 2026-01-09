@@ -164,99 +164,100 @@ export default function LessonCreator() {
                   </button>
                 </div>
               ) : (
-                <div style={styles.card}>
-                  <div style={styles.planHeader}>
-                    <h2 style={styles.planTitle}>Generated Lesson Plan</h2>
-                    <div style={styles.buttonGroup}>
-                      <button onClick={() => setLessonPlan(null)} style={styles.secondaryButton}>
-                        Create New
-                      </button>
-                      <button onClick={handleSave} style={styles.button}>Save</button>
+                <div style={styles.documentContainer}>
+                  <div style={styles.actionBar}>
+                    <button onClick={() => setLessonPlan(null)} style={styles.secondaryButton}>
+                      ← Create New
+                    </button>
+                    <button onClick={handleSave} style={styles.button}>💾 Save</button>
+                  </div>
+
+                  <div style={styles.documentPage}>
+                    {/* Document Header */}
+                    <div style={styles.docHeader}>
+                      <h1 style={styles.docTitle}>LESSON PLAN</h1>
+                      <div style={styles.docDivider}></div>
+                    </div>
+
+                    {/* Administrative Details Table */}
+                    <table style={styles.table}>
+                      <tbody>
+                        <tr>
+                          <td style={styles.tableLabelCell}>School:</td>
+                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.school}</td>
+                          <td style={styles.tableLabelCell}>Subject:</td>
+                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.subject}</td>
+                        </tr>
+                        <tr>
+                          <td style={styles.tableLabelCell}>Class:</td>
+                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.class}</td>
+                          <td style={styles.tableLabelCell}>Grade:</td>
+                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.grade}</td>
+                        </tr>
+                        <tr>
+                          <td style={styles.tableLabelCell}>Teacher:</td>
+                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.teacher}</td>
+                          <td style={styles.tableLabelCell}>Students:</td>
+                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.studentEnrollment?.total}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    {/* Guiding Question */}
+                    <div style={styles.section}>
+                      <h2 style={styles.sectionTitle}>GUIDING QUESTION</h2>
+                      <p style={styles.docText}><em>{lessonPlan.guidingQuestion}</em></p>
+                    </div>
+
+                    {/* Learning Outcomes */}
+                    <div style={styles.section}>
+                      <h2 style={styles.sectionTitle}>LEARNING OUTCOMES</h2>
+                      {lessonPlan.learningOutcomes?.map((outcome) => (
+                        <p key={outcome.id} style={styles.docText}>
+                          {outcome.id}. {outcome.outcome}
+                        </p>
+                      ))}
+                    </div>
+
+                    {/* Learning Resources */}
+                    <div style={styles.section}>
+                      <h2 style={styles.sectionTitle}>LEARNING RESOURCES</h2>
+                      <p style={styles.docText}>
+                        {lessonPlan.learningResources?.join(', ')}
+                      </p>
+                    </div>
+
+                    {/* Lesson Flow */}
+                    <div style={styles.section}>
+                      <h2 style={styles.sectionTitle}>LESSON FLOW</h2>
+                      
+                      {/* Introduction */}
+                      <div style={styles.subsection}>
+                        <h3 style={styles.subsectionTitle}>Introduction (5 minutes)</h3>
+                        <p style={styles.docText}>{lessonPlan.lessonFlow?.introduction?.description}</p>
+                      </div>
+
+                      {/* Development Steps */}
+                      <div style={styles.subsection}>
+                        <h3 style={styles.subsectionTitle}>Development Activities</h3>
+                        {lessonPlan.lessonFlow?.development?.map((step) => (
+                          <div key={step.step} style={styles.stepContainer}>
+                            <p style={styles.stepTitle}>
+                              <strong>Step {step.step}: {step.title}</strong>
+                            </p>
+                            <p style={styles.docText}><strong>Description:</strong> {step.description}</p>
+                            <p style={styles.docText}><strong>Activity:</strong> {step.activity}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Conclusion */}
+                      <div style={styles.subsection}>
+                        <h3 style={styles.subsectionTitle}>Conclusion (5 minutes)</h3>
+                        <p style={styles.docText}>{lessonPlan.lessonFlow?.conclusion?.description}</p>
+                      </div>
                     </div>
                   </div>
-
-                  <div style={styles.metaGrid}>
-
-
-
-                <div style={styles.metaGrid}>
-  <div><strong>School:</strong> {lessonPlan.administrativeDetails?.school}</div>
-  <div><strong>Subject:</strong> {lessonPlan.administrativeDetails?.subject}</div>
-  <div><strong>Class:</strong> {lessonPlan.administrativeDetails?.class}</div>
-  <div><strong>Grade:</strong> {lessonPlan.administrativeDetails?.grade}</div>
-  <div><strong>Teacher:</strong> {lessonPlan.administrativeDetails?.teacher}</div>
-  <div><strong>Students:</strong> {lessonPlan.administrativeDetails?.studentEnrollment?.total}</div>
-</div>
-
-{/* Guiding Question */}
-<div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '8px' }}>
-  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Guiding Question</h3>
-  <p style={{ fontSize: '16px', fontStyle: 'italic' }}>{lessonPlan.guidingQuestion}</p>
-</div>
-
-{/* Learning Outcomes */}
-<div style={{ marginTop: '24px' }}>
-  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' }}>Learning Outcomes</h3>
-  <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
-    {lessonPlan.learningOutcomes?.map((outcome) => (
-      <li key={outcome.id} style={{ marginBottom: '8px' }}>
-        <strong>{outcome.id})</strong> {outcome.outcome}
-      </li>
-    ))}
-  </ul>
-</div>
-
-{/* Learning Resources */}
-<div style={{ marginTop: '24px' }}>
-  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' }}>Learning Resources</h3>
-  <ul style={{ paddingLeft: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-    {lessonPlan.learningResources?.map((resource, index) => (
-      <li key={index}>{resource}</li>
-    ))}
-  </ul>
-</div>
-
-{/* Lesson Flow */}
-<div style={{ marginTop: '24px' }}>
-  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Lesson Flow</h3>
-  
-  {/* Introduction */}
-  <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#fef3c7', borderRadius: '8px' }}>
-    <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>Introduction (5 minutes)</h4>
-    <p>{lessonPlan.lessonFlow?.introduction?.description}</p>
-  </div>
-
-  {/* Development Steps */}
-  <div style={{ marginBottom: '20px' }}>
-    <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px' }}>Development Activities</h4>
-    {lessonPlan.lessonFlow?.development?.map((step) => (
-      <div key={step.step} style={{ marginBottom: '16px', padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', borderLeft: '4px solid #22c55e' }}>
-        <h5 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>
-          Step {step.step}: {step.title}
-        </h5>
-        <p style={{ marginBottom: '8px' }}><strong>Description:</strong> {step.description}</p>
-        <p><strong>Activity:</strong> {step.activity}</p>
-      </div>
-    ))}
-  </div>
-
-  {/* Conclusion */}
-  <div style={{ padding: '16px', backgroundColor: '#fce7f3', borderRadius: '8px' }}>
-    <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>Conclusion (5 minutes)</h4>
-    <p>{lessonPlan.lessonFlow?.conclusion?.description}</p>
-  </div>
-</div>
-                   
-
-
-
-
-                  </div>
-
-                  <textarea
-                    style={styles.textarea}
-                    defaultValue={lessonPlan.content}
-                  />
                 </div>
               )}
             </>
@@ -575,5 +576,102 @@ const styles = {
     border: "1px solid #dc2626",
     borderRadius: "6px",
     cursor: "pointer",
+  },
+  // Word Document Styles
+  documentContainer: {
+    backgroundColor: "#e5e7eb",
+    padding: "40px 20px",
+    minHeight: "100vh",
+  },
+  actionBar: {
+    maxWidth: "850px",
+    margin: "0 auto 20px auto",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  documentPage: {
+    maxWidth: "850px",
+    margin: "0 auto",
+    backgroundColor: "#ffffff",
+    padding: "60px 80px",
+    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    minHeight: "1100px",
+    fontFamily: "'Times New Roman', Times, serif",
+  },
+  docHeader: {
+    textAlign: "center",
+    marginBottom: "40px",
+  },
+  docTitle: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: "#000",
+    letterSpacing: "1px",
+    marginBottom: "10px",
+  },
+  docDivider: {
+    height: "3px",
+    backgroundColor: "#000",
+    width: "100%",
+    margin: "10px 0",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginBottom: "30px",
+    border: "1px solid #000",
+  },
+  tableLabelCell: {
+    border: "1px solid #000",
+    padding: "8px 12px",
+    fontWeight: "bold",
+    fontSize: "12px",
+    backgroundColor: "#f3f4f6",
+    width: "20%",
+  },
+  tableValueCell: {
+    border: "1px solid #000",
+    padding: "8px 12px",
+    fontSize: "12px",
+    width: "30%",
+  },
+  section: {
+    marginBottom: "25px",
+  },
+  sectionTitle: {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: "#000",
+    textTransform: "uppercase",
+    marginBottom: "12px",
+    borderBottom: "2px solid #000",
+    paddingBottom: "4px",
+  },
+  subsection: {
+    marginBottom: "20px",
+  },
+  subsectionTitle: {
+    fontSize: "13px",
+    fontWeight: "bold",
+    color: "#000",
+    marginBottom: "8px",
+    textDecoration: "underline",
+  },
+  docText: {
+    fontSize: "12px",
+    lineHeight: "1.8",
+    color: "#000",
+    marginBottom: "8px",
+    textAlign: "justify",
+  },
+  stepContainer: {
+    marginBottom: "15px",
+    paddingLeft: "20px",
+  },
+  stepTitle: {
+    fontSize: "12px",
+    fontWeight: "bold",
+    marginBottom: "6px",
   },
 }
