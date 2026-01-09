@@ -1,11 +1,45 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import { generateLessonPlan } from "./services/api"
-import { 
-  saveLessonPlan, 
-  fetchLessonPlans, 
-  updateLessonPlan, 
-  deleteLessonPlan 
-} from "./services/lessonPlanService"
+import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
+
+// SVG Icons as components
+const PlusIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm4 9h-3v3h-2v-3H6v-2h3V6h2v3h3v2z" />
+  </svg>
+)
+
+const ArchiveIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M3 1h14a2 2 0 0 1 2 2v4H1V3a2 2 0 0 1 2-2zm0 7h14v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8zm6 4h2v2h-2v-2z" />
+  </svg>
+)
+
+const SaveIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M3 2h11l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V2zm9 2H5v12h10V4zm-2 2v4h4V6H7z" />
+  </svg>
+)
+
+const ArrowLeftIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M7 10l5-5-1.4-1.4L4.2 10l6.4 6.4L12 15l-5-5z" />
+  </svg>
+)
+
+const EyeIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M10 3C5.6 3 1.7 5.7 0 9.5c1.7 3.8 5.6 6.5 10 6.5s8.3-2.7 10-6.5c-1.7-3.8-5.6-6.5-10-6.5zm0 10c-1.9 0-3.5-1.6-3.5-3.5S8.1 6 10 6s3.5 1.6 3.5 3.5S11.9 13 10 13z" />
+  </svg>
+)
+
+const TrashIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M6 2a1 1 0 0 0-1 1v1H2a1 1 0 1 0 0 2h1v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2h-3V3a1 1 0 0 0-1-1H6zm2 4a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V6zm4 0a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V6z" />
+  </svg>
+)
 
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("create")
@@ -20,7 +54,7 @@ export default function LessonCreator() {
     className: "",
     grade: "10",
     term: "1",
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split("T")[0],
     startTime: "08:00",
     endTime: "08:40",
     teacherName: "",
@@ -31,64 +65,47 @@ export default function LessonCreator() {
     subStrand: "",
   })
 
-  // Load saved lessons when Archive tab is opened
   useEffect(() => {
     if (activeTab === "archive") {
       loadLessons()
     }
   }, [activeTab])
 
-  
+  const loadLessons = async () => {
+    setIsLoadingLessons(true)
+    const result = await fetchLessonPlans()
 
+    if (result.success) {
+      const lessons = result.data.map((lesson) => {
+        const content = typeof lesson.content === "string" ? JSON.parse(lesson.content) : lesson.content
 
-const loadLessons = async () => {
-  setIsLoadingLessons(true)
-  const result = await fetchLessonPlans()
-  
-  if (result.success) {
-    const lessons = result.data.map(lesson => {
-      // Parse the content if it's a string
-      const content = typeof lesson.content === 'string' 
-        ? JSON.parse(lesson.content) 
-        : lesson.content
-      
-      return {
-        ...content,
-        dbId: lesson.id,
-        savedDate: new Date(lesson.created_at).toLocaleDateString(),
-        status: lesson.status
-      }
-    })
-    setSavedLessons(lessons)
-  } else {
-    alert('Failed to load lessons: ' + result.error)
+        return {
+          ...content,
+          dbId: lesson.id,
+          savedDate: new Date(lesson.created_at).toLocaleDateString(),
+          status: lesson.status,
+        }
+      })
+      setSavedLessons(lessons)
+    } else {
+      alert("Failed to load lessons: " + result.error)
+    }
+
+    setIsLoadingLessons(false)
   }
-  
-  setIsLoadingLessons(false)
-}
-
-
-
-
-
-
-
-
-
-
 
   const handleGenerate = async () => {
     setIsGenerating(true)
-    
+
     try {
       const generatedPlan = await generateLessonPlan(formData)
-        setLessonPlan(generatedPlan)
-      
+      setLessonPlan(generatedPlan)
+
       setCurrentLessonId(null)
-      console.log('Generated lesson plan:', generatedPlan)
+      console.log("Generated lesson plan:", generatedPlan)
     } catch (error) {
-      console.error('Error generating lesson plan:', error)
-      alert('Failed to generate lesson plan. Make sure the backend is running!')
+      console.error("Error generating lesson plan:", error)
+      alert("Failed to generate lesson plan. Make sure the backend is running!")
     } finally {
       setIsGenerating(false)
     }
@@ -96,12 +113,12 @@ const loadLessons = async () => {
 
   const handleSave = async () => {
     if (!lessonPlan) return
-    
+
     setIsSaving(true)
-    
+
     try {
       let result
-      
+
       if (currentLessonId) {
         result = await updateLessonPlan(currentLessonId, lessonPlan)
         if (result.success) {
@@ -114,62 +131,59 @@ const loadLessons = async () => {
           setCurrentLessonId(result.data.id)
         }
       }
-      
+
       if (!result.success) {
-        alert('Failed to save lesson plan: ' + result.error)
+        alert("Failed to save lesson plan: " + result.error)
       }
-      
+
       if (activeTab === "archive") {
         await loadLessons()
       }
     } catch (error) {
-      console.error('Error saving lesson:', error)
-      alert('An error occurred while saving the lesson plan')
+      console.error("Error saving lesson:", error)
+      alert("An error occurred while saving the lesson plan")
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDelete = async (lesson) => {
-    if (!confirm('Are you sure you want to delete this lesson plan?')) {
+    if (!confirm("Are you sure you want to delete this lesson plan?")) {
       return
     }
-    
+
     const result = await deleteLessonPlan(lesson.dbId)
-    
+
     if (result.success) {
-      alert('Lesson plan deleted successfully!')
+      alert("Lesson plan deleted successfully!")
       await loadLessons()
     } else {
-      alert('Failed to delete lesson plan: ' + result.error)
+      alert("Failed to delete lesson plan: " + result.error)
     }
   }
 
+  const handleViewLesson = (lesson) => {
+    console.log("Viewing lesson:", lesson)
+    console.log("administrativeDetails:", lesson.administrativeDetails)
+    console.log("guidingQuestion:", lesson.guidingQuestion)
+    console.log("learningOutcomes:", lesson.learningOutcomes)
+    console.log("lessonFlow:", lesson.lessonFlow)
 
-const handleViewLesson = (lesson) => {
-  console.log('Viewing lesson:', lesson)
-  console.log('administrativeDetails:', lesson.administrativeDetails)
-  console.log('guidingQuestion:', lesson.guidingQuestion)
-  console.log('learningOutcomes:', lesson.learningOutcomes)
-  console.log('lessonFlow:', lesson.lessonFlow)
-  
-  const fullLesson = {
-    administrativeDetails: lesson.administrativeDetails || {},
-    curriculumAlignment: lesson.curriculumAlignment || {},
-    learningOutcomes: lesson.learningOutcomes || [],
-    guidingQuestion: lesson.guidingQuestion || "",
-    learningResources: lesson.learningResources || [],
-    lessonFlow: lesson.lessonFlow || {}
+    const fullLesson = {
+      administrativeDetails: lesson.administrativeDetails || {},
+      curriculumAlignment: lesson.curriculumAlignment || {},
+      learningOutcomes: lesson.learningOutcomes || [],
+      guidingQuestion: lesson.guidingQuestion || "",
+      learningResources: lesson.learningResources || [],
+      lessonFlow: lesson.lessonFlow || {},
+    }
+
+    console.log("Setting lessonPlan to:", fullLesson)
+
+    setLessonPlan(fullLesson)
+    setCurrentLessonId(lesson.dbId)
+    setActiveTab("create")
   }
-  
-  console.log('Setting lessonPlan to:', fullLesson)
-  
-  setLessonPlan(fullLesson)
-  setCurrentLessonId(lesson.dbId)
-  setActiveTab("create")
-}
-
-
 
   const handleCreateNew = () => {
     setLessonPlan(null)
@@ -179,7 +193,7 @@ const handleViewLesson = (lesson) => {
       className: "",
       grade: "10",
       term: "1",
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
       startTime: "08:00",
       endTime: "08:40",
       teacherName: "",
@@ -196,7 +210,7 @@ const handleViewLesson = (lesson) => {
       {/* Sidebar */}
       <aside style={styles.sidebar}>
         <div style={styles.logo}>
-          <div style={styles.logoIcon}>✨</div>
+          <div style={styles.logoIcon}>🎓</div>
           <span style={styles.logoText}>EduPlan AI</span>
         </div>
 
@@ -208,9 +222,12 @@ const handleViewLesson = (lesson) => {
               ...(activeTab === "create" ? styles.navButtonActive : {}),
             }}
           >
-            <span style={styles.navIcon}>➕</span>
+            <span style={styles.navIcon}>
+              <PlusIcon />
+            </span>
             Create Lesson
           </button>
+
           <button
             onClick={() => setActiveTab("archive")}
             style={{
@@ -218,7 +235,9 @@ const handleViewLesson = (lesson) => {
               ...(activeTab === "archive" ? styles.navButtonActive : {}),
             }}
           >
-            <span style={styles.navIcon}>📁</span>
+            <span style={styles.navIcon}>
+              <ArchiveIcon />
+            </span>
             Lesson Archive
           </button>
         </nav>
@@ -231,9 +250,7 @@ const handleViewLesson = (lesson) => {
             <>
               <div style={styles.header}>
                 <h1 style={styles.title}>Create Lesson Plan</h1>
-                <p style={styles.subtitle}>
-                  Fill in the details to generate your curriculum-aligned plan.
-                </p>
+                <p style={styles.subtitle}>Fill in the details to generate your curriculum-aligned plan.</p>
               </div>
 
               {!lessonPlan ? (
@@ -276,17 +293,17 @@ const handleViewLesson = (lesson) => {
                       cursor: isGenerating ? "not-allowed" : "pointer",
                     }}
                   >
-                    {isGenerating ? "Generating..." : "✨ Generate Lesson Plan"}
+                    {isGenerating ? "Generating..." : "Generate Lesson Plan"}
                   </button>
                 </div>
               ) : (
                 <div style={styles.documentContainer}>
                   <div style={styles.actionBar}>
                     <button onClick={handleCreateNew} style={styles.secondaryButton}>
-                      ← Create New
+                      <ArrowLeftIcon /> Create New
                     </button>
-                    <button 
-                      onClick={handleSave} 
+                    <button
+                      onClick={handleSave}
                       disabled={isSaving}
                       style={{
                         ...styles.button,
@@ -294,18 +311,17 @@ const handleViewLesson = (lesson) => {
                         cursor: isSaving ? "not-allowed" : "pointer",
                       }}
                     >
-                      {isSaving ? "Saving..." : (currentLessonId ? "💾 Update" : "💾 Save")}
+                      <SaveIcon /> {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
                     </button>
                   </div>
 
                   <div style={styles.documentPage}>
-                    {/* Document Header */}
+                    {/* ... existing document code ... */}
                     <div style={styles.docHeader}>
                       <h1 style={styles.docTitle}>LESSON PLAN</h1>
                       <div style={styles.docDivider}></div>
                     </div>
 
-                    {/* Administrative Details Table */}
                     <table style={styles.table}>
                       <tbody>
                         <tr>
@@ -324,18 +340,20 @@ const handleViewLesson = (lesson) => {
                           <td style={styles.tableLabelCell}>Teacher:</td>
                           <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.teacher}</td>
                           <td style={styles.tableLabelCell}>Students:</td>
-                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.studentEnrollment?.total}</td>
+                          <td style={styles.tableValueCell}>
+                            {lessonPlan.administrativeDetails?.studentEnrollment?.total}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
 
-                    {/* Guiding Question */}
                     <div style={styles.section}>
                       <h2 style={styles.sectionTitle}>GUIDING QUESTION</h2>
-                      <p style={styles.docText}><em>{lessonPlan.guidingQuestion}</em></p>
+                      <p style={styles.docText}>
+                        <em>{lessonPlan.guidingQuestion}</em>
+                      </p>
                     </div>
 
-                    {/* Learning Outcomes */}
                     <div style={styles.section}>
                       <h2 style={styles.sectionTitle}>LEARNING OUTCOMES</h2>
                       {lessonPlan.learningOutcomes?.map((outcome) => (
@@ -345,39 +363,38 @@ const handleViewLesson = (lesson) => {
                       ))}
                     </div>
 
-                    {/* Learning Resources */}
                     <div style={styles.section}>
                       <h2 style={styles.sectionTitle}>LEARNING RESOURCES</h2>
-                      <p style={styles.docText}>
-                        {lessonPlan.learningResources?.join(', ')}
-                      </p>
+                      <p style={styles.docText}>{lessonPlan.learningResources?.join(", ")}</p>
                     </div>
 
-                    {/* Lesson Flow */}
                     <div style={styles.section}>
                       <h2 style={styles.sectionTitle}>LESSON FLOW</h2>
-                      
-                      {/* Introduction */}
+
                       <div style={styles.subsection}>
                         <h3 style={styles.subsectionTitle}>Introduction (5 minutes)</h3>
                         <p style={styles.docText}>{lessonPlan.lessonFlow?.introduction?.description}</p>
                       </div>
 
-                      {/* Development Steps */}
                       <div style={styles.subsection}>
                         <h3 style={styles.subsectionTitle}>Development Activities</h3>
                         {lessonPlan.lessonFlow?.development?.map((step) => (
                           <div key={step.step} style={styles.stepContainer}>
                             <p style={styles.stepTitle}>
-                              <strong>Step {step.step}: {step.title}</strong>
+                              <strong>
+                                Step {step.step}: {step.title}
+                              </strong>
                             </p>
-                            <p style={styles.docText}><strong>Description:</strong> {step.description}</p>
-                            <p style={styles.docText}><strong>Activity:</strong> {step.activity}</p>
+                            <p style={styles.docText}>
+                              <strong>Description:</strong> {step.description}
+                            </p>
+                            <p style={styles.docText}>
+                              <strong>Activity:</strong> {step.activity}
+                            </p>
                           </div>
                         ))}
                       </div>
 
-                      {/* Conclusion */}
                       <div style={styles.subsection}>
                         <h3 style={styles.subsectionTitle}>Conclusion (5 minutes)</h3>
                         <p style={styles.docText}>{lessonPlan.lessonFlow?.conclusion?.description}</p>
@@ -393,9 +410,7 @@ const handleViewLesson = (lesson) => {
             <>
               <div style={styles.header}>
                 <h1 style={styles.title}>Lesson Archive</h1>
-                <p style={styles.subtitle}>
-                  View and manage your saved lesson plans.
-                </p>
+                <p style={styles.subtitle}>View and manage your saved lesson plans.</p>
               </div>
 
               {isLoadingLessons ? (
@@ -407,9 +422,7 @@ const handleViewLesson = (lesson) => {
                 <div style={styles.emptyState}>
                   <div style={styles.emptyIcon}>📁</div>
                   <h2 style={styles.emptyTitle}>No Saved Lessons Yet</h2>
-                  <p style={styles.emptyText}>
-                    Create and save lesson plans to see them here.
-                  </p>
+                  <p style={styles.emptyText}>Create and save lesson plans to see them here.</p>
                 </div>
               ) : (
                 <div style={styles.lessonGrid}>
@@ -417,27 +430,29 @@ const handleViewLesson = (lesson) => {
                     <div key={lesson.id} style={styles.lessonCard}>
                       <div style={styles.lessonHeader}>
                         <h3 style={styles.lessonTopic}>
-                          {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 50) || 'Untitled'}
+                          {lesson.administrativeDetails?.subject ||
+                            lesson.guidingQuestion?.substring(0, 50) ||
+                            "Untitled"}
                         </h3>
-                       <span style={styles.lessonDate}>{lesson.savedDate}</span>
+                        <span style={styles.lessonDate}>{lesson.savedDate}</span>
                       </div>
                       <div style={styles.lessonMeta}>
-                        <div><strong>Grade:</strong> {lesson.administrativeDetails?.grade || lesson.grade}</div>
-                        <div><strong>Class:</strong> {lesson.administrativeDetails?.class || 'N/A'}</div>
-                        <div><strong>Teacher:</strong> {lesson.administrativeDetails?.teacher || 'N/A'}</div>
+                        <div>
+                          <strong>Grade:</strong> {lesson.administrativeDetails?.grade || lesson.grade}
+                        </div>
+                        <div>
+                          <strong>Class:</strong> {lesson.administrativeDetails?.class || "N/A"}
+                        </div>
+                        <div>
+                          <strong>Teacher:</strong> {lesson.administrativeDetails?.teacher || "N/A"}
+                        </div>
                       </div>
                       <div style={styles.lessonActions}>
-                        <button
-                          onClick={() => handleViewLesson(lesson)}
-                          style={styles.viewButton}
-                        >
-                          View
+                        <button onClick={() => handleViewLesson(lesson)} style={styles.viewButton}>
+                          <EyeIcon /> View
                         </button>
-                        <button
-                          onClick={() => handleDelete(lesson)}
-                          style={styles.deleteButton}
-                        >
-                          Delete
+                        <button onClick={() => handleDelete(lesson)} style={styles.deleteButton}>
+                          <TrashIcon /> Delete
                         </button>
                       </div>
                     </div>
@@ -456,192 +471,241 @@ const styles = {
   container: {
     display: "flex",
     minHeight: "100vh",
-    backgroundColor: "#f9fafb",
+    backgroundColor: "#f8f9fa",
+    fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif",
   },
   sidebar: {
     width: "260px",
     backgroundColor: "#fff",
-    borderRight: "1px solid #e5e7eb",
-    padding: "24px",
+    borderRight: "1px solid #e0e0e0",
+    padding: "24px 16px",
     display: "flex",
     flexDirection: "column",
     position: "fixed",
     height: "100vh",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
   },
   logo: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
     marginBottom: "40px",
+    padding: "8px 0",
   },
   logoIcon: {
     width: "40px",
     height: "40px",
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#10b981",
     color: "#fff",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: "10px",
-    fontSize: "20px",
-  },
-  logoText: {
+    borderRadius: "8px",
     fontSize: "20px",
     fontWeight: "bold",
-    color: "#1a1a1a",
+  },
+  logoText: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#000",
+    letterSpacing: "-0.3px",
   },
   nav: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "6px",
   },
   navButton: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "12px 16px",
-    fontSize: "15px",
+    padding: "11px 14px",
+    fontSize: "14px",
     fontWeight: "500",
-    color: "#666",
+    color: "#555",
     backgroundColor: "transparent",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "6px",
     cursor: "pointer",
     textAlign: "left",
-    transition: "all 0.2s",
+    transition: "all 0.2s ease",
+    borderLeft: "3px solid transparent",
   },
   navButtonActive: {
-    backgroundColor: "#4F46E5",
-    color: "#fff",
+    backgroundColor: "#f0fdf4",
+    color: "#10b981",
+    borderLeft: "3px solid #10b981",
+    fontWeight: "600",
   },
   navIcon: {
-    fontSize: "18px",
+    fontSize: "16px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "20px",
+    height: "20px",
+    color: "inherit",
   },
   main: {
     marginLeft: "260px",
     flex: 1,
-    padding: "40px",
+    padding: "32px 40px",
   },
   content: {
-    maxWidth: "900px",
+    maxWidth: "1000px",
     margin: "0 auto",
   },
   header: {
     marginBottom: "32px",
   },
   title: {
-    fontSize: "36px",
-    fontWeight: "bold",
-    color: "#1a1a1a",
+    fontSize: "32px",
+    fontWeight: "700",
+    color: "#000",
     marginBottom: "8px",
+    letterSpacing: "-0.5px",
   },
   subtitle: {
-    fontSize: "16px",
+    fontSize: "15px",
     color: "#666",
+    fontWeight: "400",
+    lineHeight: "1.5",
   },
   card: {
     backgroundColor: "#fff",
-    borderRadius: "16px",
+    borderRadius: "12px",
     padding: "32px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+    border: "1px solid #e5e7eb",
   },
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "24px",
-    marginBottom: "32px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "20px",
+    marginBottom: "28px",
   },
   fieldWrapper: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "6px",
   },
   label: {
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "600",
     color: "#1a1a1a",
+    textTransform: "uppercase",
+    letterSpacing: "0.3px",
   },
   input: {
     height: "40px",
-    padding: "0 16px",
+    padding: "0 12px",
     fontSize: "14px",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
+    border: "1px solid #d0d0d0",
+    borderRadius: "6px",
     backgroundColor: "#fff",
     color: "#1a1a1a",
     outline: "none",
+    transition: "all 0.2s ease",
+    fontFamily: "inherit",
+  },
+  inputFocus: {
+    borderColor: "#10b981",
+    boxShadow: "0 0 0 3px rgba(16, 185, 129, 0.1)",
   },
   button: {
-    padding: "12px 24px",
-    backgroundColor: "#4F46E5",
+    padding: "11px 20px",
+    backgroundColor: "#10b981",
     color: "#fff",
-    fontSize: "16px",
+    fontSize: "14px",
     fontWeight: "600",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "6px",
     cursor: "pointer",
-    transition: "opacity 0.2s",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+  },
+  buttonHover: {
+    backgroundColor: "#059669",
+    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
   },
   secondaryButton: {
-    padding: "8px 16px",
-    fontSize: "14px",
+    padding: "10px 16px",
+    fontSize: "13px",
     fontWeight: "500",
-    color: "#4F46E5",
-    backgroundColor: "#fff",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
+    color: "#10b981",
+    backgroundColor: "#f0fdf4",
+    border: "1px solid #d1fae5",
+    borderRadius: "6px",
     cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
   },
   emptyState: {
     textAlign: "center",
-    padding: "80px 20px",
+    padding: "60px 20px",
+    backgroundColor: "#fff",
+    borderRadius: "12px",
+    border: "1px solid #e5e7eb",
   },
   emptyIcon: {
-    fontSize: "80px",
+    fontSize: "64px",
     marginBottom: "16px",
   },
   emptyTitle: {
-    fontSize: "24px",
-    fontWeight: "bold",
+    fontSize: "22px",
+    fontWeight: "700",
     color: "#1a1a1a",
     marginBottom: "8px",
   },
   emptyText: {
-    fontSize: "16px",
+    fontSize: "15px",
     color: "#666",
+    lineHeight: "1.6",
   },
   lessonGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-    gap: "24px",
+    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+    gap: "20px",
   },
   lessonCard: {
     backgroundColor: "#fff",
-    borderRadius: "12px",
-    padding: "24px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+    borderRadius: "10px",
+    padding: "20px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
     border: "1px solid #e5e7eb",
+    transition: "all 0.3s ease",
+  },
+  lessonCardHover: {
+    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+    borderColor: "#10b981",
   },
   lessonHeader: {
-    marginBottom: "16px",
+    marginBottom: "14px",
     paddingBottom: "12px",
     borderBottom: "1px solid #e5e7eb",
   },
   lessonTopic: {
-    fontSize: "18px",
-    fontWeight: "bold",
+    fontSize: "16px",
+    fontWeight: "700",
     color: "#1a1a1a",
     marginBottom: "4px",
+    lineHeight: "1.4",
   },
   lessonDate: {
     fontSize: "12px",
     color: "#999",
+    fontWeight: "500",
   },
   lessonMeta: {
-    fontSize: "14px",
-    color: "#666",
+    fontSize: "13px",
+    color: "#555",
     marginBottom: "16px",
-    lineHeight: "1.6",
+    lineHeight: "1.8",
   },
   lessonActions: {
     display: "flex",
@@ -649,25 +713,35 @@ const styles = {
   },
   viewButton: {
     flex: 1,
-    padding: "8px 16px",
-    backgroundColor: "#4F46E5",
+    padding: "8px 12px",
+    backgroundColor: "#10b981",
     color: "#fff",
-    fontSize: "14px",
-    fontWeight: "500",
+    fontSize: "13px",
+    fontWeight: "600",
     border: "none",
     borderRadius: "6px",
     cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
   },
   deleteButton: {
     flex: 1,
-    padding: "8px 16px",
+    padding: "8px 12px",
     backgroundColor: "#fff",
     color: "#dc2626",
-    fontSize: "14px",
-    fontWeight: "500",
-    border: "1px solid #dc2626",
+    fontSize: "13px",
+    fontWeight: "600",
+    border: "1px solid #fecaca",
     borderRadius: "6px",
     cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
   },
   documentContainer: {
     backgroundColor: "#e5e7eb",
@@ -680,6 +754,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: "12px",
   },
   documentPage: {
     maxWidth: "850px",
