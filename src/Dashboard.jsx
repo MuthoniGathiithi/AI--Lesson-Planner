@@ -41,6 +41,12 @@ const TrashIcon = () => (
   </svg>
 )
 
+const CheckIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M7.707 10.293a1 1 0 1 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l5-5a1 1 0 0 0-1.414-1.414L8.707 10.293z" />
+  </svg>
+)
+
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("create")
   const [isGenerating, setIsGenerating] = useState(false)
@@ -279,6 +285,8 @@ export default function LessonCreator() {
                           value={formData[field.key]}
                           onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                           style={styles.input}
+                          onFocus={(e) => (e.target.style.borderColor = "#0ea5e9")}
+                          onBlur={(e) => (e.target.style.borderColor = "#d0d0d0")}
                         />
                       </div>
                     ))}
@@ -292,6 +300,16 @@ export default function LessonCreator() {
                       opacity: isGenerating ? 0.7 : 1,
                       cursor: isGenerating ? "not-allowed" : "pointer",
                     }}
+                    onMouseEnter={(e) => {
+                      if (!isGenerating) {
+                        e.target.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.3)"
+                        e.target.style.transform = "translateY(-2px)"
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.boxShadow = "none"
+                      e.target.style.transform = "translateY(0)"
+                    }}
                   >
                     {isGenerating ? "Generating..." : "Generate Lesson Plan"}
                   </button>
@@ -299,7 +317,16 @@ export default function LessonCreator() {
               ) : (
                 <div style={styles.documentContainer}>
                   <div style={styles.actionBar}>
-                    <button onClick={handleCreateNew} style={styles.secondaryButton}>
+                    <button
+                      onClick={handleCreateNew}
+                      style={styles.secondaryButton}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#dbeafe"
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "#f0fdf4"
+                      }}
+                    >
                       <ArrowLeftIcon /> Create New
                     </button>
                     <button
@@ -309,6 +336,16 @@ export default function LessonCreator() {
                         ...styles.button,
                         opacity: isSaving ? 0.7 : 1,
                         cursor: isSaving ? "not-allowed" : "pointer",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSaving) {
+                          e.target.style.boxShadow = "0 4px 12px rgba(16, 185, 129, 0.3)"
+                          e.target.style.transform = "translateY(-2px)"
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.boxShadow = "none"
+                        e.target.style.transform = "translateY(0)"
                       }}
                     >
                       <SaveIcon /> {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
@@ -427,7 +464,18 @@ export default function LessonCreator() {
               ) : (
                 <div style={styles.lessonGrid}>
                   {savedLessons.map((lesson) => (
-                    <div key={lesson.id} style={styles.lessonCard}>
+                    <div
+                      key={lesson.id}
+                      style={styles.lessonCard}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = "0 8px 16px rgba(16, 185, 129, 0.12)"
+                        e.currentTarget.style.transform = "translateY(-4px)"
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.08)"
+                        e.currentTarget.style.transform = "translateY(0)"
+                      }}
+                    >
                       <div style={styles.lessonHeader}>
                         <h3 style={styles.lessonTopic}>
                           {lesson.administrativeDetails?.subject ||
@@ -448,10 +496,28 @@ export default function LessonCreator() {
                         </div>
                       </div>
                       <div style={styles.lessonActions}>
-                        <button onClick={() => handleViewLesson(lesson)} style={styles.viewButton}>
+                        <button
+                          onClick={() => handleViewLesson(lesson)}
+                          style={styles.viewButton}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#0ea5e9"
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#10b981"
+                          }}
+                        >
                           <EyeIcon /> View
                         </button>
-                        <button onClick={() => handleDelete(lesson)} style={styles.deleteButton}>
+                        <button
+                          onClick={() => handleDelete(lesson)}
+                          style={styles.deleteButton}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = "#fee2e2"
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = "#fff"
+                          }}
+                        >
                           <TrashIcon /> Delete
                         </button>
                       </div>
@@ -471,19 +537,20 @@ const styles = {
   container: {
     display: "flex",
     minHeight: "100vh",
-    backgroundColor: "#f8f9fa",
-    fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif",
+    background:
+      "linear-gradient(135deg, #fdb4d6 0%, #f8a5d3 15%, #f297ce 30%, #e885c7 45%, #dc73be 60%, #c968b5 75%, #a860aa 85%, #8b5a9f 100%)",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif",
   },
   sidebar: {
     width: "260px",
-    backgroundColor: "#fff",
-    borderRight: "1px solid #e0e0e0",
+    backgroundColor: "#ffffff",
+    borderRight: "1px solid #e0e7ff",
     padding: "24px 16px",
     display: "flex",
     flexDirection: "column",
     position: "fixed",
     height: "100vh",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    boxShadow: "2px 0 8px rgba(0, 0, 0, 0.04)",
   },
   logo: {
     display: "flex",
@@ -495,7 +562,7 @@ const styles = {
   logoIcon: {
     width: "40px",
     height: "40px",
-    backgroundColor: "#10b981",
+    backgroundColor: "#0ea5e9",
     color: "#fff",
     display: "flex",
     alignItems: "center",
@@ -503,11 +570,12 @@ const styles = {
     borderRadius: "8px",
     fontSize: "20px",
     fontWeight: "bold",
+    boxShadow: "0 2px 8px rgba(14, 165, 233, 0.2)",
   },
   logoText: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#000",
+    color: "#0f172a",
     letterSpacing: "-0.3px",
   },
   nav: {
@@ -522,19 +590,19 @@ const styles = {
     padding: "11px 14px",
     fontSize: "14px",
     fontWeight: "500",
-    color: "#555",
+    color: "#64748b",
     backgroundColor: "transparent",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
     textAlign: "left",
     transition: "all 0.2s ease",
     borderLeft: "3px solid transparent",
   },
   navButtonActive: {
-    backgroundColor: "#f0fdf4",
-    color: "#10b981",
-    borderLeft: "3px solid #10b981",
+    backgroundColor: "#dbeafe",
+    color: "#0ea5e9",
+    borderLeft: "3px solid #0ea5e9",
     fontWeight: "600",
   },
   navIcon: {
@@ -550,6 +618,7 @@ const styles = {
     marginLeft: "260px",
     flex: 1,
     padding: "32px 40px",
+    background: "transparent",
   },
   content: {
     maxWidth: "1000px",
@@ -561,22 +630,22 @@ const styles = {
   title: {
     fontSize: "32px",
     fontWeight: "700",
-    color: "#000",
+    color: "#0f172a",
     marginBottom: "8px",
     letterSpacing: "-0.5px",
   },
   subtitle: {
     fontSize: "15px",
-    color: "#666",
+    color: "#64748b",
     fontWeight: "400",
     lineHeight: "1.5",
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     borderRadius: "12px",
     padding: "32px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
   },
   formGrid: {
     display: "grid",
@@ -592,7 +661,7 @@ const styles = {
   label: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#1a1a1a",
+    color: "#0f172a",
     textTransform: "uppercase",
     letterSpacing: "0.3px",
   },
@@ -600,17 +669,13 @@ const styles = {
     height: "40px",
     padding: "0 12px",
     fontSize: "14px",
-    border: "1px solid #d0d0d0",
-    borderRadius: "6px",
-    backgroundColor: "#fff",
-    color: "#1a1a1a",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: "8px",
+    backgroundColor: "#ffffff",
+    color: "#0f172a",
     outline: "none",
     transition: "all 0.2s ease",
     fontFamily: "inherit",
-  },
-  inputFocus: {
-    borderColor: "#10b981",
-    boxShadow: "0 0 0 3px rgba(16, 185, 129, 0.1)",
   },
   button: {
     padding: "11px 20px",
@@ -619,7 +684,7 @@ const styles = {
     fontSize: "14px",
     fontWeight: "600",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
@@ -627,18 +692,14 @@ const styles = {
     justifyContent: "center",
     gap: "8px",
   },
-  buttonHover: {
-    backgroundColor: "#059669",
-    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.3)",
-  },
   secondaryButton: {
     padding: "10px 16px",
     fontSize: "13px",
     fontWeight: "500",
-    color: "#10b981",
+    color: "#0ea5e9",
     backgroundColor: "#f0fdf4",
     border: "1px solid #d1fae5",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
@@ -648,9 +709,9 @@ const styles = {
   emptyState: {
     textAlign: "center",
     padding: "60px 20px",
-    backgroundColor: "#fff",
+    backgroundColor: "#ffffff",
     borderRadius: "12px",
-    border: "1px solid #e5e7eb",
+    border: "1px solid #e2e8f0",
   },
   emptyIcon: {
     fontSize: "64px",
@@ -659,12 +720,12 @@ const styles = {
   emptyTitle: {
     fontSize: "22px",
     fontWeight: "700",
-    color: "#1a1a1a",
+    color: "#0f172a",
     marginBottom: "8px",
   },
   emptyText: {
     fontSize: "15px",
-    color: "#666",
+    color: "#64748b",
     lineHeight: "1.6",
   },
   lessonGrid: {
@@ -673,37 +734,33 @@ const styles = {
     gap: "20px",
   },
   lessonCard: {
-    backgroundColor: "#fff",
-    borderRadius: "10px",
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
     padding: "20px",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
+    border: "1px solid #e2e8f0",
     transition: "all 0.3s ease",
-  },
-  lessonCardHover: {
-    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
-    borderColor: "#10b981",
   },
   lessonHeader: {
     marginBottom: "14px",
     paddingBottom: "12px",
-    borderBottom: "1px solid #e5e7eb",
+    borderBottom: "1px solid #e2e8f0",
   },
   lessonTopic: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#1a1a1a",
+    color: "#0f172a",
     marginBottom: "4px",
     lineHeight: "1.4",
   },
   lessonDate: {
     fontSize: "12px",
-    color: "#999",
+    color: "#94a3b8",
     fontWeight: "500",
   },
   lessonMeta: {
     fontSize: "13px",
-    color: "#555",
+    color: "#475569",
     marginBottom: "16px",
     lineHeight: "1.8",
   },
@@ -719,7 +776,7 @@ const styles = {
     fontSize: "13px",
     fontWeight: "600",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
@@ -734,8 +791,8 @@ const styles = {
     color: "#dc2626",
     fontSize: "13px",
     fontWeight: "600",
-    border: "1px solid #fecaca",
-    borderRadius: "6px",
+    border: "1.5px solid #fecaca",
+    borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
@@ -744,7 +801,7 @@ const styles = {
     gap: "6px",
   },
   documentContainer: {
-    backgroundColor: "#e5e7eb",
+    background: "transparent",
     padding: "40px 20px",
     minHeight: "100vh",
   },
@@ -761,7 +818,7 @@ const styles = {
     margin: "0 auto",
     backgroundColor: "#ffffff",
     padding: "60px 80px",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     minHeight: "1100px",
     fontFamily: "'Times New Roman', Times, serif",
   },
