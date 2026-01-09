@@ -1,73 +1,160 @@
-import { useState } from "react"
-
-import { generateLessonPlan } from "./services/api"  // ← ADD THIS LIne for connecting 
-
+import { useState, useEffect } from "react"
+import { generateLessonPlan } from "./services/api"
+import { 
+  saveLessonPlan, 
+  fetchLessonPlans, 
+  updateLessonPlan, 
+  deleteLessonPlan 
+} from "./services/lessonPlanService"
 
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("create")
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isLoadingLessons, setIsLoadingLessons] = useState(false)
   const [lessonPlan, setLessonPlan] = useState(null)
+  const [currentLessonId, setCurrentLessonId] = useState(null)
   const [savedLessons, setSavedLessons] = useState([])
   const [formData, setFormData] = useState({
-
-   
-  schoolName: "",
-  className: "",
-  grade: "10",
-  term: "1",
-  date: new Date().toISOString().split('T')[0],
-  startTime: "08:00",
-  endTime: "08:40",
-  teacherName: "",
-  tscNumber: "",
-  boys: "0",
-  girls: "0",
-  strand: "",
-  subStrand: "",
-
-
-
-
-
+    schoolName: "",
+    className: "",
+    grade: "10",
+    term: "1",
+    date: new Date().toISOString().split('T')[0],
+    startTime: "08:00",
+    endTime: "08:40",
+    teacherName: "",
+    tscNumber: "",
+    boys: "0",
+    girls: "0",
+    strand: "",
+    subStrand: "",
   })
 
-  const handleGenerate = async () => {
-  setIsGenerating(true)
-  
-  try {
-    // Call the backend API
-    const generatedPlan = await generateLessonPlan(formData)
-    
-    // Set the lesson plan from API response
-    setLessonPlan({
-      ...formData,
-      ...generatedPlan,
-      date: new Date().toLocaleDateString(),
-    })
-    
-    console.log('Generated lesson plan:', generatedPlan)
-  } catch (error) {
-    console.error('Error generating lesson plan:', error)
-    alert('Failed to generate lesson plan. Make sure the backend is running!')
-  } finally {
-    setIsGenerating(false)
-  }
-}
+  // Load saved lessons when Archive tab is opened
+  useEffect(() => {
+    if (activeTab === "archive") {
+      loadLessons()
+    }
+  }, [activeTab])
 
-  const handleSave = () => {
-    if (lessonPlan) {
-      setSavedLessons([...savedLessons, { ...lessonPlan, id: Date.now() }])
-      alert("Lesson plan saved successfully!")
+  const loadLessons = async () => {
+    setIsLoadingLessons(true)
+    const result = await fetchLessonPlans()
+    
+    if (result.success) {
+      const lessons = result.data.map(lesson => ({
+        ...lesson.content,
+        id: lesson.id,
+        dbId: lesson.id,
+        date: new Date(lesson.created_at).toLocaleDateString(),
+        status: lesson.status
+      }))
+      setSavedLessons(lessons)
+    } else {
+      alert('Failed to load lessons: ' + result.error)
+    }
+    
+    setIsLoadingLessons(false)
+  }
+
+  const handleGenerate = async () => {
+    setIsGenerating(true)
+    
+    try {
+      const generatedPlan = await generateLessonPlan(formData)
+      
+      setLessonPlan({
+        ...formData,
+        ...generatedPlan,
+        date: new Date().toLocaleDateString(),
+      })
+      
+      setCurrentLessonId(null)
+      console.log('Generated lesson plan:', generatedPlan)
+    } catch (error) {
+      console.error('Error generating lesson plan:', error)
+      alert('Failed to generate lesson plan. Make sure the backend is running!')
+    } finally {
+      setIsGenerating(false)
     }
   }
 
-  const handleDelete = (id) => {
-    setSavedLessons(savedLessons.filter(lesson => lesson.id !== id))
+  const handleSave = async () => {
+    if (!lessonPlan) return
+    
+    setIsSaving(true)
+    
+    try {
+      let result
+      
+      if (currentLessonId) {
+        result = await updateLessonPlan(currentLessonId, lessonPlan)
+        if (result.success) {
+          alert("Lesson plan updated successfully!")
+        }
+      } else {
+        result = await saveLessonPlan(lessonPlan)
+        if (result.success) {
+          alert("Lesson plan saved successfully!")
+          setCurrentLessonId(result.data.id)
+        }
+      }
+      
+      if (!result.success) {
+        alert('Failed to save lesson plan: ' + result.error)
+      }
+      
+      if (activeTab === "archive") {
+        await loadLessons()
+      }
+    } catch (error) {
+      console.error('Error saving lesson:', error)
+      alert('An error occurred while saving the lesson plan')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDelete = async (lesson) => {
+    if (!confirm('Are you sure you want to delete this lesson plan?')) {
+      return
+    }
+    
+    const result = await deleteLessonPlan(lesson.dbId)
+    
+    if (result.success) {
+      alert('Lesson plan deleted successfully!')
+      await loadLessons()
+    } else {
+      alert('Failed to delete lesson plan: ' + result.error)
+    }
   }
 
   const handleViewLesson = (lesson) => {
     setLessonPlan(lesson)
+    setCurrentLessonId(lesson.dbId)
     setActiveTab("create")
+  }
+
+  const handleCreateNew = () => {
+    setLessonPlan(null)
+    setCurrentLessonId(null)
+    setFormData({
+      schoolName: "",
+      className: "",
+      grade: "10",
+      term: "1",
+      date: new Date().toISOString().split('T')[0],
+      startTime: "08:00",
+      endTime: "08:40",
+      teacherName: "",
+      tscNumber: "",
+      boys: "0",
+      girls: "0",
+      strand: "",
+      subStrand: "",
+    })
   }
 
   return (
@@ -119,34 +206,29 @@ export default function LessonCreator() {
                 <div style={styles.card}>
                   <div style={styles.formGrid}>
                     {[
-                        
-                       
-  { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text" }, /* changed this */
-  { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text" },
-  { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number" },
-  { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number" },
-  { label: "Date", key: "date", placeholder: "", type: "date" },
-  { label: "Start Time", key: "startTime", placeholder: "", type: "time" },
-  { label: "End Time", key: "endTime", placeholder: "", type: "time" },
-  { label: "Teacher Name", key: "teacherName", placeholder: "Enter teacher name", type: "text" },
-  { label: "TSC Number", key: "tscNumber", placeholder: "Enter TSC number", type: "text" },
-  { label: "Number of Boys", key: "boys", placeholder: "0", type: "number" },
-  { label: "Number of Girls", key: "girls", placeholder: "0", type: "number" },
-  { label: "Strand", key: "strand", placeholder: "Select strand", type: "text" },
-  { label: "Sub-strand", key: "subStrand", placeholder: "Select sub-strand", type: "text" },
+                      { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text" },
+                      { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text" },
+                      { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number" },
+                      { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number" },
+                      { label: "Date", key: "date", placeholder: "", type: "date" },
+                      { label: "Start Time", key: "startTime", placeholder: "", type: "time" },
+                      { label: "End Time", key: "endTime", placeholder: "", type: "time" },
+                      { label: "Teacher Name", key: "teacherName", placeholder: "Enter teacher name", type: "text" },
+                      { label: "TSC Number", key: "tscNumber", placeholder: "Enter TSC number", type: "text" },
+                      { label: "Number of Boys", key: "boys", placeholder: "0", type: "number" },
+                      { label: "Number of Girls", key: "girls", placeholder: "0", type: "number" },
+                      { label: "Strand", key: "strand", placeholder: "Select strand", type: "text" },
+                      { label: "Sub-strand", key: "subStrand", placeholder: "Select sub-strand", type: "text" },
                     ].map((field) => (
                       <div key={field.key} style={styles.fieldWrapper}>
                         <label style={styles.label}>{field.label}</label>
-
-
-                         <input
-                            type={field.type}
-                            placeholder={field.placeholder}
-                            value={formData[field.key]}
-                            onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                            style={styles.input}
-                         />
-
+                        <input
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          value={formData[field.key]}
+                          onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                          style={styles.input}
+                        />
                       </div>
                     ))}
                   </div>
@@ -166,10 +248,20 @@ export default function LessonCreator() {
               ) : (
                 <div style={styles.documentContainer}>
                   <div style={styles.actionBar}>
-                    <button onClick={() => setLessonPlan(null)} style={styles.secondaryButton}>
+                    <button onClick={handleCreateNew} style={styles.secondaryButton}>
                       ← Create New
                     </button>
-                    <button onClick={handleSave} style={styles.button}>💾 Save</button>
+                    <button 
+                      onClick={handleSave} 
+                      disabled={isSaving}
+                      style={{
+                        ...styles.button,
+                        opacity: isSaving ? 0.7 : 1,
+                        cursor: isSaving ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {isSaving ? "Saving..." : (currentLessonId ? "💾 Update" : "💾 Save")}
+                    </button>
                   </div>
 
                   <div style={styles.documentPage}>
@@ -272,7 +364,12 @@ export default function LessonCreator() {
                 </p>
               </div>
 
-              {savedLessons.length === 0 ? (
+              {isLoadingLessons ? (
+                <div style={styles.emptyState}>
+                  <div style={styles.emptyIcon}>⏳</div>
+                  <h2 style={styles.emptyTitle}>Loading lessons...</h2>
+                </div>
+              ) : savedLessons.length === 0 ? (
                 <div style={styles.emptyState}>
                   <div style={styles.emptyIcon}>📁</div>
                   <h2 style={styles.emptyTitle}>No Saved Lessons Yet</h2>
@@ -285,13 +382,15 @@ export default function LessonCreator() {
                   {savedLessons.map((lesson) => (
                     <div key={lesson.id} style={styles.lessonCard}>
                       <div style={styles.lessonHeader}>
-                        <h3 style={styles.lessonTopic}>{lesson.topic}</h3>
+                        <h3 style={styles.lessonTopic}>
+                          {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 50) || 'Untitled'}
+                        </h3>
                         <span style={styles.lessonDate}>{lesson.date}</span>
                       </div>
                       <div style={styles.lessonMeta}>
-                        <div><strong>Grade:</strong> {lesson.grade}</div>
-                        <div><strong>Pathway:</strong> {lesson.pathway}</div>
-                        <div><strong>Strand:</strong> {lesson.strand}</div>
+                        <div><strong>Grade:</strong> {lesson.administrativeDetails?.grade || lesson.grade}</div>
+                        <div><strong>Class:</strong> {lesson.administrativeDetails?.class || 'N/A'}</div>
+                        <div><strong>Teacher:</strong> {lesson.administrativeDetails?.teacher || 'N/A'}</div>
                       </div>
                       <div style={styles.lessonActions}>
                         <button
@@ -301,7 +400,7 @@ export default function LessonCreator() {
                           View
                         </button>
                         <button
-                          onClick={() => handleDelete(lesson.id)}
+                          onClick={() => handleDelete(lesson)}
                           style={styles.deleteButton}
                         >
                           Delete
@@ -449,23 +548,6 @@ const styles = {
     cursor: "pointer",
     transition: "opacity 0.2s",
   },
-  planHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "24px",
-    paddingBottom: "16px",
-    borderBottom: "1px solid #e5e7eb",
-  },
-  planTitle: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#1a1a1a",
-  },
-  buttonGroup: {
-    display: "flex",
-    gap: "12px",
-  },
   secondaryButton: {
     padding: "8px 16px",
     fontSize: "14px",
@@ -475,30 +557,6 @@ const styles = {
     border: "1px solid #d1d5db",
     borderRadius: "8px",
     cursor: "pointer",
-  },
-  metaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "16px",
-    padding: "16px",
-    backgroundColor: "#f9fafb",
-    borderRadius: "8px",
-    fontSize: "14px",
-    marginBottom: "24px",
-  },
-  textarea: {
-    width: "100%",
-    minHeight: "400px",
-    padding: "16px",
-    fontSize: "14px",
-    fontFamily: "monospace",
-    lineHeight: "1.6",
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    backgroundColor: "#fff",
-    color: "#1a1a1a",
-    outline: "none",
-    resize: "vertical",
   },
   emptyState: {
     textAlign: "center",
@@ -577,7 +635,6 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
   },
-  // Word Document Styles
   documentContainer: {
     backgroundColor: "#e5e7eb",
     padding: "40px 20px",
