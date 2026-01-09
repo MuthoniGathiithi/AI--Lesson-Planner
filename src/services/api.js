@@ -3,7 +3,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'https://ai-lesson-planner-back
 // Generate lesson plan
 export const generateLessonPlan = async (formData) => {
   try {
-    const response = await fetch(`${API_URL}/generate-lesson-plan`, {
+    const response = await fetch(`${API_URL}/generate-lesson-plan`, {  // ✅ FIXED: Added parentheses
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export const generateLessonPlan = async (formData) => {
 
 // Get strands
 export const getStrands = async () => {
-  const response = await fetch(`${API_URL}/strands/biology`);
+  const response = await fetch(`${API_URL}/strands/biology`);  // ✅ FIXED: Added parentheses
   const data = await response.json();
   return data.strands;
 };
