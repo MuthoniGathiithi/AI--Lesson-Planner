@@ -46,12 +46,19 @@ const loadLessons = async () => {
   const result = await fetchLessonPlans()
   
   if (result.success) {
-    const lessons = result.data.map(lesson => ({
-      ...lesson.content,
-      dbId: lesson.id,
-      savedDate: new Date(lesson.created_at).toLocaleDateString(),
-      status: lesson.status
-    }))
+    const lessons = result.data.map(lesson => {
+      // Parse the content if it's a string
+      const content = typeof lesson.content === 'string' 
+        ? JSON.parse(lesson.content) 
+        : lesson.content
+      
+      return {
+        ...content,
+        dbId: lesson.id,
+        savedDate: new Date(lesson.created_at).toLocaleDateString(),
+        status: lesson.status
+      }
+    })
     setSavedLessons(lessons)
   } else {
     alert('Failed to load lessons: ' + result.error)
