@@ -138,11 +138,23 @@ const loadLessons = async () => {
     }
   }
 
-  const handleViewLesson = (lesson) => {
-    setLessonPlan(lesson)
-    setCurrentLessonId(lesson.dbId)
-    setActiveTab("create")
+
+const handleViewLesson = (lesson) => {
+  const fullLesson = {
+    administrativeDetails: lesson.administrativeDetails,
+    curriculumAlignment: lesson.curriculumAlignment,
+    learningOutcomes: lesson.learningOutcomes,
+    guidingQuestion: lesson.guidingQuestion,
+    learningResources: lesson.learningResources,
+    lessonFlow: lesson.lessonFlow
   }
+  
+  setLessonPlan(fullLesson)
+  setCurrentLessonId(lesson.dbId)
+  setActiveTab("create")
+}
+
+
 
   const handleCreateNew = () => {
     setLessonPlan(null)
