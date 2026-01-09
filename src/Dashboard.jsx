@@ -66,7 +66,7 @@ export default function LessonCreator() {
       
       setLessonPlan({
   ...generatedPlan,   // AI data FIRST
-  ...formData,        // Form data SECOND (won't overwrite)
+       // Form data SECOND (won't overwrite)
   date: new Date().toLocaleDateString(),
 })
       
