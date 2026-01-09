@@ -38,25 +38,37 @@ export default function LessonCreator() {
     }
   }, [activeTab])
 
-  const loadLessons = async () => {
-    setIsLoadingLessons(true)
-    const result = await fetchLessonPlans()
-    
-    if (result.success) {
-      const lessons = result.data.map(lesson => ({
-        ...lesson.content,
-        id: lesson.id,
-        dbId: lesson.id,
-        date: new Date(lesson.created_at).toLocaleDateString(),
-        status: lesson.status
-      }))
-      setSavedLessons(lessons)
-    } else {
-      alert('Failed to load lessons: ' + result.error)
-    }
-    
-    setIsLoadingLessons(false)
+  
+
+
+const loadLessons = async () => {
+  setIsLoadingLessons(true)
+  const result = await fetchLessonPlans()
+  
+  if (result.success) {
+    const lessons = result.data.map(lesson => ({
+      ...lesson.content,
+      dbId: lesson.id,
+      savedDate: new Date(lesson.created_at).toLocaleDateString(),
+      status: lesson.status
+    }))
+    setSavedLessons(lessons)
+  } else {
+    alert('Failed to load lessons: ' + result.error)
   }
+  
+  setIsLoadingLessons(false)
+}
+
+
+
+
+
+
+
+
+
+
 
   const handleGenerate = async () => {
     setIsGenerating(true)
@@ -380,7 +392,7 @@ export default function LessonCreator() {
                         <h3 style={styles.lessonTopic}>
                           {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 50) || 'Untitled'}
                         </h3>
-                        <span style={styles.lessonDate}>{lesson.date}</span>
+                       <span style={styles.lessonDate}>{lesson.savedDate}</span>
                       </div>
                       <div style={styles.lessonMeta}>
                         <div><strong>Grade:</strong> {lesson.administrativeDetails?.grade || lesson.grade}</div>
