@@ -1,30 +1,58 @@
 import { useState } from "react"
 
+import { generateLessonPlan } from "./services/api"  // ← ADD THIS LIne for connecting 
+
+
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("create")
   const [isGenerating, setIsGenerating] = useState(false)
   const [lessonPlan, setLessonPlan] = useState(null)
   const [savedLessons, setSavedLessons] = useState([])
   const [formData, setFormData] = useState({
-    schoolName: "",
-    pathway: "",
-    grade: "",
-    topic: "",
-    strand: "",
-    subStrand: "",
+
+   
+  schoolName: "",
+  className: "",
+  grade: "10",
+  term: "1",
+  date: new Date().toISOString().split('T')[0],
+  startTime: "08:00",
+  endTime: "08:40",
+  teacherName: "",
+  tscNumber: "",
+  boys: "0",
+  girls: "0",
+  strand: "",
+  subStrand: "",
+
+
+
+
+
   })
 
-  const handleGenerate = () => {
-    setIsGenerating(true)
-    setTimeout(() => {
-      setLessonPlan({
-        ...formData,
-        content: `# Lesson Plan: ${formData.topic}\n\n## Learning Objectives\n- Understand the core concepts of ${formData.topic}\n- Apply ${formData.topic} in real-world scenarios\n\n## Activities\n1. Introduction (10 mins)\n2. Group Discussion (20 mins)\n3. Practical Exercise (30 mins)\n\n## Assessment\nShort quiz at the end of the session.`,
-        date: new Date().toLocaleDateString(),
-      })
-      setIsGenerating(false)
-    }, 1500)
+  const handleGenerate = async () => {
+  setIsGenerating(true)
+  
+  try {
+    // Call the backend API
+    const generatedPlan = await generateLessonPlan(formData)
+    
+    // Set the lesson plan from API response
+    setLessonPlan({
+      ...formData,
+      ...generatedPlan,
+      date: new Date().toLocaleDateString(),
+    })
+    
+    console.log('Generated lesson plan:', generatedPlan)
+  } catch (error) {
+    console.error('Error generating lesson plan:', error)
+    alert('Failed to generate lesson plan. Make sure the backend is running!')
+  } finally {
+    setIsGenerating(false)
   }
+}
 
   const handleSave = () => {
     if (lessonPlan) {
@@ -91,22 +119,34 @@ export default function LessonCreator() {
                 <div style={styles.card}>
                   <div style={styles.formGrid}>
                     {[
-                      { label: "School Name", key: "schoolName", placeholder: "Enter school name" },
-                      { label: "Pathway", key: "pathway", placeholder: "e.g. Science, Arts" },
-                      { label: "Grade", key: "grade", placeholder: "e.g. Grade 10" },
-                      { label: "Topic", key: "topic", placeholder: "e.g. Photosynthesis" },
-                      { label: "Strand", key: "strand", placeholder: "e.g. Life Sciences" },
-                      { label: "Sub-strand", key: "subStrand", placeholder: "e.g. Plant Biology" },
+                        
+                       
+  { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text" }, /* changed this */
+  { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text" },
+  { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number" },
+  { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number" },
+  { label: "Date", key: "date", placeholder: "", type: "date" },
+  { label: "Start Time", key: "startTime", placeholder: "", type: "time" },
+  { label: "End Time", key: "endTime", placeholder: "", type: "time" },
+  { label: "Teacher Name", key: "teacherName", placeholder: "Enter teacher name", type: "text" },
+  { label: "TSC Number", key: "tscNumber", placeholder: "Enter TSC number", type: "text" },
+  { label: "Number of Boys", key: "boys", placeholder: "0", type: "number" },
+  { label: "Number of Girls", key: "girls", placeholder: "0", type: "number" },
+  { label: "Strand", key: "strand", placeholder: "Select strand", type: "text" },
+  { label: "Sub-strand", key: "subStrand", placeholder: "Select sub-strand", type: "text" },
                     ].map((field) => (
                       <div key={field.key} style={styles.fieldWrapper}>
                         <label style={styles.label}>{field.label}</label>
-                        <input
-                          type="text"
-                          placeholder={field.placeholder}
-                          value={formData[field.key]}
-                          onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                          style={styles.input}
-                        />
+
+
+                         <input
+                            type={field.type}
+                            placeholder={field.placeholder}
+                            value={formData[field.key]}
+                            onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                            style={styles.input}
+                         />
+
                       </div>
                     ))}
                   </div>
@@ -136,12 +176,81 @@ export default function LessonCreator() {
                   </div>
 
                   <div style={styles.metaGrid}>
-                    <div><strong>School:</strong> {lessonPlan.schoolName}</div>
-                    <div><strong>Pathway:</strong> {lessonPlan.pathway}</div>
-                    <div><strong>Grade:</strong> {lessonPlan.grade}</div>
-                    <div><strong>Topic:</strong> {lessonPlan.topic}</div>
-                    <div><strong>Strand:</strong> {lessonPlan.strand}</div>
-                    <div><strong>Sub-strand:</strong> {lessonPlan.subStrand}</div>
+
+
+
+                <div style={styles.metaGrid}>
+  <div><strong>School:</strong> {lessonPlan.administrativeDetails?.school}</div>
+  <div><strong>Subject:</strong> {lessonPlan.administrativeDetails?.subject}</div>
+  <div><strong>Class:</strong> {lessonPlan.administrativeDetails?.class}</div>
+  <div><strong>Grade:</strong> {lessonPlan.administrativeDetails?.grade}</div>
+  <div><strong>Teacher:</strong> {lessonPlan.administrativeDetails?.teacher}</div>
+  <div><strong>Students:</strong> {lessonPlan.administrativeDetails?.studentEnrollment?.total}</div>
+</div>
+
+{/* Guiding Question */}
+<div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f0f9ff', borderRadius: '8px' }}>
+  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>Guiding Question</h3>
+  <p style={{ fontSize: '16px', fontStyle: 'italic' }}>{lessonPlan.guidingQuestion}</p>
+</div>
+
+{/* Learning Outcomes */}
+<div style={{ marginTop: '24px' }}>
+  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' }}>Learning Outcomes</h3>
+  <ul style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
+    {lessonPlan.learningOutcomes?.map((outcome) => (
+      <li key={outcome.id} style={{ marginBottom: '8px' }}>
+        <strong>{outcome.id})</strong> {outcome.outcome}
+      </li>
+    ))}
+  </ul>
+</div>
+
+{/* Learning Resources */}
+<div style={{ marginTop: '24px' }}>
+  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' }}>Learning Resources</h3>
+  <ul style={{ paddingLeft: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+    {lessonPlan.learningResources?.map((resource, index) => (
+      <li key={index}>{resource}</li>
+    ))}
+  </ul>
+</div>
+
+{/* Lesson Flow */}
+<div style={{ marginTop: '24px' }}>
+  <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Lesson Flow</h3>
+  
+  {/* Introduction */}
+  <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#fef3c7', borderRadius: '8px' }}>
+    <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>Introduction (5 minutes)</h4>
+    <p>{lessonPlan.lessonFlow?.introduction?.description}</p>
+  </div>
+
+  {/* Development Steps */}
+  <div style={{ marginBottom: '20px' }}>
+    <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px' }}>Development Activities</h4>
+    {lessonPlan.lessonFlow?.development?.map((step) => (
+      <div key={step.step} style={{ marginBottom: '16px', padding: '16px', backgroundColor: '#f0fdf4', borderRadius: '8px', borderLeft: '4px solid #22c55e' }}>
+        <h5 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>
+          Step {step.step}: {step.title}
+        </h5>
+        <p style={{ marginBottom: '8px' }}><strong>Description:</strong> {step.description}</p>
+        <p><strong>Activity:</strong> {step.activity}</p>
+      </div>
+    ))}
+  </div>
+
+  {/* Conclusion */}
+  <div style={{ padding: '16px', backgroundColor: '#fce7f3', borderRadius: '8px' }}>
+    <h4 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px' }}>Conclusion (5 minutes)</h4>
+    <p>{lessonPlan.lessonFlow?.conclusion?.description}</p>
+  </div>
+</div>
+                   
+
+
+
+
                   </div>
 
                   <textarea
