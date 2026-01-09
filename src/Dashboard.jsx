@@ -67,6 +67,7 @@ export default function LessonCreator() {
   const [lessonPlan, setLessonPlan] = useState(null)
   const [currentLessonId, setCurrentLessonId] = useState(null)
   const [savedLessons, setSavedLessons] = useState([])
+  const [userName, setUserName] = useState("")
   const [formData, setFormData] = useState({
     schoolName: "",
     className: "",
@@ -84,10 +85,23 @@ export default function LessonCreator() {
   })
 
   useEffect(() => {
+    // Load lessons on mount
+    loadLessons()
+  }, [])
+
+  useEffect(() => {
     if (activeTab === "archive") {
       loadLessons()
     }
   }, [activeTab])
+
+  useEffect(() => {
+    // Extract first name from teacher name when it's filled
+    if (formData.teacherName) {
+      const firstName = formData.teacherName.split(" ")[0]
+      setUserName(firstName)
+    }
+  }, [formData.teacherName])
 
   const loadLessons = async () => {
     setIsLoadingLessons(true)
@@ -231,8 +245,8 @@ export default function LessonCreator() {
             </div>
           </div>
           <div style={styles.userInfo}>
-            <div style={styles.userName}>Dave Johnson</div>
-            <div style={styles.userRole}>Founder and Ceo</div>
+            <div style={styles.userName}>{formData.teacherName || "Teacher"}</div>
+            <div style={styles.userRole}>Educator</div>
           </div>
           <button style={styles.userMenuButton}>⋮</button>
         </div>
@@ -292,7 +306,7 @@ export default function LessonCreator() {
       <main style={styles.main}>
         <div style={styles.topBar}>
           <div style={styles.welcomeText}>
-            <div style={styles.welcomeGreeting}>Hello Dave, Welcome back</div>
+            <div style={styles.welcomeGreeting}>Hello {userName || "there"}, Welcome back</div>
             <div style={styles.welcomeTitle}>Your Dashboard is updated</div>
           </div>
           <div style={styles.topBarActions}>
@@ -325,78 +339,125 @@ export default function LessonCreator() {
                   <div style={styles.shape3D3}></div>
                 </div>
                 <div style={styles.cardInfo}>
-                  <div style={styles.cardLabel}>Latest uploades</div>
-                  <div style={styles.cardValue}>{savedLessons.length} total files</div>
+                  <div style={styles.cardLabel}>Total Lessons</div>
+                  <div style={styles.cardValue}>{savedLessons.length} lesson plans</div>
                 </div>
-                <button style={styles.floatingAddButton}>+</button>
+                <button 
+                  style={styles.floatingAddButton}
+                  onClick={() => setActiveTab("create")}
+                >
+                  +
+                </button>
               </div>
 
               <div style={styles.cardSecondary}>
                 <div style={styles.cardHeader}>
                   <div>
-                    <div style={styles.cardTag}>PRIORITY: REGULAR</div>
-                    <div style={styles.cardTitle}>Open projects</div>
-                    <div style={styles.cardSubtitle}>{savedLessons.filter(l => l.status !== 'archived').length} tasks remaining</div>
+                    <div style={styles.cardTag}>CURRICULUM PLANNING</div>
+                    <div style={styles.cardTitle}>Active Lessons</div>
+                    <div style={styles.cardSubtitle}>
+                      {savedLessons.filter(l => l.status !== 'archived').length} lessons in progress
+                    </div>
                   </div>
-                  <div style={styles.folderIcon}>📁</div>
+                  <div style={styles.folderIcon}>📚</div>
                 </div>
-                <div style={styles.progressLabel}>Complete tasks</div>
+                <div style={styles.progressLabel}>Keep teaching</div>
               </div>
 
               <div style={styles.cardTertiary}>
-                <div style={styles.playIcon}>▶</div>
-                <div style={styles.cardTitle}>Latest media</div>
-                <div style={styles.cardSubtitle}>23 media files</div>
+                <div style={styles.playIcon}>📊</div>
+                <div style={styles.cardTitle}>This Week</div>
+                <div style={styles.cardSubtitle}>
+                  {savedLessons.filter(l => {
+                    const lessonDate = new Date(l.savedDate)
+                    const weekAgo = new Date()
+                    weekAgo.setDate(weekAgo.getDate() - 7)
+                    return lessonDate >= weekAgo
+                  }).length} new lessons
+                </div>
               </div>
 
               <div style={styles.cardDark}>
-                <div style={styles.lockIcon}>🔒</div>
-                <div style={styles.cardTitle}>Urgent to do</div>
-                <div style={styles.cardSubtitle}>High priority files</div>
+                <div style={styles.lockIcon}>⭐</div>
+                <div style={styles.cardTitle}>Quick Access</div>
+                <div style={styles.cardSubtitle}>Recent materials</div>
               </div>
 
               <div style={styles.cardWeather}>
                 <div style={styles.weatherInfo}>
-                  <div style={styles.weatherQuestion}>What's your plan ?</div>
-                  <div style={styles.weatherDesc}>Looks like a shady day</div>
-                  <div style={styles.weatherTemp}>36°</div>
+                  <div style={styles.weatherQuestion}>Ready to teach?</div>
+                  <div style={styles.weatherDesc}>Create your next lesson plan</div>
+                  <div style={styles.weatherTemp}>
+                    {new Date().toLocaleDateString('en-US', { weekday: 'short' })}
+                  </div>
                 </div>
-                <button style={styles.weatherAddButton}>+</button>
+                <button 
+                  style={styles.weatherAddButton}
+                  onClick={() => setActiveTab("create")}
+                >
+                  +
+                </button>
               </div>
 
-              {/* Latest Updates */}
+              {/* Recent Lesson Plans */}
               <div style={styles.latestUpdates}>
-                <h2 style={styles.sectionTitle}>Latest updates</h2>
-                <div style={styles.updateTabs}>
-                  <button style={styles.updateTabActive}>Brand addition</button>
-                  <button style={styles.updateTab}>Upcoming tasks</button>
-                </div>
+                <h2 style={styles.sectionTitle}>Recent Lesson Plans</h2>
+                
+                {isLoadingLessons ? (
+                  <div style={styles.loadingState}>Loading lessons...</div>
+                ) : savedLessons.length === 0 ? (
+                  <div style={styles.emptyDashboard}>
+                    <div style={styles.emptyDashboardIcon}>📝</div>
+                    <div style={styles.emptyDashboardText}>No lessons yet. Create your first lesson plan!</div>
+                    <button 
+                      onClick={() => setActiveTab("create")}
+                      style={styles.createFirstButton}
+                    >
+                      Create Lesson Plan
+                    </button>
+                  </div>
+                ) : (
+                  <div style={styles.updatesList}>
+                    {savedLessons.slice(0, 4).map((lesson, index) => (
+                      <div 
+                        key={lesson.dbId} 
+                        style={styles.updateItem}
+                        onClick={() => handleViewLesson(lesson)}
+                      >
+                        <div style={styles.updateIcon}>
+                          {index === 0 ? '📘' : index === 1 ? '📗' : index === 2 ? '📙' : '📕'}
+                        </div>
+                        <div style={styles.updateDetails}>
+                          <div style={styles.updateTitle}>
+                            {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 40) || 'Lesson Plan'}
+                          </div>
+                          <div style={styles.updateCategory}>
+                            Grade {lesson.administrativeDetails?.grade || 'N/A'} • {lesson.administrativeDetails?.class || 'Class'}
+                          </div>
+                        </div>
+                        <div style={styles.updateDate}>{lesson.savedDate}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-                <div style={styles.updatesList}>
-                  {savedLessons.slice(0, 3).map((lesson, index) => (
-                    <div key={lesson.dbId} style={styles.updateItem}>
-                      <div style={styles.updateIcon}>
-                        {index === 0 ? '⭐' : index === 1 ? '📸' : '🎨'}
-                      </div>
-                      <div style={styles.updateDetails}>
-                        <div style={styles.updateTitle}>
-                          {lesson.administrativeDetails?.subject || 'Lesson Plan'}
-                        </div>
-                        <div style={styles.updateCategory}>
-                          {lesson.administrativeDetails?.grade || 'Education'}
-                        </div>
-                      </div>
-                      <div style={styles.updateAmount}>
-                        {index === 0 ? '+' : '-'}{Math.floor(Math.random() * 1000)}.00
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {savedLessons.length > 4 && (
+                  <button 
+                    onClick={() => setActiveTab("archive")}
+                    style={styles.viewAllButton}
+                  >
+                    View All Lessons →
+                  </button>
+                )}
               </div>
 
-              {/* Completion Chart */}
+              {/* Completion Stats */}
               <div style={styles.chartCard}>
-                <div style={styles.chartValue}>89%</div>
+                <div style={styles.chartValue}>
+                  {savedLessons.length > 0 
+                    ? Math.round((savedLessons.filter(l => l.status === 'completed').length / savedLessons.length) * 100)
+                    : 0}%
+                </div>
                 <svg width="200" height="200" viewBox="0 0 200 200" style={styles.donutChart}>
                   <circle
                     cx="100"
@@ -413,19 +474,21 @@ export default function LessonCreator() {
                     fill="none"
                     stroke="#fb923c"
                     strokeWidth="30"
-                    strokeDasharray={`${2 * Math.PI * 80 * 0.89} ${2 * Math.PI * 80}`}
+                    strokeDasharray={`${2 * Math.PI * 80 * (savedLessons.length > 0 ? (savedLessons.filter(l => l.status === 'completed').length / savedLessons.length) : 0)} ${2 * Math.PI * 80}`}
                     strokeDashoffset={2 * Math.PI * 80 * 0.25}
                     strokeLinecap="round"
                   />
                 </svg>
-                <div style={styles.chartLabel}>Task completion rate</div>
+                <div style={styles.chartLabel}>Lessons completion</div>
               </div>
 
-              {/* Savings Card */}
+              {/* Summary Card */}
               <div style={styles.savingsCard}>
-                <div style={styles.savingsText}>Great Job, You Saved</div>
-                <div style={styles.savingsAmount}>$5,000</div>
-                <div style={styles.savingsPoints}>Points Earned : 10,000</div>
+                <div style={styles.savingsText}>Total Lessons Created</div>
+                <div style={styles.savingsAmount}>{savedLessons.length}</div>
+                <div style={styles.savingsPoints}>
+                  Keep up the great work!
+                </div>
               </div>
             </div>
           )}
@@ -1058,6 +1121,8 @@ const styles = {
     padding: "16px",
     backgroundColor: "#f9fafb",
     borderRadius: "12px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   updateIcon: {
     width: "48px",
@@ -1086,6 +1151,54 @@ const styles = {
     fontSize: "14px",
     fontWeight: "700",
     color: "#10b981",
+  },
+  updateDate: {
+    fontSize: "13px",
+    color: "#9ca3af",
+    fontWeight: "500",
+  },
+  loadingState: {
+    textAlign: "center",
+    padding: "40px",
+    color: "#6b7280",
+    fontSize: "14px",
+  },
+  emptyDashboard: {
+    textAlign: "center",
+    padding: "40px 20px",
+  },
+  emptyDashboardIcon: {
+    fontSize: "48px",
+    marginBottom: "16px",
+  },
+  emptyDashboardText: {
+    fontSize: "14px",
+    color: "#6b7280",
+    marginBottom: "20px",
+  },
+  createFirstButton: {
+    padding: "12px 24px",
+    background: "linear-gradient(135deg, #2d3561 0%, #1f2849 100%)",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  viewAllButton: {
+    width: "100%",
+    padding: "12px",
+    marginTop: "16px",
+    backgroundColor: "#f9fafb",
+    color: "#2d3561",
+    fontSize: "14px",
+    fontWeight: "600",
+    border: "1px solid #e5e7eb",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   chartCard: {
     gridColumn: "span 1",
