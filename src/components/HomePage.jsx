@@ -48,7 +48,7 @@ export default function HomePage() {
             color: '#6B7280',
             marginBottom: '32px'
           }}>
-            AI-Powered Education Technology
+            CBE alligned Lesson Plans
           </div>
           
           <div style={{ display: 'inline-block', position: 'relative' }}>

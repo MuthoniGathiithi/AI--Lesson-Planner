@@ -11,6 +11,7 @@ import {
   Trash2,
   Search,
   FileText,
+  LogOut,
 } from "lucide-react"
 import { generateLessonPlan } from "./services/api"
 import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
@@ -195,6 +196,22 @@ export default function LessonCreator() {
     })
   }
 
+  const handleLogout = () => {
+    if (confirm("Are you sure you want to logout?")) {
+      // Clear any stored data
+      setLessonPlan(null)
+      setCurrentLessonId(null)
+      setSavedLessons([])
+      setFilteredLessons([])
+      setActiveTab("dashboard")
+      
+      // Redirect to login or home page
+      // In a real app, you would clear authentication tokens and redirect
+      alert("Logged out successfully!")
+      window.location.href = "/login" // Change this to your login route
+    }
+  }
+
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return "Good Morning"
@@ -252,6 +269,13 @@ export default function LessonCreator() {
               )}
             </button>
           </div>
+
+          <div style={styles.navSection}>
+            <button onClick={handleLogout} style={styles.logoutButton}>
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </div>
         </nav>
       </aside>
 
@@ -288,7 +312,7 @@ export default function LessonCreator() {
             <div style={styles.dashboardLayout}>
               {/* Stats Cards */}
               <div style={styles.statsRow}>
-                <div style={styles.statCard}>
+                <div style={{...styles.statCard, ...styles.statCardBlue}}>
                   <div style={styles.statHeader}>
                     <div style={styles.statLabel}>TOTAL LESSONS</div>
                   </div>
@@ -296,7 +320,7 @@ export default function LessonCreator() {
                   <div style={styles.statSubtext}>All lesson plans created</div>
                 </div>
 
-                <div style={styles.statCard}>
+                <div style={{...styles.statCard, ...styles.statCardYellow}}>
                   <div style={styles.statHeader}>
                     <div style={styles.statLabel}>THIS WEEK</div>
                   </div>
@@ -309,18 +333,6 @@ export default function LessonCreator() {
                     }).length}
                   </div>
                   <div style={styles.statSubtext}>Lessons created this week</div>
-                </div>
-
-                <div style={styles.statCard}>
-                  <div style={styles.statHeader}>
-                    <div style={styles.statLabel}>COMPLETION RATE</div>
-                  </div>
-                  <div style={styles.statValue}>
-                    {savedLessons.length > 0
-                      ? Math.round((savedLessons.filter((l) => l.status === "completed").length / savedLessons.length) * 100)
-                      : 0}%
-                  </div>
-                  <div style={styles.statSubtext}>Lessons completed</div>
                 </div>
               </div>
 
@@ -337,8 +349,14 @@ export default function LessonCreator() {
                   {filteredLessons.length === 0 ? (
                     <div style={styles.emptyState}>
                       <div style={styles.emptyIcon}>📚</div>
-                      <div style={styles.emptyText}>No lessons yet</div>
-                      <p style={styles.emptyDescription}>Create your first lesson plan to get started</p>
+                      <div style={styles.emptyText}>
+                        {searchQuery ? "No lessons match your search" : "No lessons yet"}
+                      </div>
+                      <p style={styles.emptyDescription}>
+                        {searchQuery
+                          ? "Try a different search term"
+                          : "Create your first lesson plan to get started"}
+                      </p>
                     </div>
                   ) : (
                     <table style={styles.table}>
@@ -585,12 +603,12 @@ const styles = {
     display: "flex",
     minHeight: "100vh",
     backgroundColor: "#ffffff",
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily: "'Inter', sans-serif",
   },
   sidebar: {
     width: "260px",
     backgroundColor: "#000000",
-    padding: "24px 16px",
+    padding: "24px 0",
     display: "flex",
     flexDirection: "column",
     position: "fixed",
@@ -599,6 +617,7 @@ const styles = {
   },
   sidebarHeader: {
     marginBottom: "32px",
+    padding: "0 16px",
   },
   logo: {
     display: "flex",
@@ -620,6 +639,7 @@ const styles = {
     flexDirection: "column",
     gap: "8px",
     flex: 1,
+    justifyContent: "space-between",
   },
   navSection: {
     marginBottom: "16px",
@@ -636,21 +656,39 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "14px 16px",
-    fontSize: "14px",
+    padding: "16px",
+    fontSize: "15px",
     fontWeight: "500",
     color: "#ffffff",
     backgroundColor: "transparent",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "0",
     cursor: "pointer",
     textAlign: "left",
     transition: "all 0.2s ease",
     position: "relative",
+    width: "100%",
   },
   navButtonActive: {
     backgroundColor: "#1976d2",
     fontWeight: "600",
+  },
+  logoutButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "16px",
+    fontSize: "15px",
+    fontWeight: "500",
+    color: "#ff5252",
+    backgroundColor: "transparent",
+    border: "none",
+    borderRadius: "0",
+    cursor: "pointer",
+    textAlign: "left",
+    transition: "all 0.2s ease",
+    position: "relative",
+    width: "100%",
   },
   badge: {
     marginLeft: "auto",
@@ -733,7 +771,7 @@ const styles = {
   },
   statsRow: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(2, 1fr)",
     gap: "24px",
   },
   statCard: {
@@ -742,24 +780,33 @@ const styles = {
     padding: "28px",
     border: "1px solid #e0e0e0",
   },
+  statCardBlue: {
+    backgroundColor: "#1976d2",
+    border: "none",
+  },
+  statCardYellow: {
+    backgroundColor: "#ffc107",
+    border: "none",
+  },
   statHeader: {
     marginBottom: "12px",
   },
   statLabel: {
     fontSize: "12px",
-    color: "#666666",
+    color: "#ffffff",
     fontWeight: "600",
     letterSpacing: "0.5px",
   },
   statValue: {
     fontSize: "36px",
     fontWeight: "700",
-    color: "#000000",
+    color: "#ffffff",
     marginBottom: "8px",
   },
   statSubtext: {
     fontSize: "14px",
-    color: "#666666",
+    color: "#ffffff",
+    opacity: 0.9,
   },
   lessonsSection: {
     backgroundColor: "#ffffff",
