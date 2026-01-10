@@ -344,10 +344,8 @@ export default function LessonCreator() {
                 {/* Lessons List */}
                 <div style={styles.lessonsList}>
                   <div style={styles.listHeader}>
-                    <h3 style={styles.listTitle}>LIST OF CASES TO BE ACCEPTED</h3>
-                    <button style={styles.linkButton}>
-                      Full list <ChevronRight size={16} />
-                    </button>
+                    <h3 style={styles.listTitle}>LIST OF LESSONS</h3>
+                    
                   </div>
 
                   <div style={styles.tableContainer}>
@@ -355,13 +353,11 @@ export default function LessonCreator() {
                       <thead>
                         <tr style={styles.tableHeader}>
                           <th style={styles.th}>
-                            <input type="checkbox" style={styles.checkbox} />
+                           
                           </th>
                           <th style={{ ...styles.th, textAlign: "left" }}>Name</th>
                           <th style={{ ...styles.th, textAlign: "left" }}>Dates</th>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Priority</th>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Attachment</th>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Assignee</th>
+                          <th style={{ ...styles.th, textAlign: "left" }}>Lesson PLans </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -369,7 +365,7 @@ export default function LessonCreator() {
                           <tr key={lesson.dbId} style={styles.tableRow} onClick={() => handleViewLesson(lesson)}>
                             <td style={styles.td}>
                               <input
-                                type="checkbox"
+                                
                                 checked={index === 0}
                                 onChange={() => {}}
                                 style={styles.checkbox}
@@ -389,7 +385,7 @@ export default function LessonCreator() {
                             <td style={styles.td}>
                               <div style={styles.attachmentLink}>
                                 <FileText size={14} />
-                                Requirements.doc
+                                Lesson Plan.pdf
                               </div>
                             </td>
                             <td style={styles.td}>
@@ -406,16 +402,7 @@ export default function LessonCreator() {
                   </div>
 
                   {/* Communication Section */}
-                  <div style={styles.communicationSection}>
-                    <div style={styles.listHeader}>
-                      <h3 style={styles.listTitle}>COMMUNICATION (Last 7 days)</h3>
-                      <button style={styles.linkButton}>
-                        See all <ChevronRight size={16} />
-                      </button>
-                    </div>
-
-                    
-                  </div>
+                  
                 </div>
 
                
