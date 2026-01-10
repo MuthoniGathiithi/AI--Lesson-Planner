@@ -1,7 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { LayoutDashboard, Plus, Archive, Save, ArrowLeft, Eye, Trash2, ChevronRight, User, LogOut } from "lucide-react"
+import {
+  LayoutDashboard,
+  Plus,
+  Archive,
+  Save,
+  ArrowLeft,
+  Eye,
+  Trash2,
+  ChevronRight,
+  User,
+  LogOut,
+  Search,
+} from "lucide-react"
 import { generateLessonPlan } from "./services/api"
 import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
 
@@ -173,7 +185,6 @@ export default function LessonCreator() {
           <div style={styles.logoText}>Funza AI</div>
         </div>
 
-        {/* User Profile Section */}
         <div style={styles.userProfile}>
           <div style={styles.avatar}>
             <User size={24} />
@@ -184,7 +195,6 @@ export default function LessonCreator() {
           </div>
         </div>
 
-        {/* Navigation */}
         <nav style={styles.nav}>
           <button
             onClick={() => setActiveTab("dashboard")}
@@ -229,12 +239,15 @@ export default function LessonCreator() {
         </button>
       </div>
 
-      {/* Main Content */}
       <div style={styles.main}>
         <div style={styles.topBar}>
           <div style={styles.welcomeText}>
             <div style={styles.welcomeGreeting}>Good {new Date().getHours() < 12 ? "Morning" : "Afternoon"}</div>
             <div style={styles.welcomeTitle}>Lesson Planner</div>
+          </div>
+          <div style={styles.searchContainer}>
+            <Search size={18} style={styles.searchIcon} />
+            <input type="text" placeholder="Search..." style={styles.searchInput} />
           </div>
         </div>
 
@@ -242,7 +255,6 @@ export default function LessonCreator() {
           {activeTab === "dashboard" && (
             <>
               <div style={styles.dashboardGrid}>
-                {/* Total Lessons Card */}
                 <div style={styles.cardLarge}>
                   <div style={styles.cardHeader}>
                     <div>
@@ -256,7 +268,6 @@ export default function LessonCreator() {
                   </div>
                 </div>
 
-                {/* Active Lessons Card */}
                 <div style={styles.cardMedium}>
                   <div style={styles.cardTag}>ACTIVE</div>
                   <div style={styles.cardTitle}>Active Lessons</div>
@@ -264,7 +275,6 @@ export default function LessonCreator() {
                   <div style={styles.cardSubtitle}>in progress</div>
                 </div>
 
-                {/* This Week Card */}
                 <div style={styles.cardMedium}>
                   <div style={styles.cardTag}>STATS</div>
                   <div style={styles.cardTitle}>This Week</div>
@@ -281,7 +291,6 @@ export default function LessonCreator() {
                   <div style={styles.cardSubtitle}>new lessons</div>
                 </div>
 
-                {/* Call to Action Card */}
                 <div style={styles.cardAccent}>
                   <div style={styles.accentIcon}>✨</div>
                   <div style={styles.cardTitle}>Ready to teach?</div>
@@ -291,7 +300,6 @@ export default function LessonCreator() {
                   </button>
                 </div>
 
-                {/* Recent Lessons Section */}
                 <div style={styles.cardFullWidth}>
                   <h3 style={styles.sectionTitle}>Recent Lesson Plans</h3>
                   {isLoadingLessons ? (
@@ -332,7 +340,6 @@ export default function LessonCreator() {
                   )}
                 </div>
 
-                {/* Stats Card */}
                 <div style={styles.cardStat}>
                   <div style={styles.statValue}>
                     {savedLessons.length > 0
@@ -345,7 +352,6 @@ export default function LessonCreator() {
                   <div style={styles.statLabel}>Completion Rate</div>
                 </div>
 
-                {/* Summary Card */}
                 <div style={styles.cardSummary}>
                   <div style={styles.summaryLabel}>Total Created</div>
                   <div style={styles.summaryValue}>{savedLessons.length}</div>
@@ -554,18 +560,21 @@ const styles = {
   container: {
     display: "flex",
     minHeight: "100vh",
-    backgroundColor: "#FAFAFA",
+    background: "linear-gradient(135deg, #e8f4f8 0%, #d4e9f7 50%, #c5dff0 100%)",
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif",
+    position: "relative",
   },
   sidebar: {
     width: "250px",
-    background: "#4cc9f0",
+    background: "rgba(76, 201, 240, 0.4)",
+    backdropFilter: "blur(20px)",
+    borderRight: "1px solid rgba(255, 255, 255, 0.3)",
     padding: "24px 20px",
     display: "flex",
     flexDirection: "column",
     position: "fixed",
     height: "100vh",
-    boxShadow: "2px 0 8px rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
     overflowY: "auto",
   },
   logo: {
@@ -589,19 +598,22 @@ const styles = {
     alignItems: "center",
     gap: "12px",
     padding: "16px",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(10px)",
     borderRadius: "12px",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
     marginBottom: "32px",
   },
   avatar: {
     width: "48px",
     height: "48px",
     borderRadius: "12px",
-    background: "rgba(255, 255, 255, 0.2)",
+    background: "rgba(255, 255, 255, 0.25)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     color: "#fff",
+    backdropFilter: "blur(10px)",
   },
   userInfo: {
     flex: 1,
@@ -614,7 +626,7 @@ const styles = {
   },
   userRole: {
     fontSize: "12px",
-    color: "rgba(255, 255, 255, 0.7)",
+    color: "rgba(255, 255, 255, 0.8)",
   },
   nav: {
     display: "flex",
@@ -638,9 +650,11 @@ const styles = {
     transition: "all 0.2s ease",
   },
   navButtonActive: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    backdropFilter: "blur(10px)",
     color: "#ffffff",
     fontWeight: "600",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
   },
   navChevron: {
     marginLeft: "auto",
@@ -648,7 +662,7 @@ const styles = {
   },
   navDivider: {
     height: "1px",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     margin: "16px 0",
   },
   logoutButton: {
@@ -668,7 +682,7 @@ const styles = {
   main: {
     marginLeft: "280px",
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "transparent",
     minHeight: "100vh",
   },
   topBar: {
@@ -676,8 +690,9 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "24px 40px",
-    backgroundColor: "#ffffff",
-    borderBottom: "1px solid #e5e7eb",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(15px)",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
   },
   welcomeText: {
     display: "flex",
@@ -686,12 +701,37 @@ const styles = {
   },
   welcomeGreeting: {
     fontSize: "14px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.9)",
   },
   welcomeTitle: {
     fontSize: "24px",
     fontWeight: "700",
+    color: "#0a3d62",
+  },
+  searchContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
+  searchIcon: {
+    position: "absolute",
+    left: "14px",
+    color: "rgba(107, 114, 128, 0.5)",
+    pointerEvents: "none",
+  },
+  searchInput: {
+    height: "44px",
+    paddingLeft: "40px",
+    paddingRight: "14px",
+    borderRadius: "10px",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(10px)",
+    fontSize: "14px",
     color: "#111827",
+    outline: "none",
+    transition: "all 0.2s ease",
+    width: "250px",
   },
   content: {
     padding: "32px 40px",
@@ -704,11 +744,13 @@ const styles = {
   },
   cardLarge: {
     gridColumn: "span 1",
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
     borderRadius: "16px",
     padding: "28px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    transition: "all 0.3s ease",
   },
   cardHeader: {
     display: "flex",
@@ -720,9 +762,10 @@ const styles = {
     width: "48px",
     height: "48px",
     borderRadius: "12px",
-    backgroundColor: "#000",
-    color: "#ffffff",
-    border: "none",
+    backgroundColor: "rgba(76, 201, 240, 0.3)",
+    backdropFilter: "blur(10px)",
+    color: "#0a3d62",
+    border: "1px solid rgba(76, 201, 240, 0.5)",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
@@ -730,15 +773,17 @@ const styles = {
     transition: "all 0.2s ease",
   },
   cardMedium: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
     borderRadius: "16px",
     padding: "24px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    transition: "all 0.3s ease",
   },
   cardLabel: {
     fontSize: "12px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.9)",
     fontWeight: "600",
     letterSpacing: "0.5px",
     marginBottom: "8px",
@@ -746,7 +791,7 @@ const styles = {
   },
   cardTag: {
     fontSize: "11px",
-    color: "#1e40af",
+    color: "#0a7fb5",
     fontWeight: "700",
     letterSpacing: "0.5px",
     marginBottom: "8px",
@@ -755,27 +800,29 @@ const styles = {
   cardTitle: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#111827",
+    color: "#0a3d62",
     marginBottom: "4px",
   },
   cardValue: {
     fontSize: "32px",
     fontWeight: "700",
-    color: "#1e40af",
+    color: "#0a7fb5",
     marginTop: "8px",
   },
   cardSubtitle: {
     fontSize: "13px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.8)",
     marginTop: "4px",
   },
   cardAccent: {
-    backgroundColor: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
-    background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
+    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.25) 0%, rgba(76, 201, 240, 0.15) 100%)",
+    backdropFilter: "blur(20px)",
     borderRadius: "16px",
     padding: "28px",
-    color: "#ffffff",
-    boxShadow: "0 4px 12px rgba(30, 64, 175, 0.15)",
+    color: "#0a3d62",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
+    border: "1px solid rgba(76, 201, 240, 0.4)",
+    transition: "all 0.3s ease",
   },
   accentIcon: {
     fontSize: "32px",
@@ -784,9 +831,9 @@ const styles = {
   accentButton: {
     marginTop: "16px",
     padding: "10px 16px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    color: "#ffffff",
-    border: "none",
+    backgroundColor: "rgba(76, 201, 240, 0.3)",
+    color: "#0a3d62",
+    border: "1px solid rgba(76, 201, 240, 0.5)",
     borderRadius: "8px",
     fontSize: "13px",
     fontWeight: "600",
@@ -795,16 +842,17 @@ const styles = {
   },
   cardFullWidth: {
     gridColumn: "span 3",
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
     borderRadius: "16px",
     padding: "28px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
   },
   sectionTitle: {
     fontSize: "18px",
     fontWeight: "700",
-    color: "#111827",
+    color: "#0a3d62",
     marginBottom: "20px",
   },
   lessonList: {
@@ -817,11 +865,12 @@ const styles = {
     alignItems: "center",
     gap: "16px",
     padding: "16px",
-    backgroundColor: "#f9fafb",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(10px)",
     borderRadius: "12px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    border: "1px solid #f3f4f6",
+    border: "1px solid rgba(255, 255, 255, 0.2)",
   },
   lessonIcon: {
     width: "48px",
@@ -831,7 +880,8 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     fontSize: "24px",
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(10px)",
   },
   lessonDetails: {
     flex: 1,
@@ -839,22 +889,22 @@ const styles = {
   lessonTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#111827",
+    color: "#0a3d62",
     marginBottom: "2px",
   },
   lessonMeta: {
     fontSize: "12px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.8)",
   },
   lessonDate: {
     fontSize: "13px",
-    color: "#9ca3af",
+    color: "rgba(107, 114, 128, 0.6)",
     fontWeight: "500",
   },
   loadingState: {
     textAlign: "center",
     padding: "40px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.8)",
     fontSize: "14px",
   },
   emptyState: {
@@ -868,21 +918,21 @@ const styles = {
   emptyText: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#111827",
+    color: "#0a3d62",
     marginBottom: "8px",
   },
   emptyDescription: {
     fontSize: "14px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.8)",
     marginBottom: "20px",
   },
   emptyButton: {
     padding: "10px 20px",
-    background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
-    color: "#ffffff",
+    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.3) 0%, rgba(76, 201, 240, 0.2) 100%)",
+    color: "#0a7fb5",
     fontSize: "14px",
     fontWeight: "600",
-    border: "none",
+    border: "1px solid rgba(10, 127, 181, 0.3)",
     borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
@@ -891,48 +941,51 @@ const styles = {
     width: "100%",
     padding: "12px",
     marginTop: "16px",
-    backgroundColor: "#f9fafb",
-    color: "#1e40af",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    color: "#0a7fb5",
     fontSize: "14px",
     fontWeight: "600",
-    border: "1px solid #e5e7eb",
+    border: "1px solid rgba(76, 201, 240, 0.3)",
     borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
   cardStat: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
     borderRadius: "16px",
     padding: "28px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
   },
   statValue: {
     fontSize: "40px",
     fontWeight: "700",
-    color: "#1e40af",
+    color: "#0a7fb5",
   },
   statLabel: {
     fontSize: "13px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.8)",
     marginTop: "8px",
     fontWeight: "500",
   },
   cardSummary: {
-    background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
+    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.25) 0%, rgba(76, 201, 240, 0.15) 100%)",
+    backdropFilter: "blur(20px)",
     borderRadius: "16px",
     padding: "28px",
-    color: "#ffffff",
+    color: "#0a3d62",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
-    boxShadow: "0 4px 12px rgba(30, 64, 175, 0.15)",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
+    border: "1px solid rgba(76, 201, 240, 0.4)",
   },
   summaryLabel: {
     fontSize: "13px",
@@ -944,6 +997,7 @@ const styles = {
     fontSize: "40px",
     fontWeight: "700",
     marginBottom: "8px",
+    color: "#0a7fb5",
   },
   summaryText: {
     fontSize: "13px",
@@ -955,19 +1009,20 @@ const styles = {
   pageTitle: {
     fontSize: "28px",
     fontWeight: "700",
-    color: "#111827",
+    color: "#0a3d62",
     marginBottom: "6px",
   },
   pageSubtitle: {
     fontSize: "14px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.8)",
   },
   formCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
     borderRadius: "16px",
     padding: "32px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
   },
   formGrid: {
     display: "grid",
@@ -983,31 +1038,32 @@ const styles = {
   label: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#374151",
+    color: "#0a3d62",
   },
   input: {
     height: "44px",
     padding: "0 14px",
     fontSize: "14px",
-    border: "1.5px solid #e5e7eb",
+    border: "1.5px solid rgba(255, 255, 255, 0.3)",
     borderRadius: "10px",
-    backgroundColor: "#ffffff",
-    color: "#111827",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(10px)",
+    color: "#0a3d62",
     outline: "none",
     transition: "all 0.2s ease",
     fontFamily: "inherit",
   },
   generateButton: {
     padding: "14px 28px",
-    background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
-    color: "#ffffff",
+    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.4) 0%, rgba(76, 201, 240, 0.3) 100%)",
+    color: "#0a3d62",
     fontSize: "15px",
     fontWeight: "600",
-    border: "none",
+    border: "1px solid rgba(10, 127, 181, 0.3)",
     borderRadius: "12px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: "0 4px 12px rgba(30, 64, 175, 0.3)",
+    boxShadow: "0 4px 12px rgba(10, 127, 181, 0.15)",
   },
   documentContainer: {
     backgroundColor: "transparent",
@@ -1024,9 +1080,10 @@ const styles = {
     padding: "12px 20px",
     fontSize: "14px",
     fontWeight: "500",
-    color: "#1e40af",
-    backgroundColor: "#ffffff",
-    border: "1.5px solid #e5e7eb",
+    color: "#0a7fb5",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(10px)",
+    border: "1.5px solid rgba(76, 201, 240, 0.3)",
     borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s ease",
@@ -1036,18 +1093,18 @@ const styles = {
   },
   saveButton: {
     padding: "12px 20px",
-    background: "linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)",
-    color: "#ffffff",
+    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.4) 0%, rgba(76, 201, 240, 0.3) 100%)",
+    color: "#0a3d62",
     fontSize: "14px",
     fontWeight: "600",
-    border: "none",
+    border: "1px solid rgba(10, 127, 181, 0.3)",
     borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    boxShadow: "0 2px 8px rgba(30, 64, 175, 0.3)",
+    boxShadow: "0 2px 8px rgba(10, 127, 181, 0.2)",
   },
   documentPage: {
     maxWidth: "850px",
@@ -1141,11 +1198,12 @@ const styles = {
     gap: "20px",
   },
   lessonCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backdropFilter: "blur(20px)",
     borderRadius: "12px",
     padding: "20px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-    border: "1px solid #e5e7eb",
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
     transition: "all 0.2s ease",
   },
   lessonCardHeader: {
@@ -1158,17 +1216,17 @@ const styles = {
   lessonCardTitle: {
     fontSize: "14px",
     fontWeight: "700",
-    color: "#111827",
+    color: "#0a3d62",
     flex: 1,
   },
   lessonCardDate: {
     fontSize: "12px",
-    color: "#9ca3af",
+    color: "rgba(107, 114, 128, 0.6)",
     fontWeight: "500",
   },
   lessonCardMeta: {
     fontSize: "13px",
-    color: "#6b7280",
+    color: "rgba(107, 114, 128, 0.8)",
     marginBottom: "16px",
     lineHeight: "1.5",
   },
@@ -1179,11 +1237,11 @@ const styles = {
   viewButton: {
     flex: 1,
     padding: "8px 12px",
-    backgroundColor: "#1e40af",
-    color: "#ffffff",
+    backgroundColor: "rgba(10, 127, 181, 0.3)",
+    color: "#0a3d62",
     fontSize: "13px",
     fontWeight: "600",
-    border: "none",
+    border: "1px solid rgba(10, 127, 181, 0.3)",
     borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
@@ -1195,11 +1253,11 @@ const styles = {
   deleteButton: {
     flex: 1,
     padding: "8px 12px",
-    backgroundColor: "#fee2e2",
+    backgroundColor: "rgba(220, 38, 38, 0.2)",
     color: "#dc2626",
     fontSize: "13px",
     fontWeight: "600",
-    border: "none",
+    border: "1px solid rgba(220, 38, 38, 0.2)",
     borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
