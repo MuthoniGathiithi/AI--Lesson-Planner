@@ -6,13 +6,13 @@ export default function Header() {
   const location = useLocation();
   const [activeSection, setActiveSection] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
   // Scroll detection for sections on home page
   useEffect(() => {
     const handleScroll = () => {
-      // global scrolled state — header color change when user scrolls down
       setScrolled(window.scrollY > 10);
 
       if (location.pathname !== '/') return;
@@ -28,96 +28,46 @@ export default function Header() {
         const element = document.getElementById(section.id);
         if (element) {
           const rect = element.getBoundingClientRect();
-          if (rect.top <= 150) {
-            currentSection = section.name;
-          }
+          if (rect.top <= 150) currentSection = section.name;
         }
       }
-      // if we're at the very top (no section reached), mark as 'home'
-      if (!currentSection) {
-        setActiveSection('home');
-      } else {
-        setActiveSection(currentSection);
-      }
+      setActiveSection(currentSection || 'home');
     };
 
     window.addEventListener('scroll', handleScroll);
-    // run once to set initial active section on mount
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, [location.pathname]);
 
-  const handleAboutClick = () => {
+  const scrollToSection = (id) => {
     if (location.pathname !== '/') {
       navigate('/');
-      setTimeout(() => {
-        const element = document.getElementById('about');
-        element?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 120);
     } else {
-      const element = document.getElementById('about');
-      element?.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     }
+    setMobileMenuOpen(false); // close mobile menu after click
   };
 
-  const handleHomeClick = () => {
-    if (location.pathname !== '/') {
-      navigate('/');
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 120);
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveSection('home');
-    }
-  };
-
-  const handleHowItWorksClick = () => {
-    if (location.pathname !== '/') {
-      navigate('/');
-      setTimeout(() => {
-        const element = document.getElementById('how-it-works');
-        element?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      const element = document.getElementById('how-it-works');
-      element?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handlePricingClick = () => {
-    if (location.pathname !== '/') {
-      navigate('/');
-      setTimeout(() => {
-        const element = document.getElementById('pricing');
-        element?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      const element = document.getElementById('pricing');
-      element?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleSignInClick = () => {
-    navigate('/signin');
-  };
-
-  const handleGetStartedClick = () => {
-    navigate('/signup');
-  };
+  const handleSignInClick = () => navigate('/signin');
+  const handleGetStartedClick = () => navigate('/signup');
 
   const activeColor = '#4F46E5';
-  // when scrolled, use white for inactive links for visibility on dark bg; otherwise dark text
-  const inactiveColor = scrolled ? '#FFFFFF' : '#111827';
+  const inactiveColor = scrolled ? '#fff' : '#111827';
+  const navBackground = scrolled ? '#000' : 'rgba(255,255,255,0.95)';
+  const logoColor = location.pathname === '/' && activeSection === 'home' ? activeColor : scrolled ? '#fff' : '#111827';
+  const primaryButtonBg = isActive('/signup') ? activeColor : scrolled ? '#fff' : '#111827';
+  const primaryButtonText = isActive('/signup') ? '#fff' : scrolled ? '#111827' : '#fff';
 
-  // navbar background: black when scrolled, translucent white at top
-  const navBackground = scrolled ? '#000' : 'rgba(255, 255, 255, 0.95)';
-  const navBorder = scrolled ? '#000' : '#E5E7EB';
-
-  // logo color: purple if home+active, otherwise white when scrolled for contrast
-  const logoColor = (location.pathname === '/' && activeSection === 'home') ? activeColor : (scrolled ? '#FFFFFF' : '#111827');
-
-  // Get Started button colors adapt when scrolled for visibility
-  const primaryButtonBg = isActive('/signup') ? activeColor : (scrolled ? '#FFFFFF' : '#111827');
-  const primaryButtonText = isActive('/signup') ? '#FFFFFF' : (scrolled ? '#111827' : '#FFFFFF');
+  const linkStyle = {
+    background: 'transparent',
+    border: 'none',
+    fontSize: '1.25rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    padding: '6px 0',
+    transition: 'color 0.15s',
+  };
 
   return (
     <nav style={{
@@ -127,11 +77,9 @@ export default function Header() {
       right: 0,
       backgroundColor: navBackground,
       backdropFilter: 'blur(10px)',
-      borderBottom: 'none',
       zIndex: 60,
-      padding: '16px 36px',
-      transition: 'background-color 200ms, border-color 200ms, padding 200ms',
-      pointerEvents: 'auto'
+      padding: '12px 24px',
+      transition: 'background-color 0.2s',
     }}>
       <div style={{
         maxWidth: '1200px',
@@ -139,127 +87,88 @@ export default function Header() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        position: 'relative',
-        zIndex: 1
       }}>
         <Link to="/" style={{
           fontSize: '1.5rem',
           fontWeight: 700,
           color: logoColor,
-          letterSpacing: '-0.5px',
           textDecoration: 'none',
           transition: 'color 0.2s',
-          fontFamily: 'Inter, sans-serif'
         }}>
           FunzoIQ
         </Link>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <button onClick={handleHomeClick} style={{
-            background: 'transparent',
-            border: 'none',
-            color: activeSection === 'home' ? activeColor : inactiveColor,
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: '6px 6px',
-            transition: 'color 0.15s',
-            textShadow: scrolled ? '0 1px 2px rgba(0,0,0,0.6)' : '0 1px 0 rgba(255,255,255,0.6)'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.color = activeColor}
-          onMouseOut={(e) => e.currentTarget.style.color = activeSection === 'home' ? activeColor : inactiveColor}>
-            Home
-          </button>
 
-          <button onClick={handleAboutClick} style={{
-            background: 'transparent',
-            border: 'none',
-            color: activeSection === 'about' ? activeColor : inactiveColor,
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: '6px 6px',
-            transition: 'color 0.15s',
-            textShadow: scrolled ? '0 1px 2px rgba(0,0,0,0.6)' : '0 1px 0 rgba(255,255,255,0.6)'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.color = activeColor}
-          onMouseOut={(e) => e.currentTarget.style.color = activeSection === 'about' ? activeColor : inactiveColor}>
-            About Us
-          </button>
+        {/* Desktop Links */}
+        <div className="desktop-links" style={{
+          display: 'none',
+          alignItems: 'center',
+          gap: '24px'
+        }}>
+          <button onClick={() => scrollToSection('home')} style={{ ...linkStyle, color: activeSection === 'home' ? activeColor : inactiveColor }}>Home</button>
+          <button onClick={() => scrollToSection('about')} style={{ ...linkStyle, color: activeSection === 'about' ? activeColor : inactiveColor }}>About Us</button>
+          <button onClick={() => scrollToSection('how-it-works')} style={{ ...linkStyle, color: activeSection === 'how-it-works' ? activeColor : inactiveColor }}>How It Works</button>
+          <button onClick={() => scrollToSection('pricing')} style={{ ...linkStyle, color: activeSection === 'pricing' ? activeColor : inactiveColor }}>Contacts</button>
 
-          <button onClick={handleHowItWorksClick} style={{
-            background: 'transparent',
-            border: 'none',
-            color: activeSection === 'how-it-works' ? activeColor : inactiveColor,
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            padding: '6px 6px',
-            transition: 'color 0.15s',
-            textShadow: scrolled ? '0 1px 2px rgba(0,0,0,0.6)' : '0 1px 0 rgba(255,255,255,0.6)'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.color = activeColor}
-          onMouseOut={(e) => e.currentTarget.style.color = activeSection === 'how-it-works' ? activeColor : inactiveColor}>
-            How It Works
-          </button>
-
-          <button onClick={handlePricingClick} style={{
-            background: 'transparent',
-            border: 'none',
-            fontSize: '1.25rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'color 0.15s',
-            color: activeSection === 'pricing' ? activeColor : inactiveColor,
-            padding: '6px 6px',
-            textShadow: scrolled ? '0 1px 2px rgba(0,0,0,0.6)' : '0 1px 0 rgba(255,255,255,0.6)'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.color = activeColor}
-          onMouseOut={(e) => e.currentTarget.style.color = activeSection === 'pricing' ? activeColor : inactiveColor}>
-            Contacts
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <button onClick={handleSignInClick} style={{
-            background: 'none',
-            border: 'none',
-            color: isActive('/signin') ? activeColor : inactiveColor,
-            fontSize: '1.25rem',
-            fontWeight: 500,
-            padding: '8px 20px',
-            cursor: 'pointer',
-            transition: 'color 0.2s'
-          }}
-          onMouseOver={(e) => e.target.style.color = activeColor}
-          onMouseOut={(e) => e.target.style.color = isActive('/signin') ? activeColor : inactiveColor}>
-            Sign In
-          </button>
+          <button onClick={handleSignInClick} style={{ ...linkStyle, fontWeight: 500, color: isActive('/signin') ? activeColor : inactiveColor }}>Sign In</button>
           <button onClick={handleGetStartedClick} style={{
             background: primaryButtonBg,
             border: 'none',
             color: primaryButtonText,
             fontSize: '0.95rem',
             fontWeight: 600,
-            padding: '10px 24px',
+            padding: '8px 20px',
             borderRadius: '8px',
             cursor: 'pointer',
-            transition: 'all 0.2s'
-          }}
-          onMouseOver={(e) => {
-            e.target.style.background = activeColor;
-            e.target.style.color = '#FFFFFF';
-            e.target.style.transform = 'translateY(-1px)';
-          }}
-          onMouseOut={(e) => {
-            e.target.style.background = primaryButtonBg;
-            e.target.style.color = primaryButtonText;
-            e.target.style.transform = 'translateY(0)';
-          }}>
-            Get Started
-          </button>
+          }}>Get Started</button>
         </div>
+
+        {/* Mobile Hamburger */}
+        <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{
+          display: 'block',
+          background: 'transparent',
+          border: 'none',
+          fontSize: '1.5rem',
+          cursor: 'pointer',
+          color: logoColor,
+        }}>
+          ☰
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          padding: '16px 0',
+          borderTop: '1px solid rgba(255,255,255,0.2)'
+        }}>
+          <button onClick={() => scrollToSection('home')} style={{ ...linkStyle, color: activeSection === 'home' ? activeColor : inactiveColor }}>Home</button>
+          <button onClick={() => scrollToSection('about')} style={{ ...linkStyle, color: activeSection === 'about' ? activeColor : inactiveColor }}>About Us</button>
+          <button onClick={() => scrollToSection('how-it-works')} style={{ ...linkStyle, color: activeSection === 'how-it-works' ? activeColor : inactiveColor }}>How It Works</button>
+          <button onClick={() => scrollToSection('pricing')} style={{ ...linkStyle, color: activeSection === 'pricing' ? activeColor : inactiveColor }}>Contacts</button>
+          <button onClick={handleSignInClick} style={{ ...linkStyle, fontWeight: 500, color: isActive('/signin') ? activeColor : inactiveColor }}>Sign In</button>
+          <button onClick={handleGetStartedClick} style={{
+            background: primaryButtonBg,
+            border: 'none',
+            color: primaryButtonText,
+            fontSize: '0.95rem',
+            fontWeight: 600,
+            padding: '8px 20px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}>Get Started</button>
+        </div>
+      )}
+
+      {/* Media Queries */}
+      <style>{`
+        @media(min-width: 768px) {
+          .desktop-links { display: flex !important; }
+          .mobile-menu-btn { display: none !important; }
+        }
+      `}</style>
     </nav>
   );
 }
