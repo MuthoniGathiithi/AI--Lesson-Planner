@@ -1,9 +1,9 @@
-
 "use client"
 
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
 import { supabase } from "./supabaseClient"
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 export default function SignUp() {
   const navigate = useNavigate()
@@ -18,9 +18,10 @@ export default function SignUp() {
 
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [infoMessage, setInfoMessage] = useState("")
 
-  // Validation logic
   const validateForm = () => {
     const newErrors = {}
     if (!formData.name.trim()) newErrors.name = "Name is required"
@@ -33,11 +34,11 @@ export default function SignUp() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }))
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }))
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }))
     setInfoMessage("")
   }
 
@@ -56,11 +57,10 @@ export default function SignUp() {
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: { data: { full_name: formData.name } }
+        options: { data: { full_name: formData.name } },
       })
 
       if (error) {
-        // Handle duplicate email nicely
         if (error.message.includes("already registered")) {
           setErrors({ email: "This email is already in use" })
         } else {
@@ -70,17 +70,15 @@ export default function SignUp() {
         return
       }
 
-      // Email verification sent
       if (data.user?.confirmation_sent_at) {
         setInfoMessage("Account created! Please check your email to verify your account before signing in.")
         setLoading(false)
         return
       }
 
-      // If no email verification, automatically sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       })
 
       if (signInError) {
@@ -98,106 +96,159 @@ export default function SignUp() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.formWrapper}>
-        <h1 style={styles.title}>Create Account</h1>
-        <p style={styles.subtitle}>Join us and start your journey today</p>
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          {/* Name */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="John Doe"
-              style={{ ...styles.input, ...(errors.name && styles.inputError) }}
-            />
-            {errors.name && <span style={styles.error}>{errors.name}</span>}
+      <div style={styles.contentWrapper}>
+        <div style={styles.card}>
+          <div style={styles.header}>
+            <div style={styles.logoContainer}>
+              <div style={styles.logoCircle}>
+                <User style={styles.logoIcon} />
+              </div>
+            </div>
+            <h1 style={styles.brandTitle}>FunzoIQ</h1>
+            <h2 style={styles.title}>Create Account</h2>
+            <p style={styles.subtitle}>Join us and start your journey today</p>
           </div>
 
-          {/* Email */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              style={{ ...styles.input, ...(errors.email && styles.inputError) }}
-            />
-            {errors.email && <span style={styles.error}>{errors.email}</span>}
+          <div style={styles.formContainer}>
+            {/* Name */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Full Name</label>
+              <div style={styles.inputWrapper}>
+                <div style={styles.inputIconWrapper}>
+                  <User style={styles.inputIcon} />
+                </div>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  style={{ ...styles.input, ...(errors.name && styles.inputError) }}
+                />
+              </div>
+              {errors.name && <p style={styles.errorText}>{errors.name}</p>}
+            </div>
+
+            {/* Email */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Email address</label>
+              <div style={styles.inputWrapper}>
+                <div style={styles.inputIconWrapper}>
+                  <Mail style={styles.inputIcon} />
+                </div>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  style={{ ...styles.input, ...(errors.email && styles.inputError) }}
+                />
+              </div>
+              {errors.email && <p style={styles.errorText}>{errors.email}</p>}
+            </div>
+
+            {/* Password */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Password</label>
+              <div style={styles.inputWrapper}>
+                <div style={styles.inputIconWrapper}>
+                  <Lock style={styles.inputIcon} />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Min. 8 characters"
+                  style={{ ...styles.input, ...(errors.password && styles.inputError) }}
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.toggleButton}>
+                  {showPassword ? <EyeOff style={styles.toggleIcon} /> : <Eye style={styles.toggleIcon} />}
+                </button>
+              </div>
+              {errors.password && <p style={styles.errorText}>{errors.password}</p>}
+            </div>
+
+            {/* Confirm Password */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Confirm Password</label>
+              <div style={styles.inputWrapper}>
+                <div style={styles.inputIconWrapper}>
+                  <Lock style={styles.inputIcon} />
+                </div>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  style={{ ...styles.input, ...(errors.confirmPassword && styles.inputError) }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={styles.toggleButton}
+                >
+                  {showConfirmPassword ? <EyeOff style={styles.toggleIcon} /> : <Eye style={styles.toggleIcon} />}
+                </button>
+              </div>
+              {errors.confirmPassword && <p style={styles.errorText}>{errors.confirmPassword}</p>}
+            </div>
+
+            {/* Terms Agreement */}
+            <div style={styles.termsWrapper}>
+              <label style={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  name="agreeTerms"
+                  checked={formData.agreeTerms}
+                  onChange={handleChange}
+                  style={styles.checkbox}
+                />
+                <span style={styles.checkboxText}>
+                  I agree to the{" "}
+                  <a href="#" style={styles.link}>
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" style={styles.link}>
+                    Privacy Policy
+                  </a>
+                </span>
+              </label>
+            </div>
+            {errors.agreeTerms && <p style={styles.errorText}>{errors.agreeTerms}</p>}
+
+            {/* Info message */}
+            {infoMessage && <p style={{ ...styles.errorText, color: "#1e293b" }}>{infoMessage}</p>}
+
+            {/* General error */}
+            {errors.general && <p style={styles.errorText}>{errors.general}</p>}
+
+            {/* Submit Button */}
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{ ...styles.submitButton, ...(loading && styles.submitButtonDisabled) }}
+            >
+              {loading ? "Creating Account..." : "Create Account"}
+            </button>
           </div>
 
-          {/* Password */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Min. 8 characters"
-              style={{ ...styles.input, ...(errors.password && styles.inputError) }}
-            />
-            {errors.password && <span style={styles.error}>{errors.password}</span>}
-          </div>
-
-          {/* Confirm Password */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              style={{ ...styles.input, ...(errors.confirmPassword && styles.inputError) }}
-            />
-            {errors.confirmPassword && <span style={styles.error}>{errors.confirmPassword}</span>}
-          </div>
-
-          {/* Terms */}
-          <div style={styles.checkboxGroup}>
-            <input
-              type="checkbox"
-              id="terms"
-              name="agreeTerms"
-              checked={formData.agreeTerms}
-              onChange={handleChange}
-              style={styles.checkbox}
-            />
-            <label htmlFor="terms" style={styles.checkboxLabel}>
-              I agree to the <a href="#" style={styles.link}>Terms of Service</a> and <a href="#" style={styles.link}>Privacy Policy</a>
-            </label>
-          </div>
-          {errors.agreeTerms && <span style={styles.error}>{errors.agreeTerms}</span>}
-
-          {/* General error */}
-          {errors.general && <span style={styles.error}>{errors.general}</span>}
-
-          {/* Info message */}
-          {infoMessage && <span style={{ ...styles.error, color: "#2d3748" }}>{infoMessage}</span>}
-
-          {/* Submit */}
-          <button type="submit" disabled={loading} style={{ ...styles.button, ...(loading && styles.buttonDisabled) }}>
-            {loading ? "Creating Account..." : "Create Account"}
-          </button>
-        </form>
-
-        <p style={styles.footer}>
-          Already have an account? <Link to="/signin" style={styles.link}>Sign in</Link>
-        </p>
+          {/* Footer */}
+          <p style={styles.footer}>
+            Already have an account?{" "}
+            <a href="/signin" style={styles.signupLink}>
+              Sign in
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   )
 }
-
-
-// styles remain the same as your current styles
-
 
 const styles = {
   container: {
@@ -205,145 +256,207 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
-    padding: "20px",
+    backgroundColor: "#f1f5f9",
+    padding: "1.5rem",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
   },
-  formWrapper: {
-    background: "#ffffff",
-    borderRadius: "12px",
-    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
-    padding: "40px",
+  contentWrapper: {
     width: "100%",
-    maxWidth: "420px",
+    maxWidth: "28rem",
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: "1.25rem",
+    boxShadow:
+      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 20px 25px -5px rgba(0, 0, 0, 0.05)",
+    padding: "3rem 2.5rem",
+    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+    border: "1px solid rgba(226, 232, 240, 0.8)",
   },
   header: {
-    marginBottom: "30px",
     textAlign: "center",
+    marginBottom: "2.5rem",
+  },
+  logoContainer: {
+    display: "flex",
+    justifyContent: "center",
+    marginBottom: "1.5rem",
+  },
+  logoCircle: {
+    width: "3rem",
+    height: "3rem",
+    borderRadius: "0.875rem",
+    backgroundColor: "#0f172a",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 10px 15px -3px rgba(15, 23, 42, 0.1)",
+  },
+  logoIcon: {
+    width: "1.5rem",
+    height: "1.5rem",
+    color: "#ffffff",
+  },
+  brandTitle: {
+    fontSize: "0.75rem",
+    fontWeight: "700",
+    color: "#64748b",
+    marginBottom: "0.5rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.15em",
   },
   title: {
-    fontSize: "28px",
+    fontSize: "1.75rem",
     fontWeight: "700",
-    color: "#1a202c",
-    margin: "0 0 10px 0",
+    color: "#0f172a",
+    marginBottom: "0.5rem",
+    letterSpacing: "-0.02em",
   },
   subtitle: {
-    fontSize: "14px",
-    color: "#718096",
-    margin: 0,
+    color: "#64748b",
+    fontSize: "0.9375rem",
+    lineHeight: "1.6",
   },
-  form: {
+  formContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "1.5rem",
   },
   formGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
   },
   label: {
-    fontSize: "14px",
+    display: "block",
+    fontSize: "0.875rem",
     fontWeight: "600",
-    color: "#2d3748",
+    color: "#334155",
+    marginBottom: "0.5rem",
+  },
+  inputWrapper: {
+    position: "relative",
+  },
+  inputIconWrapper: {
+    position: "absolute",
+    top: "50%",
+    left: "1rem",
+    transform: "translateY(-50%)",
+    pointerEvents: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inputIcon: {
+    width: "1.125rem",
+    height: "1.125rem",
+    color: "#94a3b8",
   },
   input: {
-    padding: "12px 14px",
+    width: "100%",
+    paddingLeft: "2.75rem",
+    paddingRight: "1rem",
+    paddingTop: "0.75rem",
+    paddingBottom: "0.75rem",
     border: "1px solid #e2e8f0",
-    borderRadius: "8px",
-    fontSize: "14px",
-    transition: "all 0.3s ease",
+    borderRadius: "0.625rem",
+    fontSize: "0.9375rem",
     outline: "none",
-    fontFamily: "inherit",
+    transition: "all 0.2s ease",
+    boxSizing: "border-box",
+    backgroundColor: "#ffffff",
+    color: "#0f172a",
   },
   inputError: {
-    borderColor: "#fc8181",
-    backgroundColor: "#fff5f5",
+    borderColor: "#ef4444",
+    backgroundColor: "#fffafb",
   },
-  error: {
-    fontSize: "12px",
-    color: "#e53e3e",
-    marginTop: "4px",
-  },
-  checkboxGroup: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "10px",
-    marginTop: "10px",
-  },
-  checkbox: {
-    marginTop: "2px",
+  toggleButton: {
+    position: "absolute",
+    top: "50%",
+    right: "0.75rem",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
     cursor: "pointer",
-    accentColor: "#667eea",
+    padding: "0.25rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#94a3b8",
+  },
+  toggleIcon: {
+    width: "1.125rem",
+    height: "1.125rem",
+  },
+  errorText: {
+    marginTop: "0.375rem",
+    fontSize: "0.8125rem",
+    fontWeight: "500",
+    color: "#ef4444",
+  },
+  termsWrapper: {
+    marginTop: "0.5rem",
   },
   checkboxLabel: {
-    fontSize: "13px",
-    color: "#4a5568",
+    display: "flex",
+    alignItems: "flex-start",
+    cursor: "pointer",
+    userSelect: "none",
+    gap: "0.5rem",
+  },
+  checkbox: {
+    width: "1rem",
+    height: "1rem",
+    accentColor: "#0f172a",
+    borderRadius: "0.25rem",
+    cursor: "pointer",
+    marginTop: "0.125rem",
+    flexShrink: 0,
+  },
+  checkboxText: {
+    fontSize: "0.875rem",
+    fontWeight: "500",
+    color: "#64748b",
     lineHeight: "1.5",
   },
-  button: {
-    padding: "12px 20px",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "16px",
+  link: {
+    fontSize: "0.875rem",
     fontWeight: "600",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    marginTop: "10px",
+    color: "#0f172a",
+    textDecoration: "none",
+    transition: "color 0.2s",
   },
-  buttonDisabled: {
-    opacity: "0.7",
+  submitButton: {
+    width: "100%",
+    backgroundColor: "#0f172a",
+    color: "#ffffff",
+    padding: "0.75rem 1rem",
+    borderRadius: "0.625rem",
+    fontWeight: "600",
+    border: "none",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    fontSize: "0.9375rem",
+    marginTop: "0.5rem",
+    boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.1)",
+  },
+  submitButtonHover: {
+    backgroundColor: "#1e293b",
+    boxShadow: "0 10px 15px -3px rgba(15, 23, 42, 0.2)",
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
     cursor: "not-allowed",
   },
   footer: {
     textAlign: "center",
-    fontSize: "14px",
-    color: "#4a5568",
-    marginTop: "20px",
+    fontSize: "0.875rem",
+    color: "#64748b",
+    marginTop: "2.5rem",
   },
-  link: {
-    color: "#667eea",
-    textDecoration: "none",
+  signupLink: {
     fontWeight: "600",
-    cursor: "pointer",
-  },
-  dividerWrapper: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    marginTop: "20px",
-    marginBottom: "14px",
-  },
-  divider: {
-    flex: 1,
-    height: "1px",
-    background: "#E5E7EB",
-  },
-  dividerText: {
-    fontSize: "13px",
-    color: "#9CA3AF",
-    whiteSpace: "nowrap",
-  },
-  socialRow: {
-    display: "flex",
-    gap: "12px",
-    justifyContent: "center",
-    marginTop: "4px",
-  },
-  socialButton: {
-    flex: 1,
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid #E5E7EB",
-    background: "#ffffff",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-  socialLabel: {
-    color: "#111827",
+    color: "#0f172a",
+    textDecoration: "none",
   },
 }
-
-
