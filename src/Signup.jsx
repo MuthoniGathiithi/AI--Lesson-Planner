@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 import { supabase } from "./supabaseClient"
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
@@ -7,7 +6,6 @@ import { useNavigate } from "react-router-dom"
 
 export default function SignUp() {
   const navigate = useNavigate()
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,7 +13,6 @@ export default function SignUp() {
     confirmPassword: "",
     agreeTerms: false,
   })
-
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -25,10 +22,14 @@ export default function SignUp() {
   const validateForm = () => {
     const newErrors = {}
     if (!formData.name.trim()) newErrors.name = "Name is required"
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) newErrors.email = "Please enter a valid email"
-    if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters"
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match"
-    if (!formData.agreeTerms) newErrors.agreeTerms = "You must agree to the terms"
+    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
+      newErrors.email = "Please enter a valid email"
+    if (formData.password.length < 8)
+      newErrors.password = "Password must be at least 8 characters"
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match"
+    if (!formData.agreeTerms)
+      newErrors.agreeTerms = "You must agree to the terms"
     return newErrors
   }
 
@@ -52,12 +53,13 @@ export default function SignUp() {
     }
 
     setLoading(true)
-
     try {
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-        options: { data: { full_name: formData.name } },
+        options: {
+          data: { full_name: formData.name }
+        },
       })
 
       if (error) {
@@ -100,27 +102,36 @@ export default function SignUp() {
         <div style={styles.card}>
           <div style={styles.header}>
             <div style={styles.logoContainer}>
+              <div style={styles.logoCircle}>
+                <User style={styles.logoIcon} />
+              </div>
             </div>
             <h1 style={styles.brandTitle}>FunzoIQ</h1>
             <h2 style={styles.title}>Create Account</h2>
-            <p style={styles.subtitle}> start your journey today At FunzoIQ</p>
+            <p style={styles.subtitle}>start your journey today At FunzoIQ</p>
           </div>
 
-          <div style={styles.formContainer}>
+          <form onSubmit={handleSubmit} style={styles.formContainer}>
             {/* Name */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Full Name</label>
+              <label htmlFor="name" style={styles.label}>
+                Full Name
+              </label>
               <div style={styles.inputWrapper}>
                 <div style={styles.inputIconWrapper}>
                   <User style={styles.inputIcon} />
                 </div>
                 <input
                   type="text"
+                  id="name"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="John Doe"
-                  style={{ ...styles.input, ...(errors.name && styles.inputError) }}
+                  style={{
+                    ...styles.input,
+                    ...(errors.name ? styles.inputError : {}),
+                  }}
+                  placeholder="Enter your full name"
                 />
               </div>
               {errors.name && <p style={styles.errorText}>{errors.name}</p>}
@@ -128,18 +139,24 @@ export default function SignUp() {
 
             {/* Email */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Email address</label>
+              <label htmlFor="email" style={styles.label}>
+                Email address
+              </label>
               <div style={styles.inputWrapper}>
                 <div style={styles.inputIconWrapper}>
                   <Mail style={styles.inputIcon} />
                 </div>
                 <input
                   type="email"
+                  id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="you@example.com"
-                  style={{ ...styles.input, ...(errors.email && styles.inputError) }}
+                  style={{
+                    ...styles.input,
+                    ...(errors.email ? styles.inputError : {}),
+                  }}
+                  placeholder="Enter your email"
                 />
               </div>
               {errors.email && <p style={styles.errorText}>{errors.email}</p>}
@@ -147,50 +164,78 @@ export default function SignUp() {
 
             {/* Password */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Password</label>
+              <label htmlFor="password" style={styles.label}>
+                Password
+              </label>
               <div style={styles.inputWrapper}>
                 <div style={styles.inputIconWrapper}>
                   <Lock style={styles.inputIcon} />
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
+                  id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Min. 8 characters"
-                  style={{ ...styles.input, ...(errors.password && styles.inputError) }}
+                  style={{
+                    ...styles.input,
+                    ...(errors.password ? styles.inputError : {}),
+                  }}
+                  placeholder="Create a password"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.toggleButton}>
-                  {showPassword ? <EyeOff style={styles.toggleIcon} /> : <Eye style={styles.toggleIcon} />}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={styles.toggleButton}
+                >
+                  {showPassword ? (
+                    <EyeOff style={styles.toggleIcon} />
+                  ) : (
+                    <Eye style={styles.toggleIcon} />
+                  )}
                 </button>
               </div>
-              {errors.password && <p style={styles.errorText}>{errors.password}</p>}
+              {errors.password && (
+                <p style={styles.errorText}>{errors.password}</p>
+              )}
             </div>
 
             {/* Confirm Password */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Confirm Password</label>
+              <label htmlFor="confirmPassword" style={styles.label}>
+                Confirm Password
+              </label>
               <div style={styles.inputWrapper}>
                 <div style={styles.inputIconWrapper}>
                   <Lock style={styles.inputIcon} />
                 </div>
                 <input
                   type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  style={{
+                    ...styles.input,
+                    ...(errors.confirmPassword ? styles.inputError : {}),
+                  }}
                   placeholder="Confirm your password"
-                  style={{ ...styles.input, ...(errors.confirmPassword && styles.inputError) }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   style={styles.toggleButton}
                 >
-                  {showConfirmPassword ? <EyeOff style={styles.toggleIcon} /> : <Eye style={styles.toggleIcon} />}
+                  {showConfirmPassword ? (
+                    <EyeOff style={styles.toggleIcon} />
+                  ) : (
+                    <Eye style={styles.toggleIcon} />
+                  )}
                 </button>
               </div>
-              {errors.confirmPassword && <p style={styles.errorText}>{errors.confirmPassword}</p>}
+              {errors.confirmPassword && (
+                <p style={styles.errorText}>{errors.confirmPassword}</p>
+              )}
             </div>
 
             {/* Terms Agreement */}
@@ -205,42 +250,48 @@ export default function SignUp() {
                 />
                 <span style={styles.checkboxText}>
                   I agree to the{" "}
-                  <a href="#" style={styles.link}>
+                  <a href="/terms" style={styles.link}>
                     Terms of Service
                   </a>{" "}
                   and{" "}
-                  <a href="#" style={styles.link}>
+                  <a href="/privacy" style={styles.link}>
                     Privacy Policy
                   </a>
                 </span>
               </label>
+              {errors.agreeTerms && (
+                <p style={styles.errorText}>{errors.agreeTerms}</p>
+              )}
             </div>
-            {errors.agreeTerms && <p style={styles.errorText}>{errors.agreeTerms}</p>}
 
             {/* Info message */}
-            {infoMessage && <p style={{ ...styles.errorText, color: "#1e293b" }}>{infoMessage}</p>}
+            {infoMessage && <div style={styles.infoMessage}>{infoMessage}</div>}
 
             {/* General error */}
-            {errors.general && <p style={styles.errorText}>{errors.general}</p>}
+            {errors.general && (
+              <div style={styles.generalError}>{errors.general}</div>
+            )}
 
             {/* Submit Button */}
             <button
-              type="button"
-              onClick={handleSubmit}
+              type="submit"
               disabled={loading}
-              style={{ ...styles.submitButton, ...(loading && styles.submitButtonDisabled) }}
+              style={{
+                ...styles.submitButton,
+                ...(loading ? styles.submitButtonDisabled : {}),
+              }}
             >
               {loading ? "Creating Account..." : "Create Account"}
             </button>
-          </div>
+          </form>
 
           {/* Footer */}
-          <p style={styles.footer}>
+          <div style={styles.footer}>
             Already have an account?{" "}
             <a href="/signin" style={styles.signupLink}>
               Sign in
             </a>
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -255,7 +306,7 @@ const styles = {
     justifyContent: "center",
     backgroundColor: "#f1f5f9",
     padding: "1.5rem",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   contentWrapper: {
     width: "100%",
@@ -264,8 +315,7 @@ const styles = {
   card: {
     backgroundColor: "#ffffff",
     borderRadius: "1.25rem",
-    boxShadow:
-      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 20px 25px -5px rgba(0, 0, 0, 0.05)",
+    boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 20px 25px -5px rgba(0, 0, 0, 0.05)",
     padding: "3rem 2.5rem",
     transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
     border: "1px solid rgba(226, 232, 240, 0.8)",
@@ -301,19 +351,21 @@ const styles = {
     marginBottom: "0.5rem",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
-    fontFamily:"inter, sans-serif"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   },
   title: {
-    fontSize: "1.75rem",
+    fontSize: "1.5rem",
     fontWeight: "700",
     color: "#0f172a",
     marginBottom: "0.5rem",
     letterSpacing: "-0.02em",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   subtitle: {
     color: "#64748b",
     fontSize: "0.9375rem",
     lineHeight: "1.6",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   formContainer: {
     display: "flex",
@@ -330,6 +382,7 @@ const styles = {
     fontWeight: "600",
     color: "#334155",
     marginBottom: "0.5rem",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   inputWrapper: {
     position: "relative",
@@ -363,6 +416,7 @@ const styles = {
     boxSizing: "border-box",
     backgroundColor: "#ffffff",
     color: "#0f172a",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   inputError: {
     borderColor: "#ef4444",
@@ -391,6 +445,7 @@ const styles = {
     fontSize: "0.8125rem",
     fontWeight: "500",
     color: "#ef4444",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   termsWrapper: {
     marginTop: "0.5rem",
@@ -416,6 +471,7 @@ const styles = {
     fontWeight: "500",
     color: "#64748b",
     lineHeight: "1.5",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   link: {
     fontSize: "0.875rem",
@@ -423,6 +479,23 @@ const styles = {
     color: "#0f172a",
     textDecoration: "none",
     transition: "color 0.2s",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+  },
+  infoMessage: {
+    padding: "0.75rem",
+    backgroundColor: "#dbeafe",
+    color: "#1e40af",
+    borderRadius: "0.5rem",
+    fontSize: "0.875rem",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+  },
+  generalError: {
+    padding: "0.75rem",
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
+    borderRadius: "0.5rem",
+    fontSize: "0.875rem",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   submitButton: {
     width: "100%",
@@ -437,6 +510,7 @@ const styles = {
     fontSize: "0.9375rem",
     marginTop: "0.5rem",
     boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.1)",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   submitButtonHover: {
     backgroundColor: "#1e293b",
@@ -451,10 +525,12 @@ const styles = {
     fontSize: "0.875rem",
     color: "#64748b",
     marginTop: "2.5rem",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
   signupLink: {
     fontWeight: "600",
     color: "#0f172a",
     textDecoration: "none",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   },
 }

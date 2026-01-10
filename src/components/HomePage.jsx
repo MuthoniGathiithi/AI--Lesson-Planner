@@ -133,7 +133,7 @@ export default function HomePage() {
               e.target.style.background = '#111827';
               e.target.style.transform = 'translateY(0)';
             }}>
-              Get Started Free
+              Get Started 
             </button>
             <button style={{
               background: '#FFFFFF',

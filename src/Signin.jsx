@@ -175,9 +175,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f1f5f9", // Updated background color for better contrast
+    backgroundColor: "#f1f5f9",
     padding: "1.5rem",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
   },
   contentWrapper: {
     width: "100%",
@@ -221,25 +221,27 @@ const styles = {
     color: "#ffffff",
   },
   brandTitle: {
-    fontSize: "1.75rem",
+    fontSize: "2.25rem", // Increased from 1.75rem
     fontWeight: "700",
     color: "#000",
-    marginBottom: "0.5rem",
+    marginBottom: "0.75rem",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
-    fontFamily:"inter, sans-serif"
+    fontFamily: "'Inter', sans-serif"
   },
   title: {
-    fontSize: "1.75rem",
-    fontWeight: "700",
+    fontSize: "1.5rem", // Increased from 1.75rem for better hierarchy
+    fontWeight: "600",
     color: "#0f172a",
     marginBottom: "0.5rem",
     letterSpacing: "-0.02em",
+    fontFamily: "'Inter', sans-serif"
   },
   subtitle: {
     color: "#64748b",
-    fontSize: "0.9375rem",
+    fontSize: "1rem", // Increased from 0.9375rem
     lineHeight: "1.6",
+    fontFamily: "'Inter', sans-serif"
   },
   formContainer: {
     display: "flex",
@@ -252,10 +254,11 @@ const styles = {
   },
   label: {
     display: "block",
-    fontSize: "0.875rem",
+    fontSize: "0.95rem", // Increased from 0.875rem
     fontWeight: "600",
     color: "#334155",
     marginBottom: "0.5rem",
+    fontFamily: "'Inter', sans-serif"
   },
   inputWrapper: {
     position: "relative",
@@ -271,24 +274,25 @@ const styles = {
     justifyContent: "center",
   },
   inputIcon: {
-    width: "1.125rem",
-    height: "1.125rem",
+    width: "1.25rem", // Increased from 1.125rem
+    height: "1.25rem",
     color: "#94a3b8",
   },
   input: {
     width: "100%",
     paddingLeft: "2.75rem",
     paddingRight: "1rem",
-    paddingTop: "0.75rem",
-    paddingBottom: "0.75rem",
+    paddingTop: "0.875rem", // Increased padding
+    paddingBottom: "0.875rem",
     border: "1px solid #e2e8f0",
     borderRadius: "0.625rem",
-    fontSize: "0.9375rem",
+    fontSize: "1rem", // Increased from 0.9375rem
     outline: "none",
     transition: "all 0.2s ease",
     boxSizing: "border-box",
     backgroundColor: "#ffffff",
     color: "#0f172a",
+    fontFamily: "'Inter', sans-serif"
   },
   inputError: {
     borderColor: "#ef4444",
@@ -309,14 +313,15 @@ const styles = {
     color: "#94a3b8",
   },
   toggleIcon: {
-    width: "1.125rem",
-    height: "1.125rem",
+    width: "1.25rem", // Increased from 1.125rem
+    height: "1.25rem",
   },
   errorText: {
     marginTop: "0.375rem",
-    fontSize: "0.8125rem",
+    fontSize: "0.875rem", // Increased from 0.8125rem
     fontWeight: "500",
     color: "#ef4444",
+    fontFamily: "'Inter', sans-serif"
   },
   optionsRow: {
     display: "flex",
@@ -339,30 +344,33 @@ const styles = {
   },
   checkboxText: {
     marginLeft: "0.5rem",
-    fontSize: "0.875rem",
+    fontSize: "0.95rem", // Increased from 0.875rem
     fontWeight: "500",
     color: "#64748b",
+    fontFamily: "'Inter', sans-serif"
   },
   link: {
-    fontSize: "0.875rem",
+    fontSize: "0.95rem", // Increased from 0.875rem
     fontWeight: "600",
     color: "#0f172a",
     textDecoration: "none",
     transition: "color 0.2s",
+    fontFamily: "'Inter', sans-serif"
   },
   submitButton: {
     width: "100%",
     backgroundColor: "#000",
     color: "#ffffff",
-    padding: "0.75rem 1rem",
+    padding: "0.875rem 1rem", // Increased padding
     borderRadius: "0.625rem",
     fontWeight: "600",
     border: "none",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    fontSize: "0.9375rem",
+    fontSize: "1.0625rem", // Increased from 0.9375rem
     marginTop: "0.5rem",
     boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.1)",
+    fontFamily: "'Inter', sans-serif"
   },
   submitButtonHover: {
     backgroundColor: "#1e293b",
@@ -391,15 +399,16 @@ const styles = {
   },
   footer: {
     textAlign: "center",
-    fontSize: "0.875rem",
+    fontSize: "0.95rem", // Increased from 0.875rem
     color: "#64748b",
     marginTop: "2.5rem",
+    fontFamily: "'Inter', sans-serif"
   },
   signupLink: {
     fontWeight: "600",
     color: "#0f172a",
     textDecoration: "none",
     marginLeft: "0.25rem",
+    fontFamily: "'Inter', sans-serif"
   },
 }
-
