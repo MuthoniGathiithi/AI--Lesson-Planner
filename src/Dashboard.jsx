@@ -225,7 +225,7 @@ export default function LessonCreator() {
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
           <div style={styles.logo}>
-            <div style={styles.logoIcon}>📚</div>
+            
             <div style={styles.logoText}>Funza</div>
           </div>
         </div>
@@ -348,7 +348,7 @@ export default function LessonCreator() {
                 <div style={styles.tableContainer}>
                   {filteredLessons.length === 0 ? (
                     <div style={styles.emptyState}>
-                      <div style={styles.emptyIcon}>📚</div>
+                      
                       <div style={styles.emptyText}>
                         {searchQuery ? "No lessons match your search" : "No lessons yet"}
                       </div>
@@ -607,7 +607,7 @@ const styles = {
   },
   sidebar: {
     width: "260px",
-    backgroundColor: "#000000",
+    backgroundColor: "#000",
     padding: "24px 0",
     display: "flex",
     flexDirection: "column",
