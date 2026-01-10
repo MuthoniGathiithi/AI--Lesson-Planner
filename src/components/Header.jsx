@@ -153,7 +153,7 @@ export default function Header() {
             background: primaryButtonBg,
             border: 'none',
             color: primaryButtonText,
-            fontSize: '0.95rem',
+            fontSize: '0.85rem',
             fontWeight: 600,
             padding: '8px 20px',
             borderRadius: '8px',
