@@ -246,17 +246,7 @@ export default function LessonCreator() {
           </div>
         </div>
 
-        <div style={styles.userCard}>
-          <div style={styles.userAvatar}>
-            <User size={20} />
-          </div>
-          <div style={styles.userDetails}>
-            <div style={styles.userGreeting}>MAIN</div>
-            <div style={styles.userTitle}>{formData.teacherName || "Teacher"}</div>
-            <div style={styles.userSubtitle}>Educator</div>
-          </div>
-          <ChevronRight size={16} style={styles.userChevron} />
-        </div>
+       
 
         <nav style={styles.nav}>
           <div style={styles.navSection}>
@@ -301,31 +291,12 @@ export default function LessonCreator() {
             {activeTab === "archive" && <div style={styles.activeIndicator}></div>}
           </button>
 
-          <button style={styles.navButton}>
-            <FileText size={18} />
-            <span>Libraries</span>
-          </button>
+          
 
-          <button style={styles.navButton}>
-            <CheckCircle size={18} />
-            <span>Saved</span>
-          </button>
+          
         </nav>
 
-        <div style={styles.sidebarFooter}>
-          <div style={styles.navLabel}>MESSAGES</div>
-          <div style={styles.messagesList}>
-            <div style={styles.messageAvatar} title="Erik Gunsel">
-              EG
-            </div>
-            <div style={styles.messageAvatar} title="Emily Smith">
-              ES
-            </div>
-            <div style={styles.messageAvatar} title="Arthur Adelk">
-              AA
-            </div>
-          </div>
-        </div>
+        
       </aside>
 
       {/* Main Content */}
@@ -366,46 +337,7 @@ export default function LessonCreator() {
           {activeTab === "dashboard" && (
             <div style={styles.dashboardLayout}>
               {/* Stats Cards */}
-              <div style={styles.statsRow}>
-                <div style={{ ...styles.statCard, ...styles.statCardPrimary }}>
-                  <div style={styles.statCardHeader}>
-                    <div style={styles.statIcon}>👋</div>
-                    <div style={styles.statBadge}>PF</div>
-                  </div>
-                  <div style={styles.statContent}>
-                    <div style={styles.statLabel}>Hello {formData.teacherName.split(" ")[0] || "Teacher"}</div>
-                    <div style={styles.statText}>New cases are waiting</div>
-                  </div>
-                </div>
-
-                <div style={styles.statCard}>
-                  <div style={styles.statHeader}>
-                    <div style={styles.statTitle}>NEW CASES</div>
-                    <div style={styles.chartMini}>
-                      <TrendingUp size={40} color="#10b981" strokeWidth={2} />
-                    </div>
-                  </div>
-                  <div style={styles.statValue}>{thisWeekLessons.length}</div>
-                  <div style={styles.statSubtext}>
-                    <span style={styles.statTrend}>{weekGrowth}</span>
-                    <span style={styles.statPeriod}>Trends last month</span>
-                  </div>
-                </div>
-
-                <div style={styles.statCard}>
-                  <div style={styles.statHeader}>
-                    <div style={styles.statTitle}>NEW TASKS</div>
-                    <div style={styles.chartMini}>
-                      <TrendingDown size={40} color="#ef4444" strokeWidth={2} />
-                    </div>
-                  </div>
-                  <div style={styles.statValue}>{savedLessons.filter((l) => l.status !== "completed").length}</div>
-                  <div style={styles.statSubtext}>
-                    <span style={{ ...styles.statTrend, color: "#ef4444" }}>-5.67%</span>
-                    <span style={styles.statPeriod}>Trends last month</span>
-                  </div>
-                </div>
-              </div>
+              
 
               {/* Main Content Grid */}
               <div style={styles.dashboardGrid}>
@@ -482,77 +414,11 @@ export default function LessonCreator() {
                       </button>
                     </div>
 
-                    <div style={styles.messageList}>
-                      {["Mark Wahlberg", "Leonardo DiCaprio"].map((name, index) => (
-                        <div key={index} style={styles.messageItem}>
-                          <div style={styles.messageAvatar}>{name.split(" ").map(n => n[0]).join("")}</div>
-                          <div style={styles.messageContent}>
-                            <div style={styles.messageName}>{name}</div>
-                            <div style={styles.messageText}>
-                              Lorem ipsum dolor sit amet consectetur. Ut turpis lectus adipiscing leo leo in non tristique...
-                            </div>
-                            <div style={styles.messageTime}>{index === 0 ? "2 days ago" : "3 days ago"}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    
                   </div>
                 </div>
 
-                {/* Sidebar Stats */}
-                <div style={styles.rightSidebar}>
-                  {/* Case Type Breakdown */}
-                  <div style={styles.widget}>
-                    <div style={styles.widgetHeader}>
-                      <h4 style={styles.widgetTitle}>CASE TYPE BREAKDOWN</h4>
-                      <button style={styles.linkButton}>
-                        Full Report <ChevronRight size={14} />
-                      </button>
-                    </div>
-                    <div style={styles.chartArea}>
-                      <div style={styles.barChart}>
-                        <div style={{ ...styles.barItem, height: "60%" }}></div>
-                        <div style={{ ...styles.barItem, height: "100%" }}></div>
-                        <div style={{ ...styles.barItem, height: "40%" }}></div>
-                        <div style={{ ...styles.barItem, height: "80%" }}></div>
-                      </div>
-                      <div style={styles.chartLegend}>
-                        <div style={styles.legendItem}>
-                          <div style={{ ...styles.legendDot, backgroundColor: "#3b82f6" }}></div>
-                          <span>Product</span>
-                          <span style={styles.legendValue}>76</span>
-                        </div>
-                        <div style={styles.legendItem}>
-                          <div style={{ ...styles.legendDot, backgroundColor: "#ef4444" }}></div>
-                          <span>Trademark</span>
-                          <span style={styles.legendValue}>48</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Number of Cases */}
-                  <div style={styles.widget}>
-                    <div style={styles.widgetHeader}>
-                      <h4 style={styles.widgetTitle}>NUMBER OF CASES (Per Country)</h4>
-                      <button style={styles.linkButton}>
-                        See all <ChevronRight size={14} />
-                      </button>
-                    </div>
-                    <div style={styles.countryList}>
-                      <div style={styles.countryItem}>
-                        <div style={styles.countryInfo}>
-                          <span style={styles.countryName}>Country</span>
-                          <span style={styles.countryLabel}>Sweden</span>
-                        </div>
-                        <div style={styles.countryStats}>
-                          <span style={styles.countryValue}>76</span>
-                          <span style={styles.countryGrowth}>↑ 16,7%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+               
               </div>
             </div>
           )}
@@ -692,7 +558,7 @@ export default function LessonCreator() {
             <>
               {isLoadingLessons ? (
                 <div style={styles.emptyState}>
-                  <div style={styles.emptyIcon}>⏳</div>
+                  
                   <div style={styles.emptyText}>Loading lessons...</div>
                 </div>
               ) : filteredLessons.length === 0 ? (
@@ -756,8 +622,8 @@ const styles = {
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   sidebar: {
-    width: "280px",
-    background: "rgba(255, 255, 255, 0.7)",
+    width: "250px",
+    background:"#FAFAFA" ,
     backdropFilter: "blur(20px)",
     borderRight: "1px solid rgba(255, 255, 255, 0.5)",
     padding: "24px 16px",
@@ -783,7 +649,7 @@ const styles = {
   logoText: {
     fontSize: "24px",
     fontWeight: "700",
-    background: "linear-gradient(135deg, #1976d2 0%, #7c4dff 100%)",
+    background: "#000",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     letterSpacing: "-0.5px",
