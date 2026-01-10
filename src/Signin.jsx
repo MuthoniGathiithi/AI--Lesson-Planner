@@ -137,19 +137,7 @@ export default function SignIn() {
               {errors.password && <p style={styles.errorText}>{errors.password}</p>}
             </div>
 
-            {/* Remember Me */}
-            <div style={styles.optionsRow}>
-              <label style={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                  style={styles.checkbox}
-                />
-                <span style={styles.checkboxText}>Remember me</span>
-              </label>
-            </div>
+            
 
             {/* Info message */}
             {infoMessage && <p style={{ ...styles.errorText, color: "#1e293b" }}>{infoMessage}</p>}
