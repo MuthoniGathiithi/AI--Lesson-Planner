@@ -12,20 +12,24 @@ import {
   Search,
   FileText,
   LogOut,
+  Download,
 } from "lucide-react"
 import { generateLessonPlan } from "./services/api"
 import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
+import { downloadLessonPlanAsDocx, downloadLessonPlanAsPdf } from "./utils/downloadLessonPlan"
 
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoadingLessons, setIsLoadingLessons] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [lessonPlan, setLessonPlan] = useState(null)
   const [currentLessonId, setCurrentLessonId] = useState(null)
   const [savedLessons, setSavedLessons] = useState([])
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredLessons, setFilteredLessons] = useState([])
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -148,6 +152,31 @@ export default function LessonCreator() {
     }
   }
 
+  const handleDownload = async (lesson, format = 'docx') => {
+    setIsDownloading(true)
+    try {
+      const fileName = `${lesson.administrativeDetails?.subject || 'lesson_plan'}_${lesson.administrativeDetails?.class || ''}_${new Date().toISOString().split('T')[0]}.${format}`
+      
+      let result
+      if (format === 'pdf') {
+        result = await downloadLessonPlanAsPdf(lesson, fileName)
+      } else {
+        result = await downloadLessonPlanAsDocx(lesson, fileName)
+      }
+
+      if (result.success) {
+        alert(`Lesson plan downloaded successfully as ${format.toUpperCase()}!`)
+      } else {
+        alert(`Failed to download: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Download error:", error)
+      alert("An error occurred while downloading the lesson plan")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   const handleDelete = async (lesson) => {
     if (!confirm("Are you sure you want to delete this lesson plan?")) {
       return
@@ -174,6 +203,7 @@ export default function LessonCreator() {
     setLessonPlan(fullLesson)
     setCurrentLessonId(lesson.dbId)
     setActiveTab("create")
+    setIsMobileMenuOpen(false)
   }
 
   const handleCreateNew = () => {
@@ -219,22 +249,41 @@ export default function LessonCreator() {
     return "Good Evening"
   }
 
+  const handleNavClick = (tab) => {
+    setActiveTab(tab)
+    setIsMobileMenuOpen(false)
+  }
+
   return (
     <div style={styles.container}>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        style={styles.mobileMenuButton}
+        aria-label="Toggle menu"
+      >
+        <div style={styles.hamburger}>
+          <span style={styles.hamburgerLine}></span>
+          <span style={styles.hamburgerLine}></span>
+          <span style={styles.hamburgerLine}></span>
+        </div>
+      </button>
+
       {/* Sidebar */}
-      <aside style={styles.sidebar}>
+      <aside style={{
+        ...styles.sidebar,
+        ...(isMobileMenuOpen ? styles.sidebarMobileOpen : {})
+      }}>
         <div style={styles.sidebarHeader}>
           <div style={styles.logo}>
-            
             <div style={styles.logoText}>Funza</div>
           </div>
         </div>
 
         <nav style={styles.nav}>
           <div style={styles.navSection}>
-            <div style={styles.navLabel}>MENU</div>
             <button
-              onClick={() => setActiveTab("dashboard")}
+              onClick={() => handleNavClick("dashboard")}
               style={{
                 ...styles.navButton,
                 ...(activeTab === "dashboard" ? styles.navButtonActive : {}),
@@ -245,7 +294,7 @@ export default function LessonCreator() {
             </button>
 
             <button
-              onClick={() => setActiveTab("create")}
+              onClick={() => handleNavClick("create")}
               style={{
                 ...styles.navButton,
                 ...(activeTab === "create" ? styles.navButtonActive : {}),
@@ -256,7 +305,7 @@ export default function LessonCreator() {
             </button>
 
             <button
-              onClick={() => setActiveTab("archive")}
+              onClick={() => handleNavClick("archive")}
               style={{
                 ...styles.navButton,
                 ...(activeTab === "archive" ? styles.navButtonActive : {}),
@@ -270,14 +319,23 @@ export default function LessonCreator() {
             </button>
           </div>
 
-          <div style={styles.navSection}>
+          <div style={styles.navSectionBottom}>
+            <div style={styles.dividerLine}></div>
             <button onClick={handleLogout} style={styles.logoutButton}>
               <LogOut size={20} />
-              <span>Logout</span>
+              <span>Log out</span>
             </button>
           </div>
         </nav>
       </aside>
+
+      {/* Overlay for mobile */}
+      {isMobileMenuOpen && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          style={styles.mobileOverlay}
+        />
+      )}
 
       {/* Main Content */}
       <main style={styles.main}>
@@ -314,15 +372,30 @@ export default function LessonCreator() {
               <div style={styles.statsRow}>
                 <div style={{...styles.statCard, ...styles.statCardBlue}}>
                   <div style={styles.statHeader}>
-                    <div style={styles.statLabel}>TOTAL LESSONS</div>
+                    <div style={styles.statIcon}>
+                      <FileText size={24} />
+                    </div>
+                    <div style={styles.statPercentage}>
+                      {savedLessons.length > 0 ? "100%" : "0%"}
+                    </div>
                   </div>
-                  <div style={styles.statValue}>{savedLessons.length}</div>
-                  <div style={styles.statSubtext}>All lesson plans created</div>
+                  <div style={styles.statValue}>{savedLessons.length.toLocaleString()}</div>
+                  <div style={styles.statSubtext}>Total Lessons</div>
                 </div>
 
-                <div style={{...styles.statCard, ...styles.statCardYellow}}>
+                <div style={{...styles.statCard, ...styles.statCardPurple}}>
                   <div style={styles.statHeader}>
-                    <div style={styles.statLabel}>THIS WEEK</div>
+                    <div style={styles.statIcon}>
+                      <Archive size={24} />
+                    </div>
+                    <div style={styles.statPercentage}>
+                      {savedLessons.filter((l) => {
+                        const lessonDate = new Date(l.savedDate)
+                        const weekAgo = new Date()
+                        weekAgo.setDate(weekAgo.getDate() - 7)
+                        return lessonDate >= weekAgo
+                      }).length > 0 ? "+12%" : "0%"}
+                    </div>
                   </div>
                   <div style={styles.statValue}>
                     {savedLessons.filter((l) => {
@@ -330,9 +403,9 @@ export default function LessonCreator() {
                       const weekAgo = new Date()
                       weekAgo.setDate(weekAgo.getDate() - 7)
                       return lessonDate >= weekAgo
-                    }).length}
+                    }).length.toLocaleString()}
                   </div>
-                  <div style={styles.statSubtext}>Lessons created this week</div>
+                  <div style={styles.statSubtext}>This Week</div>
                 </div>
               </div>
 
@@ -348,7 +421,6 @@ export default function LessonCreator() {
                 <div style={styles.tableContainer}>
                   {filteredLessons.length === 0 ? (
                     <div style={styles.emptyState}>
-                      
                       <div style={styles.emptyText}>
                         {searchQuery ? "No lessons match your search" : "No lessons yet"}
                       </div>
@@ -381,10 +453,20 @@ export default function LessonCreator() {
                             <td style={styles.td}>{lesson.administrativeDetails?.teacher || "N/A"}</td>
                             <td style={styles.td}>{lesson.savedDate}</td>
                             <td style={styles.td}>
-                              <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
-                                <Eye size={16} />
-                                View
-                              </button>
+                              <div style={styles.actionButtonGroup}>
+                                <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
+                                  <Eye size={16} />
+                                  View
+                                </button>
+                                <button 
+                                  onClick={() => handleDownload(lesson, 'docx')} 
+                                  style={styles.downloadButtonSmall}
+                                  disabled={isDownloading}
+                                  title="Download as DOCX"
+                                >
+                                  <Download size={16} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -440,10 +522,28 @@ export default function LessonCreator() {
                       <ArrowLeft size={16} />
                       Create New
                     </button>
-                    <button onClick={handleSave} disabled={isSaving} style={styles.saveButton}>
-                      <Save size={16} />
-                      {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
-                    </button>
+                    <div style={styles.actionBarRight}>
+                      <button 
+                        onClick={() => handleDownload(lessonPlan, 'docx')} 
+                        disabled={isDownloading}
+                        style={styles.downloadButton}
+                      >
+                        <Download size={16} />
+                        {isDownloading ? "Downloading..." : "Download DOCX"}
+                      </button>
+                      <button 
+                        onClick={() => handleDownload(lessonPlan, 'pdf')} 
+                        disabled={isDownloading}
+                        style={styles.downloadButton}
+                      >
+                        <Download size={16} />
+                        {isDownloading ? "Downloading..." : "Download PDF"}
+                      </button>
+                      <button onClick={handleSave} disabled={isSaving} style={styles.saveButton}>
+                        <Save size={16} />
+                        {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
+                      </button>
+                    </div>
                   </div>
 
                   <div style={styles.documentPage}>
@@ -581,6 +681,15 @@ export default function LessonCreator() {
                           <Eye size={16} />
                           View
                         </button>
+                        <button 
+                          onClick={() => handleDownload(lesson, 'docx')} 
+                          style={styles.downloadButtonCard}
+                          disabled={isDownloading}
+                          title="Download as DOCX"
+                        >
+                          <Download size={16} />
+                          Download
+                        </button>
                         <button onClick={() => handleDelete(lesson)} style={styles.deleteButton}>
                           <Trash2 size={16} />
                           Delete
@@ -603,20 +712,69 @@ const styles = {
     display: "flex",
     minHeight: "100vh",
     backgroundColor: "#ffffff",
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  },
+  mobileMenuButton: {
+    display: "none",
+    position: "fixed",
+    top: "16px",
+    left: "16px",
+    zIndex: 1001,
+    backgroundColor: "#000000",
+    border: "none",
+    borderRadius: "8px",
+    padding: "12px",
+    cursor: "pointer",
+    "@media (max-width: 768px)": {
+      display: "block",
+    },
+  },
+  hamburger: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  hamburgerLine: {
+    width: "24px",
+    height: "2px",
+    backgroundColor: "#ffffff",
+    borderRadius: "2px",
+  },
+  mobileOverlay: {
+    display: "none",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 999,
+    "@media (max-width: 768px)": {
+      display: "block",
+    },
   },
   sidebar: {
     width: "260px",
-    backgroundColor: "#000",
+    backgroundColor: "#000000",
     padding: "24px 0",
     display: "flex",
     flexDirection: "column",
     position: "fixed",
     height: "100vh",
     overflowY: "auto",
+    zIndex: 1000,
+    transition: "transform 0.3s ease",
+    "@media (max-width: 768px)": {
+      transform: "translateX(-100%)",
+    },
+  },
+  sidebarMobileOpen: {
+    "@media (max-width: 768px)": {
+      transform: "translateX(0)",
+    },
   },
   sidebarHeader: {
-    marginBottom: "32px",
+    marginBottom: "40px",
     padding: "0 16px",
   },
   logo: {
@@ -624,9 +782,6 @@ const styles = {
     alignItems: "center",
     gap: "12px",
     padding: "12px",
-  },
-  logoIcon: {
-    fontSize: "28px",
   },
   logoText: {
     fontSize: "24px",
@@ -637,26 +792,29 @@ const styles = {
   nav: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
     flex: 1,
     justifyContent: "space-between",
   },
   navSection: {
-    marginBottom: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
   },
-  navLabel: {
-    fontSize: "11px",
-    color: "#888888",
-    fontWeight: "600",
-    letterSpacing: "1px",
-    padding: "8px 16px",
-    marginBottom: "8px",
+  navSectionBottom: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: "auto",
+  },
+  dividerLine: {
+    height: "1px",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    margin: "16px 16px",
   },
   navButton: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "16px",
+    padding: "14px 16px",
     fontSize: "15px",
     fontWeight: "500",
     color: "#ffffff",
@@ -670,17 +828,17 @@ const styles = {
     width: "100%",
   },
   navButtonActive: {
-    backgroundColor: "#1976d2",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     fontWeight: "600",
   },
   logoutButton: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "16px",
+    padding: "14px 16px",
     fontSize: "15px",
     fontWeight: "500",
-    color: "#ff5252",
+    color: "#ffffff",
     backgroundColor: "transparent",
     border: "none",
     borderRadius: "0",
@@ -706,6 +864,9 @@ const styles = {
     flex: 1,
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
+    "@media (max-width: 768px)": {
+      marginLeft: 0,
+    },
   },
   topBar: {
     display: "flex",
@@ -714,6 +875,12 @@ const styles = {
     padding: "24px 32px",
     backgroundColor: "#ffffff",
     borderBottom: "1px solid #e0e0e0",
+    "@media (max-width: 768px)": {
+      padding: "80px 16px 16px 16px",
+      flexDirection: "column",
+      gap: "16px",
+      alignItems: "flex-start",
+    },
   },
   topBarLeft: {
     display: "flex",
@@ -730,16 +897,25 @@ const styles = {
     fontWeight: "700",
     color: "#000000",
     margin: 0,
+    "@media (max-width: 768px)": {
+      fontSize: "24px",
+    },
   },
   topBarRight: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
+    "@media (max-width: 768px)": {
+      width: "100%",
+    },
   },
   searchBox: {
     position: "relative",
     display: "flex",
     alignItems: "center",
+    "@media (max-width: 768px)": {
+      width: "100%",
+    },
   },
   searchIcon: {
     position: "absolute",
@@ -760,9 +936,15 @@ const styles = {
     transition: "all 0.2s ease",
     width: "300px",
     fontFamily: "inherit",
+    "@media (max-width: 768px)": {
+      width: "100%",
+    },
   },
   content: {
     padding: "32px",
+    "@media (max-width: 768px)": {
+      padding: "16px",
+    },
   },
   dashboardLayout: {
     display: "flex",
@@ -771,54 +953,71 @@ const styles = {
   },
   statsRow: {
     display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "24px",
   },
   statCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
+    borderRadius: "16px",
     padding: "28px",
-    border: "1px solid #e0e0e0",
+    border: "none",
+    position: "relative",
+    overflow: "hidden",
   },
   statCardBlue: {
-    backgroundColor: "#1976d2",
-    border: "none",
+    backgroundColor: "#d4f1ff",
   },
-  statCardYellow: {
-    backgroundColor: "#ffc107",
-    border: "none",
+  statCardPurple: {
+    backgroundColor: "#e5deff",
   },
   statHeader: {
-    marginBottom: "12px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: "20px",
   },
-  statLabel: {
-    fontSize: "12px",
-    color: "#ffffff",
+  statIcon: {
+    color: "#000000",
+    opacity: 0.6,
+  },
+  statPercentage: {
+    fontSize: "14px",
     fontWeight: "600",
-    letterSpacing: "0.5px",
+    color: "#22c55e",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: "4px 12px",
+    borderRadius: "20px",
   },
   statValue: {
     fontSize: "36px",
     fontWeight: "700",
-    color: "#ffffff",
+    color: "#000000",
     marginBottom: "8px",
   },
   statSubtext: {
     fontSize: "14px",
-    color: "#ffffff",
-    opacity: 0.9,
+    color: "#000000",
+    opacity: 0.7,
+    fontWeight: "500",
   },
   lessonsSection: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
     padding: "28px",
     border: "1px solid #e0e0e0",
+    "@media (max-width: 768px)": {
+      padding: "20px",
+    },
   },
   sectionHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "24px",
+    "@media (max-width: 768px)": {
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "12px",
+    },
   },
   sectionTitle: {
     fontSize: "18px",
@@ -842,6 +1041,9 @@ const styles = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
+    "@media (max-width: 768px)": {
+      fontSize: "13px",
+    },
   },
   tableHeader: {
     borderBottom: "2px solid #e0e0e0",
@@ -852,6 +1054,10 @@ const styles = {
     fontWeight: "600",
     color: "#666666",
     textAlign: "center",
+    "@media (max-width: 768px)": {
+      padding: "10px 8px",
+      fontSize: "12px",
+    },
   },
   tableRow: {
     borderBottom: "1px solid #f0f0f0",
@@ -862,6 +1068,19 @@ const styles = {
     fontSize: "14px",
     color: "#000000",
     textAlign: "left",
+    "@media (max-width: 768px)": {
+      padding: "10px 8px",
+      fontSize: "13px",
+    },
+  },
+  actionButtonGroup: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "center",
+    "@media (max-width: 768px)": {
+      flexDirection: "column",
+      gap: "4px",
+    },
   },
   viewButtonSmall: {
     display: "flex",
@@ -876,24 +1095,55 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
     transition: "all 0.2s ease",
+    "@media (max-width: 768px)": {
+      width: "100%",
+      justifyContent: "center",
+    },
+  },
+  downloadButtonSmall: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    padding: "6px 10px",
+    fontSize: "13px",
+    fontWeight: "500",
+    color: "#4caf50",
+    backgroundColor: "transparent",
+    border: "1px solid #4caf50",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    "@media (max-width: 768px)": {
+      width: "100%",
+      justifyContent: "center",
+    },
   },
   formCard: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
     padding: "32px",
     border: "1px solid #e0e0e0",
+    "@media (max-width: 768px)": {
+      padding: "20px",
+    },
   },
   formTitle: {
     fontSize: "24px",
     fontWeight: "700",
     color: "#000000",
     marginBottom: "28px",
+    "@media (max-width: 768px)": {
+      fontSize: "20px",
+    },
   },
   formGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
     gap: "20px",
     marginBottom: "28px",
+    "@media (max-width: 768px)": {
+      gridTemplateColumns: "1fr",
+    },
   },
   fieldWrapper: {
     display: "flex",
@@ -927,6 +1177,10 @@ const styles = {
     borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
+    width: "100%",
+    "@media (min-width: 768px)": {
+      width: "auto",
+    },
   },
   documentContainer: {
     backgroundColor: "transparent",
@@ -938,6 +1192,16 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     gap: "12px",
+    "@media (max-width: 768px)": {
+      flexDirection: "column",
+    },
+  },
+  actionBarRight: {
+    display: "flex",
+    gap: "12px",
+    "@media (max-width: 768px)": {
+      flexDirection: "column",
+    },
   },
   backButton: {
     padding: "12px 20px",
@@ -952,6 +1216,22 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
+    justifyContent: "center",
+  },
+  downloadButton: {
+    padding: "12px 20px",
+    backgroundColor: "#4caf50",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    justifyContent: "center",
   },
   saveButton: {
     padding: "12px 20px",
@@ -966,6 +1246,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
+    justifyContent: "center",
   },
   documentPage: {
     maxWidth: "850px",
@@ -977,6 +1258,9 @@ const styles = {
     lineHeight: "1.6",
     borderRadius: "8px",
     border: "1px solid #e0e0e0",
+    "@media (max-width: 768px)": {
+      padding: "30px 20px",
+    },
   },
   docHeader: {
     textAlign: "center",
@@ -1079,6 +1363,9 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
     gap: "24px",
+    "@media (max-width: 768px)": {
+      gridTemplateColumns: "1fr",
+    },
   },
   lessonCard: {
     backgroundColor: "#ffffff",
@@ -1121,14 +1408,15 @@ const styles = {
   },
   lessonCardActions: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
+    flexWrap: "wrap",
   },
   viewButton: {
     flex: 1,
-    padding: "12px 16px",
+    padding: "10px 14px",
     backgroundColor: "#1976d2",
     color: "#ffffff",
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "600",
     border: "none",
     borderRadius: "6px",
@@ -1138,13 +1426,31 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "6px",
+    minWidth: "90px",
+  },
+  downloadButtonCard: {
+    flex: 1,
+    padding: "10px 14px",
+    backgroundColor: "#4caf50",
+    color: "#ffffff",
+    fontSize: "13px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    minWidth: "110px",
   },
   deleteButton: {
     flex: 1,
-    padding: "12px 16px",
+    padding: "10px 14px",
     backgroundColor: "#ffffff",
     color: "#000000",
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "600",
     border: "1px solid #e0e0e0",
     borderRadius: "6px",
@@ -1154,5 +1460,6 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "6px",
+    minWidth: "90px",
   },
 }

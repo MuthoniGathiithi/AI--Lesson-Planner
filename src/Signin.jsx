@@ -167,9 +167,11 @@ export default function SignIn() {
 
 
 
+const FONT = "'Inter', sans-serif"
 
 
 const styles = {
+
   container: {
     minHeight: "100vh",
     display: "flex",
@@ -221,27 +223,34 @@ const styles = {
     color: "#ffffff",
   },
   brandTitle: {
-    fontSize: "2.25rem", // Increased from 1.75rem
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: "0.75rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.15em",
-    fontFamily: "'Inter', sans-serif"
+     fontSize: "0.875rem",       // small, confident brand
+  fontWeight: "600",
+  color: "#475569",
+  marginBottom: "0.75rem",
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  fontFamily: FONT,
   },
-  title: {
-    fontSize: "1.5rem", // Increased from 1.75rem for better hierarchy
-    fontWeight: "600",
-    color: "#0f172a",
-    marginBottom: "0.5rem",
-    letterSpacing: "-0.02em",
-    fontFamily: "'Inter', sans-serif"
+ 
+    
+title: {
+  fontSize: "2rem",           // main focus
+  fontWeight: "700",
+  color: "#0f172a",
+  marginBottom: "0.5rem",
+  letterSpacing: "-0.03em",
+  fontFamily: FONT,
   },
+
+
   subtitle: {
-    color: "#64748b",
-    fontSize: "1rem", // Increased from 0.9375rem
-    lineHeight: "1.6",
-    fontFamily: "'Inter', sans-serif"
+    fontSize: "0.95rem",
+  fontWeight: "400",
+  color: "#64748b",
+  lineHeight: "1.6",
+  maxWidth: "22rem",
+  margin: "0 auto",
+  fontFamily: FONT,
   },
   formContainer: {
     display: "flex",
@@ -253,12 +262,11 @@ const styles = {
     flexDirection: "column",
   },
   label: {
-    display: "block",
-    fontSize: "0.95rem", // Increased from 0.875rem
-    fontWeight: "600",
-    color: "#334155",
-    marginBottom: "0.5rem",
-    fontFamily: "'Inter', sans-serif"
+     fontSize: "0.875rem",
+  fontWeight: "500",
+  color: "#475569",
+  marginBottom: "0.375rem",
+  fontFamily: FONT,
   },
   inputWrapper: {
     position: "relative",
@@ -293,6 +301,7 @@ const styles = {
     backgroundColor: "#ffffff",
     color: "#0f172a",
     fontFamily: "'Inter', sans-serif"
+    
   },
   inputError: {
     borderColor: "#ef4444",
