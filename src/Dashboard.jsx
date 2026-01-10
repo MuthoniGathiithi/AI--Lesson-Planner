@@ -226,16 +226,16 @@ export default function LessonCreator() {
     container: {
       display: "flex",
       height: "100vh",
-      backgroundColor: "#e8f5f7",
+      backgroundColor: "#dff5f8",
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     },
     sidebar: {
       width: "260px",
-      backgroundColor: "#1a1f4d",
+      backgroundColor: "#2c3e50",
       color: "#ffffff",
       padding: "24px 20px",
       overflow: "auto",
-      boxShadow: "2px 0 12px rgba(0, 0, 0, 0.08)",
+      boxShadow: "2px 0 12px rgba(0, 0, 0, 0.15)",
     },
     logo: {
       display: "flex",
@@ -257,7 +257,7 @@ export default function LessonCreator() {
       alignItems: "center",
       gap: "12px",
       padding: "16px",
-      backgroundColor: "rgba(255, 255, 255, 0.08)",
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
       borderRadius: "12px",
       marginBottom: "28px",
       cursor: "pointer",
@@ -316,7 +316,7 @@ export default function LessonCreator() {
       transition: "all 0.2s ease",
     },
     navButtonActive: {
-      backgroundColor: "rgba(100, 200, 255, 0.2)",
+      backgroundColor: "rgba(123, 220, 183, 0.25)",
       color: "#ffffff",
     },
     navIcon: {
@@ -332,12 +332,12 @@ export default function LessonCreator() {
       display: "flex",
       flexDirection: "column",
       overflow: "auto",
-      backgroundColor: "#e8f5f7",
+      backgroundColor: "#dff5f8",
     },
     topBar: {
       padding: "28px 40px",
       backgroundColor: "#ffffff",
-      borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
+      borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
     },
     welcomeText: {
       maxWidth: "1200px",
@@ -345,14 +345,14 @@ export default function LessonCreator() {
     },
     welcomeGreeting: {
       fontSize: "14px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       fontWeight: "500",
       marginBottom: "6px",
     },
     welcomeTitle: {
       fontSize: "28px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
     },
     content: {
       flex: 1,
@@ -361,9 +361,50 @@ export default function LessonCreator() {
     },
     dashboardGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)",
+      gridTemplateColumns: "1fr",
       gap: "20px",
       marginBottom: "28px",
+      maxWidth: "1000px",
+      margin: "0 auto",
+    },
+    heroCard: {
+      backgroundColor: "#2c3e50",
+      borderRadius: "20px",
+      padding: "60px 40px",
+      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+      position: "relative",
+      overflow: "hidden",
+      color: "#ffffff",
+      textAlign: "center",
+      minHeight: "300px",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    heroTitle: {
+      fontSize: "36px",
+      fontWeight: "700",
+      marginBottom: "16px",
+      color: "#ffffff",
+    },
+    heroSubtitle: {
+      fontSize: "16px",
+      color: "rgba(255, 255, 255, 0.85)",
+      marginBottom: "32px",
+      maxWidth: "600px",
+    },
+    heroCTA: {
+      padding: "14px 32px",
+      backgroundColor: "#7bdcb7",
+      color: "#2c3e50",
+      fontSize: "15px",
+      fontWeight: "600",
+      border: "none",
+      borderRadius: "12px",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      boxShadow: "0 4px 16px rgba(123, 220, 183, 0.3)",
     },
     cardPrimary: {
       gridColumn: "span 1",
@@ -381,7 +422,7 @@ export default function LessonCreator() {
     cardLabel: {
       fontSize: "11px",
       fontWeight: "700",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       letterSpacing: "0.5px",
       marginBottom: "8px",
       textTransform: "uppercase",
@@ -389,12 +430,12 @@ export default function LessonCreator() {
     cardValue: {
       fontSize: "18px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
       marginBottom: "4px",
     },
     cardSubtitle: {
       fontSize: "13px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
     },
     floatingAddButton: {
       position: "absolute",
@@ -403,7 +444,7 @@ export default function LessonCreator() {
       width: "44px",
       height: "44px",
       borderRadius: "12px",
-      backgroundColor: "#64c8ff",
+      backgroundColor: "#7bdcb7",
       color: "#ffffff",
       border: "none",
       fontSize: "20px",
@@ -411,7 +452,7 @@ export default function LessonCreator() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      boxShadow: "0 4px 16px rgba(100, 200, 255, 0.3)",
+      boxShadow: "0 4px 16px rgba(123, 220, 183, 0.3)",
       transition: "all 0.2s ease",
     },
     cardSecondary: {
@@ -431,7 +472,7 @@ export default function LessonCreator() {
     cardTag: {
       fontSize: "11px",
       fontWeight: "700",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       letterSpacing: "0.5px",
       marginBottom: "8px",
       textTransform: "uppercase",
@@ -439,7 +480,7 @@ export default function LessonCreator() {
     cardTitle: {
       fontSize: "16px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
       marginBottom: "4px",
     },
     folderIcon: {
@@ -447,7 +488,7 @@ export default function LessonCreator() {
     },
     progressLabel: {
       fontSize: "13px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       marginTop: "12px",
     },
     cardTertiary: {
@@ -466,7 +507,7 @@ export default function LessonCreator() {
       width: "44px",
       height: "44px",
       borderRadius: "12px",
-      background: "#64c8ff",
+      background: "#7bdcb7",
       color: "#ffffff",
       display: "flex",
       alignItems: "center",
@@ -476,11 +517,11 @@ export default function LessonCreator() {
     },
     cardDark: {
       gridColumn: "span 2",
-      background: "linear-gradient(135deg, #1a1f4d 0%, #2d3561 100%)",
+      background: "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
       borderRadius: "16px",
       padding: "32px",
       color: "#ffffff",
-      boxShadow: "0 8px 24px rgba(26, 31, 77, 0.2)",
+      boxShadow: "0 8px 24px rgba(44, 62, 80, 0.2)",
       position: "relative",
       overflow: "hidden",
     },
@@ -491,13 +532,13 @@ export default function LessonCreator() {
     cardWeather: {
       gridColumn: "span 1",
       gridRow: "span 2",
-      background: "linear-gradient(135deg, #64c8ff 0%, #4eb8e8 100%)",
+      background: "linear-gradient(135deg, #7bdcb7 0%, #5ecaa8 100%)",
       borderRadius: "16px",
       padding: "28px",
       color: "#ffffff",
       position: "relative",
       overflow: "hidden",
-      boxShadow: "0 8px 24px rgba(100, 200, 255, 0.25)",
+      boxShadow: "0 8px 24px rgba(123, 220, 183, 0.25)",
       display: "flex",
       flexDirection: "column",
       justifyContent: "space-between",
@@ -526,7 +567,7 @@ export default function LessonCreator() {
       height: "48px",
       borderRadius: "12px",
       backgroundColor: "#ffffff",
-      color: "#64c8ff",
+      color: "#7bdcb7",
       border: "none",
       fontSize: "24px",
       cursor: "pointer",
@@ -547,7 +588,7 @@ export default function LessonCreator() {
     sectionTitle: {
       fontSize: "18px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
       marginBottom: "20px",
     },
     updatesList: {
@@ -560,7 +601,7 @@ export default function LessonCreator() {
       alignItems: "center",
       gap: "16px",
       padding: "16px",
-      backgroundColor: "#f8fafb",
+      backgroundColor: "#f5f8fa",
       borderRadius: "12px",
       cursor: "pointer",
       transition: "all 0.2s ease",
@@ -583,27 +624,27 @@ export default function LessonCreator() {
     updateTitle: {
       fontSize: "14px",
       fontWeight: "600",
-      color: "#1a1f4d",
+      color: "#1a232d",
       marginBottom: "4px",
     },
     updateCategory: {
       fontSize: "12px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
     },
     updateAmount: {
       fontSize: "14px",
       fontWeight: "700",
-      color: "#64c8ff",
+      color: "#7bdcb7",
     },
     updateDate: {
       fontSize: "12px",
-      color: "#b5c0d0",
+      color: "#a8b5c4",
       fontWeight: "500",
     },
     loadingState: {
       textAlign: "center",
       padding: "40px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       fontSize: "14px",
     },
     emptyDashboard: {
@@ -616,12 +657,12 @@ export default function LessonCreator() {
     },
     emptyDashboardText: {
       fontSize: "14px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       marginBottom: "20px",
     },
     createFirstButton: {
       padding: "12px 24px",
-      background: "linear-gradient(135deg, #64c8ff 0%, #4eb8e8 100%)",
+      background: "linear-gradient(135deg, #7bdcb7 0%, #5ecaa8 100%)",
       color: "#ffffff",
       fontSize: "14px",
       fontWeight: "600",
@@ -629,14 +670,14 @@ export default function LessonCreator() {
       borderRadius: "10px",
       cursor: "pointer",
       transition: "all 0.2s ease",
-      boxShadow: "0 4px 12px rgba(100, 200, 255, 0.25)",
+      boxShadow: "0 4px 12px rgba(123, 220, 183, 0.25)",
     },
     viewAllButton: {
       width: "100%",
       padding: "12px",
       marginTop: "16px",
-      backgroundColor: "#f8fafb",
-      color: "#64c8ff",
+      backgroundColor: "#f5f8fa",
+      color: "#7bdcb7",
       fontSize: "14px",
       fontWeight: "600",
       border: "1px solid #e5e7eb",
@@ -659,7 +700,7 @@ export default function LessonCreator() {
       position: "absolute",
       fontSize: "32px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
     },
     donutChart: {
       transform: "rotate(-90deg)",
@@ -667,11 +708,11 @@ export default function LessonCreator() {
     chartLabel: {
       marginTop: "16px",
       fontSize: "13px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       fontWeight: "500",
     },
     savingsCard: {
-      background: "linear-gradient(135deg, #ffc75f 0%, #ffb347 100%)",
+      background: "linear-gradient(135deg, #f5b041 0%, #f39c12 100%)",
       borderRadius: "16px",
       padding: "28px",
       color: "#ffffff",
@@ -680,7 +721,7 @@ export default function LessonCreator() {
       alignItems: "center",
       justifyContent: "center",
       textAlign: "center",
-      boxShadow: "0 8px 24px rgba(255, 199, 95, 0.25)",
+      boxShadow: "0 8px 24px rgba(243, 156, 18, 0.25)",
     },
     savingsText: {
       fontSize: "16px",
@@ -703,12 +744,12 @@ export default function LessonCreator() {
     pageTitle: {
       fontSize: "28px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
       marginBottom: "6px",
     },
     pageSubtitle: {
       fontSize: "14px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
     },
     formCard: {
       backgroundColor: "#ffffff",
@@ -731,7 +772,7 @@ export default function LessonCreator() {
     label: {
       fontSize: "13px",
       fontWeight: "600",
-      color: "#1a1f4d",
+      color: "#1a232d",
     },
     input: {
       height: "44px",
@@ -740,14 +781,14 @@ export default function LessonCreator() {
       border: "1.5px solid #e5e7eb",
       borderRadius: "10px",
       backgroundColor: "#ffffff",
-      color: "#1a1f4d",
+      color: "#1a232d",
       outline: "none",
       transition: "all 0.2s ease",
       fontFamily: "inherit",
     },
     generateButton: {
       padding: "14px 28px",
-      background: "linear-gradient(135deg, #64c8ff 0%, #4eb8e8 100%)",
+      background: "linear-gradient(135deg, #7bdcb7 0%, #5ecaa8 100%)",
       color: "#ffffff",
       fontSize: "15px",
       fontWeight: "600",
@@ -755,7 +796,7 @@ export default function LessonCreator() {
       borderRadius: "12px",
       cursor: "pointer",
       transition: "all 0.2s ease",
-      boxShadow: "0 4px 16px rgba(100, 200, 255, 0.3)",
+      boxShadow: "0 4px 16px rgba(123, 220, 183, 0.3)",
     },
     documentContainer: {
       backgroundColor: "transparent",
@@ -772,7 +813,7 @@ export default function LessonCreator() {
       padding: "12px 20px",
       fontSize: "14px",
       fontWeight: "500",
-      color: "#64c8ff",
+      color: "#7bdcb7",
       backgroundColor: "#ffffff",
       border: "1.5px solid #e5e7eb",
       borderRadius: "10px",
@@ -784,7 +825,7 @@ export default function LessonCreator() {
     },
     saveButton: {
       padding: "12px 20px",
-      background: "linear-gradient(135deg, #64c8ff 0%, #4eb8e8 100%)",
+      background: "linear-gradient(135deg, #7bdcb7 0%, #5ecaa8 100%)",
       color: "#ffffff",
       fontSize: "14px",
       fontWeight: "600",
@@ -795,7 +836,7 @@ export default function LessonCreator() {
       display: "flex",
       alignItems: "center",
       gap: "8px",
-      boxShadow: "0 4px 12px rgba(100, 200, 255, 0.25)",
+      boxShadow: "0 4px 12px rgba(123, 220, 183, 0.25)",
     },
     documentPage: {
       maxWidth: "850px",
@@ -887,12 +928,12 @@ export default function LessonCreator() {
     emptyTitle: {
       fontSize: "24px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
       marginBottom: "8px",
     },
     emptyText: {
       fontSize: "15px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
     },
     lessonGrid: {
       display: "grid",
@@ -915,17 +956,17 @@ export default function LessonCreator() {
     lessonTopic: {
       fontSize: "16px",
       fontWeight: "700",
-      color: "#1a1f4d",
+      color: "#1a232d",
       marginBottom: "6px",
     },
     lessonDate: {
       fontSize: "12px",
-      color: "#b5c0d0",
+      color: "#a8b5c4",
       fontWeight: "500",
     },
     lessonMeta: {
       fontSize: "13px",
-      color: "#8b96ad",
+      color: "#6b7a8f",
       marginBottom: "20px",
       lineHeight: "1.8",
     },
@@ -936,7 +977,7 @@ export default function LessonCreator() {
     viewButton: {
       flex: 1,
       padding: "10px 16px",
-      background: "linear-gradient(135deg, #64c8ff 0%, #4eb8e8 100%)",
+      background: "linear-gradient(135deg, #7bdcb7 0%, #5ecaa8 100%)",
       color: "#ffffff",
       fontSize: "13px",
       fontWeight: "600",
@@ -1033,145 +1074,15 @@ export default function LessonCreator() {
           {activeTab === "dashboard" && (
             <>
               <div style={styles.dashboardGrid}>
-                <div style={styles.cardPrimary}>
-                  <div style={styles.cardInfo}>
-                    <div style={styles.cardLabel}>CURRICULUM PLANNING</div>
-                    <div style={styles.cardValue}>Total Lessons</div>
-                    <div style={styles.cardSubtitle}>{savedLessons.length} lesson plans</div>
+                <div style={styles.heroCard}>
+                  <div style={styles.heroTitle}>Welcome Back, {formData.teacherName || "Educator"}!</div>
+                  <div style={styles.heroSubtitle}>
+                    Start creating curriculum-aligned lesson plans with AI. Get started by generating your first lesson
+                    plan today.
                   </div>
-                  <button onClick={() => setActiveTab("create")} style={styles.floatingAddButton}>
-                    +
+                  <button onClick={() => setActiveTab("create")} style={styles.heroCTA}>
+                    Create Your First Lesson Plan
                   </button>
-                </div>
-
-                <div style={styles.cardSecondary}>
-                  <div style={styles.cardHeader}>
-                    <div>
-                      <div style={styles.cardTag}>ACTIVE</div>
-                      <div style={styles.cardTitle}>Active Lessons</div>
-                      <div style={styles.cardSubtitle}>
-                        {savedLessons.filter((l) => l.status !== "archived").length} lessons in progress
-                      </div>
-                    </div>
-                  </div>
-                  <div style={styles.progressLabel}>Keep teaching</div>
-                </div>
-
-                <div style={styles.cardSecondary}>
-                  <div style={styles.cardHeader}>
-                    <div>
-                      <div style={styles.cardTag}>STATS</div>
-                      <div style={styles.cardTitle}>This Week</div>
-                      <div style={styles.cardSubtitle}>
-                        {
-                          savedLessons.filter((l) => {
-                            const lessonDate = new Date(l.savedDate)
-                            const weekAgo = new Date()
-                            weekAgo.setDate(weekAgo.getDate() - 7)
-                            return lessonDate >= weekAgo
-                          }).length
-                        }{" "}
-                        new lessons
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={styles.cardTertiary}>
-                  <div style={styles.playIcon}>▶</div>
-                  <div style={styles.cardTitle}>Quick Access</div>
-                  <div style={styles.cardSubtitle}>Recent materials</div>
-                </div>
-
-                <div style={styles.cardDark}>
-                  <div style={styles.lockIcon}>✨</div>
-                  <div style={styles.cardTitle}>Ready to teach?</div>
-                  <div style={styles.cardSubtitle}>Create your next lesson plan</div>
-                </div>
-
-                <div style={styles.cardWeather}>
-                  <div style={styles.weatherInfo}>
-                    <div style={styles.weatherQuestion}>Ready to teach?</div>
-                    <div style={styles.weatherDesc}>Create your next lesson plan</div>
-                    <div style={styles.weatherTemp}>{new Date().toLocaleDateString("en-US", { weekday: "short" })}</div>
-                  </div>
-                  <button onClick={() => setActiveTab("create")} style={styles.weatherAddButton}>
-                    +
-                  </button>
-                </div>
-
-                <div style={styles.latestUpdates}>
-                  <h3 style={styles.sectionTitle}>Recent Lesson Plans</h3>
-                  {isLoadingLessons ? (
-                    <div style={styles.loadingState}>Loading lessons...</div>
-                  ) : savedLessons.length === 0 ? (
-                    <div style={styles.emptyDashboard}>
-                      <div style={styles.emptyDashboardIcon}>📝</div>
-                      <div style={styles.emptyDashboardText}>No lessons yet. Create your first lesson plan!</div>
-                      <button onClick={() => setActiveTab("create")} style={styles.createFirstButton}>
-                        Create Lesson Plan
-                      </button>
-                    </div>
-                  ) : (
-                    <div style={styles.updatesList}>
-                      {savedLessons.slice(0, 4).map((lesson, index) => (
-                        <div key={index} style={styles.updateItem} onClick={() => handleViewLesson(lesson)}>
-                          <div style={styles.updateIcon}>
-                            {index === 0 ? "📘" : index === 1 ? "📗" : index === 2 ? "📙" : "📕"}
-                          </div>
-                          <div style={styles.updateDetails}>
-                            <div style={styles.updateTitle}>
-                              {lesson.administrativeDetails?.subject ||
-                                lesson.guidingQuestion?.substring(0, 40) ||
-                                "Lesson Plan"}
-                            </div>
-                            <div style={styles.updateCategory}>
-                              Grade {lesson.administrativeDetails?.grade || "N/A"} •{" "}
-                              {lesson.administrativeDetails?.class || "Class"}
-                            </div>
-                          </div>
-                          <div style={styles.updateDate}>{lesson.savedDate}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {savedLessons.length > 4 && (
-                    <button onClick={() => setActiveTab("archive")} style={styles.viewAllButton}>
-                      View All Lessons →
-                    </button>
-                  )}
-                </div>
-
-                <div style={styles.chartCard}>
-                  <div style={styles.chartValue}>
-                    {savedLessons.length > 0
-                      ? Math.round(
-                          (savedLessons.filter((l) => l.status === "completed").length / savedLessons.length) * 100,
-                        )
-                      : 0}
-                    %
-                  </div>
-                  <svg width="180" height="180" style={styles.donutChart}>
-                    <circle cx="90" cy="90" r="80" fill="none" stroke="#e5e7eb" strokeWidth="20" />
-                    <circle
-                      cx="90"
-                      cy="90"
-                      r="80"
-                      fill="none"
-                      stroke="#64c8ff"
-                      strokeWidth="20"
-                      strokeDasharray={`${2 * Math.PI * 80 * (savedLessons.length > 0 ? savedLessons.filter((l) => l.status === "completed").length / savedLessons.length : 0)} ${2 * Math.PI * 80}`}
-                      strokeDashoffset={2 * Math.PI * 80 * 0.25}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div style={styles.chartLabel}>Lessons completion</div>
-                </div>
-
-                <div style={styles.savingsCard}>
-                  <div style={styles.savingsText}>Total Lessons Created</div>
-                  <div style={styles.savingsAmount}>{savedLessons.length}</div>
-                  <div style={styles.savingsPoints}>Keep up the great work!</div>
                 </div>
               </div>
             </>
