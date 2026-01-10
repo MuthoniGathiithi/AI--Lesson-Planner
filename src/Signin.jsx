@@ -80,11 +80,7 @@ export default function SignIn() {
         <div style={styles.card}>
           {/* Header */}
           <div style={styles.header}>
-            <div style={styles.logoContainer}>
-              <div style={styles.logoCircle}>
-                <Lock style={styles.logoIcon} />
-              </div>
-            </div>
+            
             <h1 style={styles.brandTitle}>FunzoIQ</h1>
             <h2 style={styles.title}>Welcome back</h2>
             <p style={styles.subtitle}>Enter your credentials to access your account</p>
@@ -227,10 +223,11 @@ const styles = {
   brandTitle: {
     fontSize: "0.75rem",
     fontWeight: "700",
-    color: "#64748b",
+    color: "#000",
     marginBottom: "0.5rem",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
+    fontFamily:"inter, sans-serif"
   },
   title: {
     fontSize: "1.75rem",
@@ -355,7 +352,7 @@ const styles = {
   },
   submitButton: {
     width: "100%",
-    backgroundColor: "#0f172a",
+    backgroundColor: "#000",
     color: "#ffffff",
     padding: "0.75rem 1rem",
     borderRadius: "0.625rem",

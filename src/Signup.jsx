@@ -100,13 +100,10 @@ export default function SignUp() {
         <div style={styles.card}>
           <div style={styles.header}>
             <div style={styles.logoContainer}>
-              <div style={styles.logoCircle}>
-                <User style={styles.logoIcon} />
-              </div>
             </div>
             <h1 style={styles.brandTitle}>FunzoIQ</h1>
             <h2 style={styles.title}>Create Account</h2>
-            <p style={styles.subtitle}>Join us and start your journey today</p>
+            <p style={styles.subtitle}> start your journey today At FunzoIQ</p>
           </div>
 
           <div style={styles.formContainer}>
@@ -300,7 +297,7 @@ const styles = {
   brandTitle: {
     fontSize: "0.75rem",
     fontWeight: "700",
-    color: "#64748b",
+    color: "#000",
     marginBottom: "0.5rem",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
@@ -428,7 +425,7 @@ const styles = {
   },
   submitButton: {
     width: "100%",
-    backgroundColor: "#0f172a",
+    backgroundColor: "#000",
     color: "#ffffff",
     padding: "0.75rem 1rem",
     borderRadius: "0.625rem",
