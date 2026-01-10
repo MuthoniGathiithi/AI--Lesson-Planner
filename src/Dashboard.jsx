@@ -6,56 +6,68 @@ import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } 
 
 // SVG Icons as components
 const PlusIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm4 9h-3v3h-2v-3H6v-2h3V6h2v3h3v2z" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="12" y1="5" x2="12" y2="19"></line>
+    <line x1="5" y1="12" x2="19" y2="12"></line>
   </svg>
 )
 
 const DashboardIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M3 3h6v6H3V3zm8 0h6v6h-6V3zM3 11h6v6H3v-6zm8 0h6v6h-6v-6z" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="3" y="3" width="7" height="7"></rect>
+    <rect x="14" y="3" width="7" height="7"></rect>
+    <rect x="14" y="14" width="7" height="7"></rect>
+    <rect x="3" y="14" width="7" height="7"></rect>
   </svg>
 )
 
 const ArchiveIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M3 1h14a2 2 0 0 1 2 2v4H1V3a2 2 0 0 1 2-2zm0 7h14v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8zm6 4h2v2h-2v-2z" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="21 8 21 21 3 21 3 8"></polyline>
+    <rect x="1" y="3" width="22" height="5"></rect>
+    <line x1="10" y1="12" x2="14" y2="12"></line>
   </svg>
 )
 
 const SaveIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M3 2h11l3 3v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V2zm9 2H5v12h10V4zm-2 2v4h4V6H7z" />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+    <polyline points="7 3 7 8 15 8"></polyline>
   </svg>
 )
 
 const ArrowLeftIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M7 10l5-5-1.4-1.4L4.2 10l6.4 6.4L12 15l-5-5z" />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="19" y1="12" x2="5" y2="12"></line>
+    <polyline points="12 19 5 12 12 5"></polyline>
   </svg>
 )
 
 const EyeIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M10 3C5.6 3 1.7 5.7 0 9.5c1.7 3.8 5.6 6.5 10 6.5s8.3-2.7 10-6.5c-1.7-3.8-5.6-6.5-10-6.5zm0 10c-1.9 0-3.5-1.6-3.5-3.5S8.1 6 10 6s3.5 1.6 3.5 3.5S11.9 13 10 13z" />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
   </svg>
 )
 
 const TrashIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M6 2a1 1 0 0 0-1 1v1H2a1 1 0 1 0 0 2h1v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6h1a1 1 0 1 0 0-2h-3V3a1 1 0 0 0-1-1H6zm2 4a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V6zm4 0a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V6z" />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="3 6 5 6 21 6"></polyline>
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
   </svg>
 )
 
 const ChevronRightIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-    <path d="M8 4l6 6-6 6V4z" />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="9 18 15 12 9 6"></polyline>
   </svg>
 )
 
 const UserIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+    <circle cx="12" cy="7" r="4"></circle>
   </svg>
 )
 
@@ -68,6 +80,7 @@ export default function LessonCreator() {
   const [currentLessonId, setCurrentLessonId] = useState(null)
   const [savedLessons, setSavedLessons] = useState([])
   const [userName, setUserName] = useState("")
+
   const [formData, setFormData] = useState({
     schoolName: "",
     className: "",
@@ -106,11 +119,9 @@ export default function LessonCreator() {
   const loadLessons = async () => {
     setIsLoadingLessons(true)
     const result = await fetchLessonPlans()
-
     if (result.success) {
       const lessons = result.data.map((lesson) => {
         const content = typeof lesson.content === "string" ? JSON.parse(lesson.content) : lesson.content
-
         return {
           ...content,
           dbId: lesson.id,
@@ -122,13 +133,11 @@ export default function LessonCreator() {
     } else {
       alert("Failed to load lessons: " + result.error)
     }
-
     setIsLoadingLessons(false)
   }
 
   const handleGenerate = async () => {
     setIsGenerating(true)
-
     try {
       const generatedPlan = await generateLessonPlan(formData)
       setLessonPlan(generatedPlan)
@@ -146,10 +155,8 @@ export default function LessonCreator() {
     if (!lessonPlan) return
 
     setIsSaving(true)
-
     try {
       let result
-
       if (currentLessonId) {
         result = await updateLessonPlan(currentLessonId, lessonPlan)
         if (result.success) {
@@ -184,7 +191,6 @@ export default function LessonCreator() {
     }
 
     const result = await deleteLessonPlan(lesson.dbId)
-
     if (result.success) {
       alert("Lesson plan deleted successfully!")
       await loadLessons()
@@ -202,7 +208,6 @@ export default function LessonCreator() {
       learningResources: lesson.learningResources || [],
       lessonFlow: lesson.lessonFlow || {},
     }
-
     setLessonPlan(fullLesson)
     setCurrentLessonId(lesson.dbId)
     setActiveTab("create")
@@ -231,10 +236,10 @@ export default function LessonCreator() {
   return (
     <div style={styles.container}>
       {/* Sidebar */}
-      <aside style={styles.sidebar}>
+      <div style={styles.sidebar}>
         <div style={styles.logo}>
           <div style={styles.logoIcon}>📚</div>
-          <span style={styles.logoText}>EduPlan</span>
+          <div style={styles.logoText}>Funza AI</div>
         </div>
 
         {/* User Profile */}
@@ -267,7 +272,6 @@ export default function LessonCreator() {
               <ChevronRightIcon />
             </span>
           </button>
-
           <button
             onClick={() => setActiveTab("create")}
             style={{
@@ -283,7 +287,6 @@ export default function LessonCreator() {
               <ChevronRightIcon />
             </span>
           </button>
-
           <button
             onClick={() => setActiveTab("archive")}
             style={{
@@ -300,52 +303,29 @@ export default function LessonCreator() {
             </span>
           </button>
         </nav>
-      </aside>
+      </div>
 
       {/* Main Content */}
-      <main style={styles.main}>
+      <div style={styles.main}>
         <div style={styles.topBar}>
           <div style={styles.welcomeText}>
-            <div style={styles.welcomeGreeting}>Hello {userName || "there"}, Welcome back</div>
-            <div style={styles.welcomeTitle}>Your Dashboard is updated</div>
-          </div>
-          <div style={styles.topBarActions}>
-            <button style={styles.iconButton}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" />
-              </svg>
-            </button>
-            <button style={styles.iconButton}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM5 7V5h14v2H5zm2 4h10v2H7v-2z" />
-              </svg>
-            </button>
-            <button style={styles.iconButton}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-              </svg>
-            </button>
+            <div style={styles.welcomeGreeting}>Good {new Date().getHours() < 12 ? "Morning" : "Afternoon"}</div>
+            <div style={styles.welcomeTitle}>Lesson Planner</div>
           </div>
         </div>
 
         <div style={styles.content}>
           {activeTab === "dashboard" && (
-            <div style={styles.dashboardGrid}>
+            <>
               {/* Stats Cards */}
+              <div style={styles.dashboardGrid}>
               <div style={styles.cardPrimary}>
-                <div style={styles.illustration3D}>
-                  <div style={styles.shape3D1}></div>
-                  <div style={styles.shape3D2}></div>
-                  <div style={styles.shape3D3}></div>
-                </div>
                 <div style={styles.cardInfo}>
-                  <div style={styles.cardLabel}>Total Lessons</div>
-                  <div style={styles.cardValue}>{savedLessons.length} lesson plans</div>
+                  <div style={styles.cardLabel}>CURRICULUM PLANNING</div>
+                  <div style={styles.cardValue}>Total Lessons</div>
+                  <div style={styles.cardSubtitle}>{savedLessons.length} lesson plans</div>
                 </div>
-                <button 
-                  style={styles.floatingAddButton}
-                  onClick={() => setActiveTab("create")}
-                >
+                <button onClick={() => setActiveTab("create")} style={styles.floatingAddButton}>
                   +
                 </button>
               </div>
@@ -353,7 +333,7 @@ export default function LessonCreator() {
               <div style={styles.cardSecondary}>
                 <div style={styles.cardHeader}>
                   <div>
-                    <div style={styles.cardTag}>CURRICULUM PLANNING</div>
+                    <div style={styles.cardTag}>ACTIVE</div>
                     <div style={styles.cardTitle}>Active Lessons</div>
                     <div style={styles.cardSubtitle}>
                       {savedLessons.filter(l => l.status !== 'archived').length} lessons in progress
@@ -364,66 +344,68 @@ export default function LessonCreator() {
                 <div style={styles.progressLabel}>Keep teaching</div>
               </div>
 
-              <div style={styles.cardTertiary}>
-                <div style={styles.playIcon}>📊</div>
-                <div style={styles.cardTitle}>This Week</div>
-                <div style={styles.cardSubtitle}>
-                  {savedLessons.filter(l => {
-                    const lessonDate = new Date(l.savedDate)
-                    const weekAgo = new Date()
-                    weekAgo.setDate(weekAgo.getDate() - 7)
-                    return lessonDate >= weekAgo
-                  }).length} new lessons
+              <div style={styles.cardSecondary}>
+                <div style={styles.cardHeader}>
+                  <div>
+                    <div style={styles.cardTag}>STATS</div>
+                    <div style={styles.cardTitle}>This Week</div>
+                    <div style={styles.cardSubtitle}>
+                      {savedLessons.filter(l => {
+                        const lessonDate = new Date(l.savedDate)
+                        const weekAgo = new Date()
+                        weekAgo.setDate(weekAgo.getDate() - 7)
+                        return lessonDate >= weekAgo
+                      }).length} new lessons
+                    </div>
+                  </div>
+                  <div style={styles.folderIcon}>📊</div>
                 </div>
+              </div>
+
+              <div style={styles.cardTertiary}>
+                <div style={styles.playIcon}>▶</div>
+                <div style={styles.cardTitle}>Quick Access</div>
+                <div style={styles.cardSubtitle}>Recent materials</div>
               </div>
 
               <div style={styles.cardDark}>
                 <div style={styles.lockIcon}>⭐</div>
-                <div style={styles.cardTitle}>Quick Access</div>
-                <div style={styles.cardSubtitle}>Recent materials</div>
+                <div style={styles.cardTitle}>Ready to teach?</div>
+                <div style={styles.cardSubtitle}>Create your next lesson plan</div>
               </div>
 
               <div style={styles.cardWeather}>
                 <div style={styles.weatherInfo}>
                   <div style={styles.weatherQuestion}>Ready to teach?</div>
                   <div style={styles.weatherDesc}>Create your next lesson plan</div>
-                  <div style={styles.weatherTemp}>
-                    {new Date().toLocaleDateString('en-US', { weekday: 'short' })}
-                  </div>
+                  <div style={styles.weatherTemp}>{new Date().toLocaleDateString('en-US', { weekday: 'short' })}</div>
                 </div>
-                <button 
-                  style={styles.weatherAddButton}
-                  onClick={() => setActiveTab("create")}
-                >
+                <button onClick={() => setActiveTab("create")} style={styles.weatherAddButton}>
                   +
                 </button>
               </div>
 
               {/* Recent Lesson Plans */}
               <div style={styles.latestUpdates}>
-                <h2 style={styles.sectionTitle}>Recent Lesson Plans</h2>
-                
+                <h3 style={styles.sectionTitle}>Recent Lesson Plans</h3>
                 {isLoadingLessons ? (
-                  <div style={styles.loadingState}>Loading lessons...</div>
+                  <div style={styles.loadingState}>
+                    Loading lessons...
+                  </div>
                 ) : savedLessons.length === 0 ? (
                   <div style={styles.emptyDashboard}>
                     <div style={styles.emptyDashboardIcon}>📝</div>
-                    <div style={styles.emptyDashboardText}>No lessons yet. Create your first lesson plan!</div>
-                    <button 
-                      onClick={() => setActiveTab("create")}
-                      style={styles.createFirstButton}
-                    >
+                    <div style={styles.emptyDashboardText}>
+                      No lessons yet. Create your first lesson plan!
+                    </div>
+                    <button onClick={() => setActiveTab("create")} style={styles.createFirstButton}>
                       Create Lesson Plan
                     </button>
                   </div>
                 ) : (
                   <div style={styles.updatesList}>
                     {savedLessons.slice(0, 4).map((lesson, index) => (
-                      <div 
-                        key={lesson.dbId} 
-                        style={styles.updateItem}
-                        onClick={() => handleViewLesson(lesson)}
-                      >
+                      <div key={index} style={styles.updateItem} onClick={() => handleViewLesson(lesson)}>
                         <div style={styles.updateIcon}>
                           {index === 0 ? '📘' : index === 1 ? '📗' : index === 2 ? '📙' : '📕'}
                         </div>
@@ -440,12 +422,8 @@ export default function LessonCreator() {
                     ))}
                   </div>
                 )}
-
                 {savedLessons.length > 4 && (
-                  <button 
-                    onClick={() => setActiveTab("archive")}
-                    style={styles.viewAllButton}
-                  >
+                  <button onClick={() => setActiveTab("archive")} style={styles.viewAllButton}>
                     View All Lessons →
                   </button>
                 )}
@@ -454,26 +432,17 @@ export default function LessonCreator() {
               {/* Completion Stats */}
               <div style={styles.chartCard}>
                 <div style={styles.chartValue}>
-                  {savedLessons.length > 0 
-                    ? Math.round((savedLessons.filter(l => l.status === 'completed').length / savedLessons.length) * 100)
-                    : 0}%
+                  {savedLessons.length > 0 ? Math.round((savedLessons.filter(l => l.status === 'completed').length / savedLessons.length) * 100) : 0}%
                 </div>
-                <svg width="200" height="200" viewBox="0 0 200 200" style={styles.donutChart}>
+                <svg width="180" height="180" style={styles.donutChart}>
+                  <circle cx="90" cy="90" r="80" fill="none" stroke="#e5e7eb" strokeWidth="20" />
                   <circle
-                    cx="100"
-                    cy="100"
+                    cx="90"
+                    cy="90"
                     r="80"
                     fill="none"
-                    stroke="#f3f4f6"
-                    strokeWidth="30"
-                  />
-                  <circle
-                    cx="100"
-                    cy="100"
-                    r="80"
-                    fill="none"
-                    stroke="#fb923c"
-                    strokeWidth="30"
+                    stroke="#10b981"
+                    strokeWidth="20"
                     strokeDasharray={`${2 * Math.PI * 80 * (savedLessons.length > 0 ? (savedLessons.filter(l => l.status === 'completed').length / savedLessons.length) : 0)} ${2 * Math.PI * 80}`}
                     strokeDashoffset={2 * Math.PI * 80 * 0.25}
                     strokeLinecap="round"
@@ -486,17 +455,16 @@ export default function LessonCreator() {
               <div style={styles.savingsCard}>
                 <div style={styles.savingsText}>Total Lessons Created</div>
                 <div style={styles.savingsAmount}>{savedLessons.length}</div>
-                <div style={styles.savingsPoints}>
-                  Keep up the great work!
-                </div>
+                <div style={styles.savingsPoints}>Keep up the great work!</div>
               </div>
             </div>
+            </>
           )}
 
           {activeTab === "create" && (
             <>
               <div style={styles.pageHeader}>
-                <h1 style={styles.pageTitle}>Create Lesson Plan</h1>
+                <h2 style={styles.pageTitle}>Create Lesson Plan</h2>
                 <p style={styles.pageSubtitle}>Fill in the details to generate your curriculum-aligned plan.</p>
               </div>
 
@@ -530,16 +498,7 @@ export default function LessonCreator() {
                       </div>
                     ))}
                   </div>
-
-                  <button
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    style={{
-                      ...styles.generateButton,
-                      opacity: isGenerating ? 0.7 : 1,
-                      cursor: isGenerating ? "not-allowed" : "pointer",
-                    }}
-                  >
+                  <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
                     {isGenerating ? "Generating..." : "Generate Lesson Plan"}
                   </button>
                 </div>
@@ -547,23 +506,18 @@ export default function LessonCreator() {
                 <div style={styles.documentContainer}>
                   <div style={styles.actionBar}>
                     <button onClick={handleCreateNew} style={styles.backButton}>
-                      <ArrowLeftIcon /> Create New
+                      <ArrowLeftIcon />
+                      Create New
                     </button>
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      style={{
-                        ...styles.saveButton,
-                        opacity: isSaving ? 0.7 : 1,
-                      }}
-                    >
-                      <SaveIcon /> {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
+                    <button onClick={handleSave} disabled={isSaving} style={styles.saveButton}>
+                      <SaveIcon />
+                      {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
                     </button>
                   </div>
 
                   <div style={styles.documentPage}>
                     <div style={styles.docHeader}>
-                      <h1 style={styles.docTitle}>LESSON PLAN</h1>
+                      <div style={styles.docTitle}>LESSON PLAN</div>
                       <div style={styles.docDivider}></div>
                     </div>
 
@@ -585,22 +539,18 @@ export default function LessonCreator() {
                           <td style={styles.tableLabelCell}>Teacher:</td>
                           <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.teacher}</td>
                           <td style={styles.tableLabelCell}>Students:</td>
-                          <td style={styles.tableValueCell}>
-                            {lessonPlan.administrativeDetails?.studentEnrollment?.total}
-                          </td>
+                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.studentEnrollment?.total}</td>
                         </tr>
                       </tbody>
                     </table>
 
                     <div style={styles.section}>
-                      <h2 style={styles.sectionTitle}>GUIDING QUESTION</h2>
-                      <p style={styles.docText}>
-                        <em>{lessonPlan.guidingQuestion}</em>
-                      </p>
+                      <div style={styles.sectionTitle}>GUIDING QUESTION</div>
+                      <p style={styles.docText}>{lessonPlan.guidingQuestion}</p>
                     </div>
 
                     <div style={styles.section}>
-                      <h2 style={styles.sectionTitle}>LEARNING OUTCOMES</h2>
+                      <div style={styles.sectionTitle}>LEARNING OUTCOMES</div>
                       {lessonPlan.learningOutcomes?.map((outcome) => (
                         <p key={outcome.id} style={styles.docText}>
                           {outcome.id}. {outcome.outcome}
@@ -609,39 +559,33 @@ export default function LessonCreator() {
                     </div>
 
                     <div style={styles.section}>
-                      <h2 style={styles.sectionTitle}>LEARNING RESOURCES</h2>
+                      <div style={styles.sectionTitle}>LEARNING RESOURCES</div>
                       <p style={styles.docText}>{lessonPlan.learningResources?.join(", ")}</p>
                     </div>
 
                     <div style={styles.section}>
-                      <h2 style={styles.sectionTitle}>LESSON FLOW</h2>
+                      <div style={styles.sectionTitle}>LESSON FLOW</div>
 
                       <div style={styles.subsection}>
-                        <h3 style={styles.subsectionTitle}>Introduction (5 minutes)</h3>
+                        <div style={styles.subsectionTitle}>Introduction (5 minutes)</div>
                         <p style={styles.docText}>{lessonPlan.lessonFlow?.introduction?.description}</p>
                       </div>
 
                       <div style={styles.subsection}>
-                        <h3 style={styles.subsectionTitle}>Development Activities</h3>
+                        <div style={styles.subsectionTitle}>Development Activities</div>
                         {lessonPlan.lessonFlow?.development?.map((step) => (
                           <div key={step.step} style={styles.stepContainer}>
-                            <p style={styles.stepTitle}>
-                              <strong>
-                                Step {step.step}: {step.title}
-                              </strong>
-                            </p>
-                            <p style={styles.docText}>
-                              <strong>Description:</strong> {step.description}
-                            </p>
-                            <p style={styles.docText}>
-                              <strong>Activity:</strong> {step.activity}
-                            </p>
+                            <div style={styles.stepTitle}>
+                              Step {step.step}: {step.title}
+                            </div>
+                            <p style={styles.docText}>Description: {step.description}</p>
+                            <p style={styles.docText}>Activity: {step.activity}</p>
                           </div>
                         ))}
                       </div>
 
                       <div style={styles.subsection}>
-                        <h3 style={styles.subsectionTitle}>Conclusion (5 minutes)</h3>
+                        <div style={styles.subsectionTitle}>Conclusion (5 minutes)</div>
                         <p style={styles.docText}>{lessonPlan.lessonFlow?.conclusion?.description}</p>
                       </div>
                     </div>
@@ -654,19 +598,19 @@ export default function LessonCreator() {
           {activeTab === "archive" && (
             <>
               <div style={styles.pageHeader}>
-                <h1 style={styles.pageTitle}>Lesson Archive</h1>
+                <h2 style={styles.pageTitle}>Lesson Archive</h2>
                 <p style={styles.pageSubtitle}>View and manage your saved lesson plans.</p>
               </div>
 
               {isLoadingLessons ? (
                 <div style={styles.emptyState}>
                   <div style={styles.emptyIcon}>⏳</div>
-                  <h2 style={styles.emptyTitle}>Loading lessons...</h2>
+                  <div style={styles.emptyTitle}>Loading lessons...</div>
                 </div>
               ) : savedLessons.length === 0 ? (
                 <div style={styles.emptyState}>
                   <div style={styles.emptyIcon}>📁</div>
-                  <h2 style={styles.emptyTitle}>No Saved Lessons Yet</h2>
+                  <div style={styles.emptyTitle}>No Saved Lessons Yet</div>
                   <p style={styles.emptyText}>Create and save lesson plans to see them here.</p>
                 </div>
               ) : (
@@ -674,30 +618,26 @@ export default function LessonCreator() {
                   {savedLessons.map((lesson) => (
                     <div key={lesson.dbId} style={styles.lessonCard}>
                       <div style={styles.lessonHeader}>
-                        <h3 style={styles.lessonTopic}>
-                          {lesson.administrativeDetails?.subject ||
-                            lesson.guidingQuestion?.substring(0, 50) ||
-                            "Untitled"}
-                        </h3>
-                        <span style={styles.lessonDate}>{lesson.savedDate}</span>
+                        <div style={styles.lessonTopic}>
+                          {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 50) || "Untitled"}
+                        </div>
+                        <div style={styles.lessonDate}>{lesson.savedDate}</div>
                       </div>
                       <div style={styles.lessonMeta}>
-                        <div>
-                          <strong>Grade:</strong> {lesson.administrativeDetails?.grade || lesson.grade}
-                        </div>
-                        <div>
-                          <strong>Class:</strong> {lesson.administrativeDetails?.class || "N/A"}
-                        </div>
-                        <div>
-                          <strong>Teacher:</strong> {lesson.administrativeDetails?.teacher || "N/A"}
-                        </div>
+                        Grade: {lesson.administrativeDetails?.grade || lesson.grade}
+                        <br />
+                        Class: {lesson.administrativeDetails?.class || "N/A"}
+                        <br />
+                        Teacher: {lesson.administrativeDetails?.teacher || "N/A"}
                       </div>
                       <div style={styles.lessonActions}>
                         <button onClick={() => handleViewLesson(lesson)} style={styles.viewButton}>
-                          <EyeIcon /> View
+                          <EyeIcon />
+                          View
                         </button>
                         <button onClick={() => handleDelete(lesson)} style={styles.deleteButton}>
-                          <TrashIcon /> Delete
+                          <TrashIcon />
+                          Delete
                         </button>
                       </div>
                     </div>
@@ -707,7 +647,7 @@ export default function LessonCreator() {
             </>
           )}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
@@ -721,7 +661,7 @@ const styles = {
   },
   sidebar: {
     width: "280px",
-    background: "linear-gradient(180deg, #2d3561 0%, #1f2849 100%)",
+    background: "linear-gradient(180deg, #059669 0%, #047857 100%)",
     padding: "24px 20px",
     display: "flex",
     flexDirection: "column",
@@ -761,7 +701,7 @@ const styles = {
     width: "48px",
     height: "48px",
     borderRadius: "12px",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -889,40 +829,6 @@ const styles = {
     overflow: "hidden",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
   },
-  illustration3D: {
-    position: "relative",
-    height: "120px",
-    marginBottom: "16px",
-  },
-  shape3D1: {
-    position: "absolute",
-    width: "60px",
-    height: "80px",
-    background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
-    borderRadius: "8px",
-    left: "10px",
-    top: "20px",
-    transform: "rotate(-10deg)",
-  },
-  shape3D2: {
-    position: "absolute",
-    width: "50px",
-    height: "50px",
-    background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
-    borderRadius: "50%",
-    right: "30px",
-    top: "30px",
-  },
-  shape3D3: {
-    position: "absolute",
-    width: "70px",
-    height: "40px",
-    background: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
-    borderRadius: "20px",
-    right: "10px",
-    bottom: "10px",
-    transform: "rotate(5deg)",
-  },
   cardInfo: {
     position: "relative",
     zIndex: 1,
@@ -945,7 +851,7 @@ const styles = {
     width: "44px",
     height: "44px",
     borderRadius: "50%",
-    background: "linear-gradient(135deg, #2d3561 0%, #1f2849 100%)",
+    background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
     color: "#ffffff",
     border: "none",
     fontSize: "24px",
@@ -1015,7 +921,7 @@ const styles = {
   },
   cardDark: {
     gridColumn: "span 1",
-    background: "linear-gradient(135deg, #2d3561 0%, #1f2849 100%)",
+    background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
     borderRadius: "16px",
     padding: "24px",
     color: "#ffffff",
@@ -1028,7 +934,7 @@ const styles = {
   cardWeather: {
     gridColumn: "span 1",
     gridRow: "span 2",
-    background: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
+    background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
     borderRadius: "16px",
     padding: "28px",
     color: "#ffffff",
@@ -1062,7 +968,7 @@ const styles = {
     height: "52px",
     borderRadius: "50%",
     backgroundColor: "#ffffff",
-    color: "#1e3a8a",
+    color: "#059669",
     border: "none",
     fontSize: "28px",
     cursor: "pointer",
@@ -1092,7 +998,7 @@ const styles = {
   },
   updateTabActive: {
     padding: "10px 20px",
-    backgroundColor: "#2d3561",
+    backgroundColor: "#059669",
     color: "#ffffff",
     border: "none",
     borderRadius: "20px",
@@ -1178,7 +1084,7 @@ const styles = {
   },
   createFirstButton: {
     padding: "12px 24px",
-    background: "linear-gradient(135deg, #2d3561 0%, #1f2849 100%)",
+    background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
     color: "#ffffff",
     fontSize: "14px",
     fontWeight: "600",
@@ -1192,7 +1098,7 @@ const styles = {
     padding: "12px",
     marginTop: "16px",
     backgroundColor: "#f9fafb",
-    color: "#2d3561",
+    color: "#059669",
     fontSize: "14px",
     fontWeight: "600",
     border: "1px solid #e5e7eb",
@@ -1229,7 +1135,7 @@ const styles = {
   },
   savingsCard: {
     gridColumn: "span 1",
-    background: "linear-gradient(135deg, #f472b6 0%, #a855f7 100%)",
+    background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
     borderRadius: "16px",
     padding: "28px",
     color: "#ffffff",
@@ -1304,7 +1210,7 @@ const styles = {
   },
   generateButton: {
     padding: "14px 28px",
-    background: "linear-gradient(135deg, #2d3561 0%, #1f2849 100%)",
+    background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
     color: "#ffffff",
     fontSize: "15px",
     fontWeight: "600",
@@ -1312,7 +1218,7 @@ const styles = {
     borderRadius: "12px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: "0 4px 12px rgba(45, 53, 97, 0.3)",
+    boxShadow: "0 4px 12px rgba(5, 150, 105, 0.3)",
   },
   documentContainer: {
     backgroundColor: "transparent",
@@ -1329,7 +1235,7 @@ const styles = {
     padding: "12px 20px",
     fontSize: "14px",
     fontWeight: "500",
-    color: "#2d3561",
+    color: "#059669",
     backgroundColor: "#ffffff",
     border: "1.5px solid #e5e7eb",
     borderRadius: "10px",
@@ -1403,15 +1309,6 @@ const styles = {
   },
   section: {
     marginBottom: "25px",
-  },
-  sectionTitle: {
-    fontSize: "14px",
-    fontWeight: "bold",
-    color: "#000",
-    textTransform: "uppercase",
-    marginBottom: "12px",
-    borderBottom: "2px solid #000",
-    paddingBottom: "4px",
   },
   subsection: {
     marginBottom: "20px",
