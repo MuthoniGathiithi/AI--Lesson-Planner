@@ -13,6 +13,14 @@ import {
   User,
   LogOut,
   Search,
+  Bell,
+  Settings,
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Clock,
+  FileText,
+  CheckCircle,
 } from "lucide-react"
 import { generateLessonPlan } from "./services/api"
 import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
@@ -26,6 +34,8 @@ export default function LessonCreator() {
   const [currentLessonId, setCurrentLessonId] = useState(null)
   const [savedLessons, setSavedLessons] = useState([])
   const [userName, setUserName] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filteredLessons, setFilteredLessons] = useState([])
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -60,6 +70,31 @@ export default function LessonCreator() {
     }
   }, [formData.teacherName])
 
+  useEffect(() => {
+    // Filter lessons based on search query
+    if (searchQuery.trim() === "") {
+      setFilteredLessons(savedLessons)
+    } else {
+      const query = searchQuery.toLowerCase()
+      const filtered = savedLessons.filter((lesson) => {
+        const subject = lesson.administrativeDetails?.subject?.toLowerCase() || ""
+        const grade = lesson.administrativeDetails?.grade?.toString().toLowerCase() || ""
+        const className = lesson.administrativeDetails?.class?.toLowerCase() || ""
+        const teacher = lesson.administrativeDetails?.teacher?.toLowerCase() || ""
+        const question = lesson.guidingQuestion?.toLowerCase() || ""
+
+        return (
+          subject.includes(query) ||
+          grade.includes(query) ||
+          className.includes(query) ||
+          teacher.includes(query) ||
+          question.includes(query)
+        )
+      })
+      setFilteredLessons(filtered)
+    }
+  }, [searchQuery, savedLessons])
+
   const loadLessons = async () => {
     setIsLoadingLessons(true)
     const result = await fetchLessonPlans()
@@ -74,6 +109,7 @@ export default function LessonCreator() {
         }
       })
       setSavedLessons(lessons)
+      setFilteredLessons(lessons)
     } else {
       alert("Failed to load lessons: " + result.error)
     }
@@ -177,36 +213,67 @@ export default function LessonCreator() {
     })
   }
 
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return "Good Morning"
+    if (hour < 18) return "Good Afternoon"
+    return "Good Evening"
+  }
+
+  const thisWeekLessons = savedLessons.filter((l) => {
+    const lessonDate = new Date(l.savedDate)
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    return lessonDate >= weekAgo
+  })
+
+  const completionRate =
+    savedLessons.length > 0
+      ? Math.round((savedLessons.filter((l) => l.status === "completed").length / savedLessons.length) * 100)
+      : 0
+
+  const weekGrowth = thisWeekLessons.length > 0 ? "+14.88%" : "0%"
+  const isGrowthPositive = thisWeekLessons.length > 0
+
   return (
     <div style={styles.container}>
-      <div style={styles.sidebar}>
-        <div style={styles.logo}>
-          <div style={styles.logoIcon}>📚</div>
-          <div style={styles.logoText}>Funza AI</div>
+      {/* Sidebar */}
+      <aside style={styles.sidebar}>
+        <div style={styles.sidebarHeader}>
+          <div style={styles.logo}>
+            <div style={styles.logoIcon}>📚</div>
+            <div style={styles.logoText}>Funza</div>
+          </div>
         </div>
 
-        <div style={styles.userProfile}>
-          <div style={styles.avatar}>
-            <User size={24} />
+        <div style={styles.userCard}>
+          <div style={styles.userAvatar}>
+            <User size={20} />
           </div>
-          <div style={styles.userInfo}>
-            <div style={styles.userName}>{formData.teacherName || "Teacher"}</div>
-            <div style={styles.userRole}>Educator</div>
+          <div style={styles.userDetails}>
+            <div style={styles.userGreeting}>MAIN</div>
+            <div style={styles.userTitle}>{formData.teacherName || "Teacher"}</div>
+            <div style={styles.userSubtitle}>Educator</div>
           </div>
+          <ChevronRight size={16} style={styles.userChevron} />
         </div>
 
         <nav style={styles.nav}>
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            style={{
-              ...styles.navButton,
-              ...(activeTab === "dashboard" ? styles.navButtonActive : {}),
-            }}
-          >
-            <LayoutDashboard size={20} />
-            <span>Dashboard</span>
-            <ChevronRight size={16} style={styles.navChevron} />
-          </button>
+          <div style={styles.navSection}>
+            <div style={styles.navLabel}>MAIN</div>
+            <button
+              onClick={() => setActiveTab("dashboard")}
+              style={{
+                ...styles.navButton,
+                ...(activeTab === "dashboard" ? styles.navButtonActive : {}),
+              }}
+            >
+              <LayoutDashboard size={18} />
+              <span>Dashboard</span>
+              {activeTab === "dashboard" && <div style={styles.activeIndicator}></div>}
+            </button>
+          </div>
+
           <button
             onClick={() => setActiveTab("create")}
             style={{
@@ -214,10 +281,11 @@ export default function LessonCreator() {
               ...(activeTab === "create" ? styles.navButtonActive : {}),
             }}
           >
-            <Plus size={20} />
+            <Plus size={18} />
             <span>Create Lesson</span>
-            <ChevronRight size={16} style={styles.navChevron} />
+            {activeTab === "create" && <div style={styles.activeIndicator}></div>}
           </button>
+
           <button
             onClick={() => setActiveTab("archive")}
             style={{
@@ -225,149 +293,272 @@ export default function LessonCreator() {
               ...(activeTab === "archive" ? styles.navButtonActive : {}),
             }}
           >
-            <Archive size={20} />
+            <Archive size={18} />
             <span>Lesson Archive</span>
-            <ChevronRight size={16} style={styles.navChevron} />
+            {activeTab === "archive" && savedLessons.length > 0 && (
+              <span style={styles.badge}>{savedLessons.length}</span>
+            )}
+            {activeTab === "archive" && <div style={styles.activeIndicator}></div>}
+          </button>
+
+          <button style={styles.navButton}>
+            <FileText size={18} />
+            <span>Libraries</span>
+          </button>
+
+          <button style={styles.navButton}>
+            <CheckCircle size={18} />
+            <span>Saved</span>
           </button>
         </nav>
 
-        <div style={styles.navDivider}></div>
-
-        <button style={styles.logoutButton}>
-          <LogOut size={20} />
-          <span>Logout</span>
-        </button>
-      </div>
-
-      <div style={styles.main}>
-        <div style={styles.topBar}>
-          <div style={styles.welcomeText}>
-            <div style={styles.welcomeGreeting}>Good {new Date().getHours() < 12 ? "Morning" : "Afternoon"}</div>
-            <div style={styles.welcomeTitle}>Lesson Planner</div>
-          </div>
-          <div style={styles.searchContainer}>
-            <Search size={18} style={styles.searchIcon} />
-            <input type="text" placeholder="Search..." style={styles.searchInput} />
+        <div style={styles.sidebarFooter}>
+          <div style={styles.navLabel}>MESSAGES</div>
+          <div style={styles.messagesList}>
+            <div style={styles.messageAvatar} title="Erik Gunsel">
+              EG
+            </div>
+            <div style={styles.messageAvatar} title="Emily Smith">
+              ES
+            </div>
+            <div style={styles.messageAvatar} title="Arthur Adelk">
+              AA
+            </div>
           </div>
         </div>
+      </aside>
 
+      {/* Main Content */}
+      <main style={styles.main}>
+        {/* Top Bar */}
+        <header style={styles.topBar}>
+          <div style={styles.topBarLeft}>
+            <div style={styles.greeting}>{getGreeting()}</div>
+            <h1 style={styles.pageTitle}>
+              {activeTab === "dashboard" && "Dashboard"}
+              {activeTab === "create" && "Lesson Planner"}
+              {activeTab === "archive" && "Lesson Archive"}
+            </h1>
+          </div>
+
+          <div style={styles.topBarRight}>
+            <div style={styles.searchBox}>
+              <Search size={18} style={styles.searchIcon} />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={styles.searchInput}
+              />
+            </div>
+            <button style={styles.iconButton}>
+              <Bell size={20} />
+            </button>
+            <button style={styles.iconButton}>
+              <Settings size={20} />
+            </button>
+          </div>
+        </header>
+
+        {/* Content Area */}
         <div style={styles.content}>
           {activeTab === "dashboard" && (
-            <>
-              <div style={styles.dashboardGrid}>
-                <div style={styles.cardLarge}>
-                  <div style={styles.cardHeader}>
-                    <div>
-                      <div style={styles.cardLabel}>CURRICULUM PLANNING</div>
-                      <div style={styles.cardTitle}>Total Lessons</div>
-                      <div style={styles.cardValue}>{savedLessons.length}</div>
+            <div style={styles.dashboardLayout}>
+              {/* Stats Cards */}
+              <div style={styles.statsRow}>
+                <div style={{ ...styles.statCard, ...styles.statCardPrimary }}>
+                  <div style={styles.statCardHeader}>
+                    <div style={styles.statIcon}>👋</div>
+                    <div style={styles.statBadge}>PF</div>
+                  </div>
+                  <div style={styles.statContent}>
+                    <div style={styles.statLabel}>Hello {formData.teacherName.split(" ")[0] || "Teacher"}</div>
+                    <div style={styles.statText}>New cases are waiting</div>
+                  </div>
+                </div>
+
+                <div style={styles.statCard}>
+                  <div style={styles.statHeader}>
+                    <div style={styles.statTitle}>NEW CASES</div>
+                    <div style={styles.chartMini}>
+                      <TrendingUp size={40} color="#10b981" strokeWidth={2} />
                     </div>
-                    <button onClick={() => setActiveTab("create")} style={styles.cardButton}>
-                      <Plus size={24} />
+                  </div>
+                  <div style={styles.statValue}>{thisWeekLessons.length}</div>
+                  <div style={styles.statSubtext}>
+                    <span style={styles.statTrend}>{weekGrowth}</span>
+                    <span style={styles.statPeriod}>Trends last month</span>
+                  </div>
+                </div>
+
+                <div style={styles.statCard}>
+                  <div style={styles.statHeader}>
+                    <div style={styles.statTitle}>NEW TASKS</div>
+                    <div style={styles.chartMini}>
+                      <TrendingDown size={40} color="#ef4444" strokeWidth={2} />
+                    </div>
+                  </div>
+                  <div style={styles.statValue}>{savedLessons.filter((l) => l.status !== "completed").length}</div>
+                  <div style={styles.statSubtext}>
+                    <span style={{ ...styles.statTrend, color: "#ef4444" }}>-5.67%</span>
+                    <span style={styles.statPeriod}>Trends last month</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Content Grid */}
+              <div style={styles.dashboardGrid}>
+                {/* Lessons List */}
+                <div style={styles.lessonsList}>
+                  <div style={styles.listHeader}>
+                    <h3 style={styles.listTitle}>LIST OF CASES TO BE ACCEPTED</h3>
+                    <button style={styles.linkButton}>
+                      Full list <ChevronRight size={16} />
                     </button>
                   </div>
-                </div>
 
-                <div style={styles.cardMedium}>
-                  <div style={styles.cardTag}>ACTIVE</div>
-                  <div style={styles.cardTitle}>Active Lessons</div>
-                  <div style={styles.cardValue}>{savedLessons.filter((l) => l.status !== "archived").length}</div>
-                  <div style={styles.cardSubtitle}>in progress</div>
-                </div>
-
-                <div style={styles.cardMedium}>
-                  <div style={styles.cardTag}>STATS</div>
-                  <div style={styles.cardTitle}>This Week</div>
-                  <div style={styles.cardValue}>
-                    {
-                      savedLessons.filter((l) => {
-                        const lessonDate = new Date(l.savedDate)
-                        const weekAgo = new Date()
-                        weekAgo.setDate(weekAgo.getDate() - 7)
-                        return lessonDate >= weekAgo
-                      }).length
-                    }
+                  <div style={styles.tableContainer}>
+                    <table style={styles.table}>
+                      <thead>
+                        <tr style={styles.tableHeader}>
+                          <th style={styles.th}>
+                            <input type="checkbox" style={styles.checkbox} />
+                          </th>
+                          <th style={{ ...styles.th, textAlign: "left" }}>Name</th>
+                          <th style={{ ...styles.th, textAlign: "left" }}>Dates</th>
+                          <th style={{ ...styles.th, textAlign: "left" }}>Priority</th>
+                          <th style={{ ...styles.th, textAlign: "left" }}>Attachment</th>
+                          <th style={{ ...styles.th, textAlign: "left" }}>Assignee</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredLessons.slice(0, 3).map((lesson, index) => (
+                          <tr key={lesson.dbId} style={styles.tableRow} onClick={() => handleViewLesson(lesson)}>
+                            <td style={styles.td}>
+                              <input
+                                type="checkbox"
+                                checked={index === 0}
+                                onChange={() => {}}
+                                style={styles.checkbox}
+                              />
+                            </td>
+                            <td style={{ ...styles.td, fontWeight: "500" }}>
+                              {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
+                            </td>
+                            <td style={styles.td}>
+                              {lesson.savedDate} - {new Date(new Date(lesson.savedDate).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                            </td>
+                            <td style={styles.td}>
+                              <span style={{ ...styles.priorityBadge, ...(index === 0 ? styles.priorityLow : styles.priorityMedium) }}>
+                                {index === 0 ? "Low" : "Medium"}
+                              </span>
+                            </td>
+                            <td style={styles.td}>
+                              <div style={styles.attachmentLink}>
+                                <FileText size={14} />
+                                Requirements.doc
+                              </div>
+                            </td>
+                            <td style={styles.td}>
+                              <div style={styles.assigneeGroup}>
+                                <div style={styles.assigneeAvatar}>
+                                  {lesson.administrativeDetails?.teacher?.charAt(0) || "T"}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div style={styles.cardSubtitle}>new lessons</div>
-                </div>
 
-                <div style={styles.cardAccent}>
-                  <div style={styles.accentIcon}>✨</div>
-                  <div style={styles.cardTitle}>Ready to teach?</div>
-                  <div style={styles.cardSubtitle}>Create your next lesson plan</div>
-                  <button onClick={() => setActiveTab("create")} style={styles.accentButton}>
-                    Create Now →
-                  </button>
-                </div>
-
-                <div style={styles.cardFullWidth}>
-                  <h3 style={styles.sectionTitle}>Recent Lesson Plans</h3>
-                  {isLoadingLessons ? (
-                    <div style={styles.loadingState}>Loading lessons...</div>
-                  ) : savedLessons.length === 0 ? (
-                    <div style={styles.emptyState}>
-                      <div style={styles.emptyIcon}>📝</div>
-                      <div style={styles.emptyText}>No lessons yet. Create your first lesson plan!</div>
-                      <button onClick={() => setActiveTab("create")} style={styles.emptyButton}>
-                        Create Lesson Plan
+                  {/* Communication Section */}
+                  <div style={styles.communicationSection}>
+                    <div style={styles.listHeader}>
+                      <h3 style={styles.listTitle}>COMMUNICATION (Last 7 days)</h3>
+                      <button style={styles.linkButton}>
+                        See all <ChevronRight size={16} />
                       </button>
                     </div>
-                  ) : (
-                    <div style={styles.lessonList}>
-                      {savedLessons.slice(0, 4).map((lesson, index) => (
-                        <div key={index} style={styles.lessonItem} onClick={() => handleViewLesson(lesson)}>
-                          <div style={styles.lessonIcon}>{["📘", "📗", "📙", "📕"][index % 4]}</div>
-                          <div style={styles.lessonDetails}>
-                            <div style={styles.lessonTitle}>
-                              {lesson.administrativeDetails?.subject ||
-                                lesson.guidingQuestion?.substring(0, 40) ||
-                                "Lesson Plan"}
+
+                    <div style={styles.messageList}>
+                      {["Mark Wahlberg", "Leonardo DiCaprio"].map((name, index) => (
+                        <div key={index} style={styles.messageItem}>
+                          <div style={styles.messageAvatar}>{name.split(" ").map(n => n[0]).join("")}</div>
+                          <div style={styles.messageContent}>
+                            <div style={styles.messageName}>{name}</div>
+                            <div style={styles.messageText}>
+                              Lorem ipsum dolor sit amet consectetur. Ut turpis lectus adipiscing leo leo in non tristique...
                             </div>
-                            <div style={styles.lessonMeta}>
-                              Grade {lesson.administrativeDetails?.grade || "N/A"} •{" "}
-                              {lesson.administrativeDetails?.class || "Class"}
-                            </div>
+                            <div style={styles.messageTime}>{index === 0 ? "2 days ago" : "3 days ago"}</div>
                           </div>
-                          <div style={styles.lessonDate}>{lesson.savedDate}</div>
                         </div>
                       ))}
                     </div>
-                  )}
-                  {savedLessons.length > 4 && (
-                    <button onClick={() => setActiveTab("archive")} style={styles.viewAllButton}>
-                      View All Lessons →
-                    </button>
-                  )}
-                </div>
-
-                <div style={styles.cardStat}>
-                  <div style={styles.statValue}>
-                    {savedLessons.length > 0
-                      ? Math.round(
-                          (savedLessons.filter((l) => l.status === "completed").length / savedLessons.length) * 100,
-                        )
-                      : 0}
-                    %
                   </div>
-                  <div style={styles.statLabel}>Completion Rate</div>
                 </div>
 
-                <div style={styles.cardSummary}>
-                  <div style={styles.summaryLabel}>Total Created</div>
-                  <div style={styles.summaryValue}>{savedLessons.length}</div>
-                  <div style={styles.summaryText}>Keep up the great work!</div>
+                {/* Sidebar Stats */}
+                <div style={styles.rightSidebar}>
+                  {/* Case Type Breakdown */}
+                  <div style={styles.widget}>
+                    <div style={styles.widgetHeader}>
+                      <h4 style={styles.widgetTitle}>CASE TYPE BREAKDOWN</h4>
+                      <button style={styles.linkButton}>
+                        Full Report <ChevronRight size={14} />
+                      </button>
+                    </div>
+                    <div style={styles.chartArea}>
+                      <div style={styles.barChart}>
+                        <div style={{ ...styles.barItem, height: "60%" }}></div>
+                        <div style={{ ...styles.barItem, height: "100%" }}></div>
+                        <div style={{ ...styles.barItem, height: "40%" }}></div>
+                        <div style={{ ...styles.barItem, height: "80%" }}></div>
+                      </div>
+                      <div style={styles.chartLegend}>
+                        <div style={styles.legendItem}>
+                          <div style={{ ...styles.legendDot, backgroundColor: "#3b82f6" }}></div>
+                          <span>Product</span>
+                          <span style={styles.legendValue}>76</span>
+                        </div>
+                        <div style={styles.legendItem}>
+                          <div style={{ ...styles.legendDot, backgroundColor: "#ef4444" }}></div>
+                          <span>Trademark</span>
+                          <span style={styles.legendValue}>48</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Number of Cases */}
+                  <div style={styles.widget}>
+                    <div style={styles.widgetHeader}>
+                      <h4 style={styles.widgetTitle}>NUMBER OF CASES (Per Country)</h4>
+                      <button style={styles.linkButton}>
+                        See all <ChevronRight size={14} />
+                      </button>
+                    </div>
+                    <div style={styles.countryList}>
+                      <div style={styles.countryItem}>
+                        <div style={styles.countryInfo}>
+                          <span style={styles.countryName}>Country</span>
+                          <span style={styles.countryLabel}>Sweden</span>
+                        </div>
+                        <div style={styles.countryStats}>
+                          <span style={styles.countryValue}>76</span>
+                          <span style={styles.countryGrowth}>↑ 16,7%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {activeTab === "create" && (
             <>
-              <div style={styles.pageHeader}>
-                <h2 style={styles.pageTitle}>Create Lesson Plan</h2>
-                <p style={styles.pageSubtitle}>Fill in the details to generate your curriculum-aligned plan.</p>
-              </div>
-
               {!lessonPlan ? (
                 <div style={styles.formCard}>
                   <div style={styles.formGrid}>
@@ -421,7 +612,7 @@ export default function LessonCreator() {
                       <div style={styles.docDivider}></div>
                     </div>
 
-                    <table style={styles.table}>
+                    <table style={styles.docTable}>
                       <tbody>
                         <tr>
                           <td style={styles.tableLabelCell}>School:</td>
@@ -499,25 +690,26 @@ export default function LessonCreator() {
 
           {activeTab === "archive" && (
             <>
-              <div style={styles.pageHeader}>
-                <h2 style={styles.pageTitle}>Lesson Archive</h2>
-                <p style={styles.pageSubtitle}>View and manage your saved lesson plans.</p>
-              </div>
-
               {isLoadingLessons ? (
                 <div style={styles.emptyState}>
                   <div style={styles.emptyIcon}>⏳</div>
                   <div style={styles.emptyText}>Loading lessons...</div>
                 </div>
-              ) : savedLessons.length === 0 ? (
+              ) : filteredLessons.length === 0 ? (
                 <div style={styles.emptyState}>
                   <div style={styles.emptyIcon}>📁</div>
-                  <div style={styles.emptyText}>No Saved Lessons Yet</div>
-                  <p style={styles.emptyDescription}>Create and save lesson plans to see them here.</p>
+                  <div style={styles.emptyText}>
+                    {searchQuery ? "No lessons match your search" : "No Saved Lessons Yet"}
+                  </div>
+                  <p style={styles.emptyDescription}>
+                    {searchQuery
+                      ? "Try a different search term"
+                      : "Create and save lesson plans to see them here."}
+                  </p>
                 </div>
               ) : (
                 <div style={styles.lessonGrid}>
-                  {savedLessons.map((lesson) => (
+                  {filteredLessons.map((lesson) => (
                     <div key={lesson.dbId} style={styles.lessonCard}>
                       <div style={styles.lessonCardHeader}>
                         <div style={styles.lessonCardTitle}>
@@ -551,7 +743,7 @@ export default function LessonCreator() {
             </>
           )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }
@@ -560,79 +752,106 @@ const styles = {
   container: {
     display: "flex",
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #e8f4f8 0%, #d4e9f7 50%, #c5dff0 100%)",
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif",
-    position: "relative",
+    background: "linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 50%, #f3e5f5 100%)",
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   sidebar: {
-    width: "250px",
-    background: "rgba(76, 201, 240, 0.4)",
+    width: "280px",
+    background: "rgba(255, 255, 255, 0.7)",
     backdropFilter: "blur(20px)",
-    borderRight: "1px solid rgba(255, 255, 255, 0.3)",
-    padding: "24px 20px",
+    borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+    padding: "24px 16px",
     display: "flex",
     flexDirection: "column",
     position: "fixed",
     height: "100vh",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
+    boxShadow: "4px 0 24px rgba(0, 0, 0, 0.04)",
     overflowY: "auto",
+  },
+  sidebarHeader: {
+    marginBottom: "24px",
   },
   logo: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    marginBottom: "32px",
-    padding: "0 8px",
+    padding: "8px 12px",
   },
   logoIcon: {
-    fontSize: "28px",
+    fontSize: "24px",
   },
   logoText: {
-    fontSize: "20px",
-    fontWeight: "600",
-    color: "#ffffff",
+    fontSize: "24px",
+    fontWeight: "700",
+    background: "linear-gradient(135deg, #1976d2 0%, #7c4dff 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
     letterSpacing: "-0.5px",
   },
-  userProfile: {
+  userCard: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
     padding: "16px",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "12px",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-    marginBottom: "32px",
+    backgroundColor: "#ffffff",
+    borderRadius: "16px",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
+    marginBottom: "24px",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
-  avatar: {
+  userAvatar: {
     width: "48px",
     height: "48px",
     borderRadius: "12px",
-    background: "rgba(255, 255, 255, 0.25)",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     color: "#fff",
-    backdropFilter: "blur(10px)",
+    fontWeight: "600",
+    fontSize: "18px",
   },
-  userInfo: {
+  userDetails: {
     flex: 1,
   },
-  userName: {
-    fontSize: "14px",
+  userGreeting: {
+    fontSize: "10px",
+    color: "#6b7280",
     fontWeight: "600",
-    color: "#ffffff",
+    letterSpacing: "0.5px",
     marginBottom: "2px",
   },
-  userRole: {
+  userTitle: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: "2px",
+  },
+  userSubtitle: {
     fontSize: "12px",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#6b7280",
+  },
+  userChevron: {
+    color: "#9ca3af",
   },
   nav: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "4px",
     flex: 1,
+  },
+  navSection: {
+    marginBottom: "8px",
+  },
+  navLabel: {
+    fontSize: "11px",
+    color: "#9ca3af",
+    fontWeight: "600",
+    letterSpacing: "0.5px",
+    padding: "8px 12px",
+    marginTop: "12px",
   },
   navButton: {
     display: "flex",
@@ -641,43 +860,62 @@ const styles = {
     padding: "12px 16px",
     fontSize: "14px",
     fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#6b7280",
     backgroundColor: "transparent",
     border: "none",
-    borderRadius: "10px",
+    borderRadius: "12px",
     cursor: "pointer",
     textAlign: "left",
     transition: "all 0.2s ease",
+    position: "relative",
   },
   navButtonActive: {
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    backdropFilter: "blur(10px)",
-    color: "#ffffff",
+    backgroundColor: "#ffffff",
+    color: "#1976d2",
     fontWeight: "600",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
+    boxShadow: "0 2px 8px rgba(25, 118, 210, 0.12)",
   },
-  navChevron: {
+  activeIndicator: {
+    position: "absolute",
+    right: "12px",
+    width: "4px",
+    height: "20px",
+    backgroundColor: "#1976d2",
+    borderRadius: "2px",
+  },
+  badge: {
     marginLeft: "auto",
-    opacity: 0.5,
+    backgroundColor: "#ef4444",
+    color: "#fff",
+    fontSize: "11px",
+    fontWeight: "600",
+    padding: "2px 8px",
+    borderRadius: "12px",
+    minWidth: "20px",
+    textAlign: "center",
   },
-  navDivider: {
-    height: "1px",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    margin: "16px 0",
+  sidebarFooter: {
+    marginTop: "auto",
+    paddingTop: "16px",
   },
-  logoutButton: {
+  messagesList: {
+    display: "flex",
+    gap: "8px",
+    padding: "8px 12px",
+  },
+  messageAvatar: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "10px",
+    background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
-    padding: "12px 16px",
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.8)",
-    backgroundColor: "transparent",
-    border: "none",
-    borderRadius: "10px",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: "11px",
+    fontWeight: "600",
     cursor: "pointer",
-    transition: "all 0.2s ease",
+    transition: "transform 0.2s ease",
   },
   main: {
     marginLeft: "280px",
@@ -689,26 +927,33 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "24px 40px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    backdropFilter: "blur(15px)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+    padding: "24px 32px",
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    backdropFilter: "blur(20px)",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
   },
-  welcomeText: {
+  topBarLeft: {
     display: "flex",
     flexDirection: "column",
     gap: "4px",
   },
-  welcomeGreeting: {
-    fontSize: "14px",
-    color: "rgba(107, 114, 128, 0.9)",
+  greeting: {
+    fontSize: "13px",
+    color: "#6b7280",
+    fontWeight: "500",
   },
-  welcomeTitle: {
-    fontSize: "24px",
+  pageTitle: {
+    fontSize: "28px",
     fontWeight: "700",
-    color: "#0a3d62",
+    color: "#111827",
+    margin: 0,
   },
-  searchContainer: {
+  topBarRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+  searchBox: {
     position: "relative",
     display: "flex",
     alignItems: "center",
@@ -716,317 +961,393 @@ const styles = {
   searchIcon: {
     position: "absolute",
     left: "14px",
-    color: "rgba(107, 114, 128, 0.5)",
+    color: "#9ca3af",
     pointerEvents: "none",
   },
   searchInput: {
     height: "44px",
-    paddingLeft: "40px",
-    paddingRight: "14px",
-    borderRadius: "10px",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    backdropFilter: "blur(10px)",
+    paddingLeft: "44px",
+    paddingRight: "16px",
+    borderRadius: "12px",
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    backgroundColor: "#ffffff",
     fontSize: "14px",
     color: "#111827",
     outline: "none",
     transition: "all 0.2s ease",
-    width: "250px",
+    width: "280px",
+    fontFamily: "inherit",
   },
-  content: {
-    padding: "32px 40px",
-  },
-  dashboardGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "24px",
-    gridAutoRows: "auto",
-  },
-  cardLarge: {
-    gridColumn: "span 1",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "16px",
-    padding: "28px",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
-    transition: "all 0.3s ease",
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "16px",
-  },
-  cardButton: {
-    width: "48px",
-    height: "48px",
+  iconButton: {
+    width: "44px",
+    height: "44px",
     borderRadius: "12px",
-    backgroundColor: "rgba(76, 201, 240, 0.3)",
-    backdropFilter: "blur(10px)",
-    color: "#0a3d62",
-    border: "1px solid rgba(76, 201, 240, 0.5)",
+    backgroundColor: "#ffffff",
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    color: "#6b7280",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     transition: "all 0.2s ease",
   },
-  cardMedium: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "16px",
+  content: {
+    padding: "32px",
+  },
+  dashboardLayout: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "24px",
+  },
+  statsRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: "20px",
+  },
+  statCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: "20px",
     padding: "24px",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
-    transition: "all 0.3s ease",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
+    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
   },
-  cardLabel: {
-    fontSize: "12px",
-    color: "rgba(107, 114, 128, 0.9)",
+  statCardPrimary: {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#ffffff",
+  },
+  statCardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+  },
+  statIcon: {
+    fontSize: "32px",
+  },
+  statBadge: {
+    width: "44px",
+    height: "44px",
+    borderRadius: "12px",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(10px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "14px",
     fontWeight: "600",
-    letterSpacing: "0.5px",
-    marginBottom: "8px",
-    textTransform: "uppercase",
   },
-  cardTag: {
-    fontSize: "11px",
-    color: "#0a7fb5",
-    fontWeight: "700",
-    letterSpacing: "0.5px",
-    marginBottom: "8px",
-    textTransform: "uppercase",
+  statContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
   },
-  cardTitle: {
+  statLabel: {
     fontSize: "16px",
-    fontWeight: "700",
-    color: "#0a3d62",
-    marginBottom: "4px",
+    fontWeight: "600",
+    opacity: 0.95,
   },
-  cardValue: {
-    fontSize: "32px",
-    fontWeight: "700",
-    color: "#0a7fb5",
-    marginTop: "8px",
-  },
-  cardSubtitle: {
+  statText: {
     fontSize: "13px",
-    color: "rgba(107, 114, 128, 0.8)",
-    marginTop: "4px",
+    opacity: 0.85,
   },
-  cardAccent: {
-    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.25) 0%, rgba(76, 201, 240, 0.15) 100%)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "16px",
-    padding: "28px",
-    color: "#0a3d62",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
-    border: "1px solid rgba(76, 201, 240, 0.4)",
-    transition: "all 0.3s ease",
+  statHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: "16px",
   },
-  accentIcon: {
-    fontSize: "32px",
-    marginBottom: "12px",
+  statTitle: {
+    fontSize: "11px",
+    color: "#6b7280",
+    fontWeight: "600",
+    letterSpacing: "0.5px",
   },
-  accentButton: {
-    marginTop: "16px",
-    padding: "10px 16px",
-    backgroundColor: "rgba(76, 201, 240, 0.3)",
-    color: "#0a3d62",
-    border: "1px solid rgba(76, 201, 240, 0.5)",
-    borderRadius: "8px",
+  chartMini: {
+    width: "60px",
+    height: "40px",
+  },
+  statValue: {
+    fontSize: "36px",
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: "8px",
+  },
+  statSubtext: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "13px",
+  },
+  statTrend: {
+    color: "#10b981",
+    fontWeight: "600",
+  },
+  statPeriod: {
+    color: "#9ca3af",
+  },
+  dashboardGrid: {
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr",
+    gap: "24px",
+  },
+  lessonsList: {
+    backgroundColor: "#ffffff",
+    borderRadius: "20px",
+    padding: "24px",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
+    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
+  },
+  listHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "20px",
+  },
+  listTitle: {
     fontSize: "13px",
     fontWeight: "600",
+    color: "#6b7280",
+    letterSpacing: "0.5px",
+  },
+  linkButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    fontSize: "13px",
+    color: "#1976d2",
+    fontWeight: "500",
+    backgroundColor: "transparent",
+    border: "none",
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
-  cardFullWidth: {
-    gridColumn: "span 3",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "16px",
-    padding: "28px",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
+  tableContainer: {
+    overflowX: "auto",
+    marginBottom: "32px",
   },
-  sectionTitle: {
-    fontSize: "18px",
-    fontWeight: "700",
-    color: "#0a3d62",
+  table: {
+    width: "100%",
+    borderCollapse: "separate",
+    borderSpacing: "0",
+  },
+  tableHeader: {
+    borderBottom: "1px solid #e5e7eb",
+  },
+  th: {
+    padding: "12px 16px",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#6b7280",
+    textAlign: "center",
+  },
+  tableRow: {
+    borderBottom: "1px solid #f3f4f6",
+    cursor: "pointer",
+    transition: "background-color 0.2s ease",
+  },
+  td: {
+    padding: "16px",
+    fontSize: "13px",
+    color: "#374151",
+    textAlign: "center",
+  },
+  checkbox: {
+    width: "16px",
+    height: "16px",
+    cursor: "pointer",
+    accentColor: "#1976d2",
+  },
+  priorityBadge: {
+    display: "inline-block",
+    padding: "4px 12px",
+    borderRadius: "8px",
+    fontSize: "12px",
+    fontWeight: "500",
+  },
+  priorityLow: {
+    backgroundColor: "#d1fae5",
+    color: "#065f46",
+  },
+  priorityMedium: {
+    backgroundColor: "#fef3c7",
+    color: "#92400e",
+  },
+  attachmentLink: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    color: "#1976d2",
+    fontSize: "13px",
+  },
+  assigneeGroup: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "4px",
+  },
+  assigneeAvatar: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "8px",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: "11px",
+    fontWeight: "600",
+  },
+  communicationSection: {
+    paddingTop: "24px",
+    borderTop: "1px solid #f3f4f6",
+  },
+  messageList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+  messageItem: {
+    display: "flex",
+    gap: "12px",
+    padding: "12px",
+    borderRadius: "12px",
+    backgroundColor: "#f9fafb",
+    transition: "all 0.2s ease",
+  },
+  messageContent: {
+    flex: 1,
+  },
+  messageName: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: "4px",
+  },
+  messageText: {
+    fontSize: "13px",
+    color: "#6b7280",
+    lineHeight: "1.5",
+    marginBottom: "4px",
+  },
+  messageTime: {
+    fontSize: "12px",
+    color: "#9ca3af",
+  },
+  rightSidebar: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
+  widget: {
+    backgroundColor: "#ffffff",
+    borderRadius: "20px",
+    padding: "24px",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
+    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
+  },
+  widgetHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: "20px",
   },
-  lessonList: {
+  widgetTitle: {
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#6b7280",
+    letterSpacing: "0.5px",
+  },
+  chartArea: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
+  barChart: {
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "space-around",
+    height: "120px",
+    gap: "8px",
+  },
+  barItem: {
+    flex: 1,
+    backgroundColor: "#3b82f6",
+    borderRadius: "8px 8px 0 0",
+    minHeight: "20px",
+  },
+  chartLegend: {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
   },
-  lessonItem: {
+  legendItem: {
     display: "flex",
     alignItems: "center",
-    gap: "16px",
-    padding: "16px",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "12px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-  },
-  lessonIcon: {
-    width: "48px",
-    height: "48px",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "24px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    backdropFilter: "blur(10px)",
-  },
-  lessonDetails: {
-    flex: 1,
-  },
-  lessonTitle: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#0a3d62",
-    marginBottom: "2px",
-  },
-  lessonMeta: {
-    fontSize: "12px",
-    color: "rgba(107, 114, 128, 0.8)",
-  },
-  lessonDate: {
+    gap: "8px",
     fontSize: "13px",
-    color: "rgba(107, 114, 128, 0.6)",
-    fontWeight: "500",
+    color: "#374151",
   },
-  loadingState: {
-    textAlign: "center",
-    padding: "40px",
-    color: "rgba(107, 114, 128, 0.8)",
-    fontSize: "14px",
+  legendDot: {
+    width: "8px",
+    height: "8px",
+    borderRadius: "50%",
   },
-  emptyState: {
-    textAlign: "center",
-    padding: "60px 20px",
-  },
-  emptyIcon: {
-    fontSize: "48px",
-    marginBottom: "16px",
-  },
-  emptyText: {
-    fontSize: "16px",
+  legendValue: {
+    marginLeft: "auto",
     fontWeight: "600",
-    color: "#0a3d62",
-    marginBottom: "8px",
   },
-  emptyDescription: {
-    fontSize: "14px",
-    color: "rgba(107, 114, 128, 0.8)",
-    marginBottom: "20px",
+  countryList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
   },
-  emptyButton: {
-    padding: "10px 20px",
-    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.3) 0%, rgba(76, 201, 240, 0.2) 100%)",
-    color: "#0a7fb5",
-    fontSize: "14px",
-    fontWeight: "600",
-    border: "1px solid rgba(10, 127, 181, 0.3)",
-    borderRadius: "8px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-  },
-  viewAllButton: {
-    width: "100%",
+  countryItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: "12px",
-    marginTop: "16px",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    color: "#0a7fb5",
+    borderRadius: "12px",
+    backgroundColor: "#f9fafb",
+  },
+  countryInfo: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  countryName: {
+    fontSize: "11px",
+    color: "#9ca3af",
+    fontWeight: "500",
+  },
+  countryLabel: {
     fontSize: "14px",
+    color: "#111827",
     fontWeight: "600",
-    border: "1px solid rgba(76, 201, 240, 0.3)",
-    borderRadius: "10px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
   },
-  cardStat: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "16px",
-    padding: "28px",
+  countryStats: {
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
+    gap: "12px",
   },
-  statValue: {
-    fontSize: "40px",
+  countryValue: {
+    fontSize: "18px",
     fontWeight: "700",
-    color: "#0a7fb5",
+    color: "#111827",
   },
-  statLabel: {
+  countryGrowth: {
     fontSize: "13px",
-    color: "rgba(107, 114, 128, 0.8)",
-    marginTop: "8px",
-    fontWeight: "500",
-  },
-  cardSummary: {
-    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.25) 0%, rgba(76, 201, 240, 0.15) 100%)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "16px",
-    padding: "28px",
-    color: "#0a3d62",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.15)",
-    border: "1px solid rgba(76, 201, 240, 0.4)",
-  },
-  summaryLabel: {
-    fontSize: "13px",
-    fontWeight: "500",
-    marginBottom: "8px",
-    opacity: 0.9,
-  },
-  summaryValue: {
-    fontSize: "40px",
-    fontWeight: "700",
-    marginBottom: "8px",
-    color: "#0a7fb5",
-  },
-  summaryText: {
-    fontSize: "13px",
-    opacity: 0.9,
-  },
-  pageHeader: {
-    marginBottom: "28px",
-  },
-  pageTitle: {
-    fontSize: "28px",
-    fontWeight: "700",
-    color: "#0a3d62",
-    marginBottom: "6px",
-  },
-  pageSubtitle: {
-    fontSize: "14px",
-    color: "rgba(107, 114, 128, 0.8)",
+    color: "#10b981",
+    fontWeight: "600",
   },
   formCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "16px",
+    backgroundColor: "#ffffff",
+    borderRadius: "20px",
     padding: "32px",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
+    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
   },
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
     gap: "20px",
     marginBottom: "28px",
   },
@@ -1038,32 +1359,31 @@ const styles = {
   label: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#0a3d62",
+    color: "#374151",
   },
   input: {
     height: "44px",
-    padding: "0 14px",
+    padding: "0 16px",
     fontSize: "14px",
-    border: "1.5px solid rgba(255, 255, 255, 0.3)",
-    borderRadius: "10px",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    backdropFilter: "blur(10px)",
-    color: "#0a3d62",
+    border: "1px solid rgba(0, 0, 0, 0.1)",
+    borderRadius: "12px",
+    backgroundColor: "#ffffff",
+    color: "#111827",
     outline: "none",
     transition: "all 0.2s ease",
     fontFamily: "inherit",
   },
   generateButton: {
-    padding: "14px 28px",
-    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.4) 0%, rgba(76, 201, 240, 0.3) 100%)",
-    color: "#0a3d62",
+    padding: "14px 32px",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#ffffff",
     fontSize: "15px",
     fontWeight: "600",
-    border: "1px solid rgba(10, 127, 181, 0.3)",
+    border: "none",
     borderRadius: "12px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: "0 4px 12px rgba(10, 127, 181, 0.15)",
+    boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
   },
   documentContainer: {
     backgroundColor: "transparent",
@@ -1080,11 +1400,10 @@ const styles = {
     padding: "12px 20px",
     fontSize: "14px",
     fontWeight: "500",
-    color: "#0a7fb5",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    backdropFilter: "blur(10px)",
-    border: "1.5px solid rgba(76, 201, 240, 0.3)",
-    borderRadius: "10px",
+    color: "#6b7280",
+    backgroundColor: "#ffffff",
+    border: "1px solid rgba(0, 0, 0, 0.1)",
+    borderRadius: "12px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
@@ -1093,18 +1412,18 @@ const styles = {
   },
   saveButton: {
     padding: "12px 20px",
-    background: "linear-gradient(135deg, rgba(10, 127, 181, 0.4) 0%, rgba(76, 201, 240, 0.3) 100%)",
-    color: "#0a3d62",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#ffffff",
     fontSize: "14px",
     fontWeight: "600",
-    border: "1px solid rgba(10, 127, 181, 0.3)",
-    borderRadius: "10px",
+    border: "none",
+    borderRadius: "12px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    boxShadow: "0 2px 8px rgba(10, 127, 181, 0.2)",
+    boxShadow: "0 2px 8px rgba(102, 126, 234, 0.3)",
   },
   documentPage: {
     maxWidth: "850px",
@@ -1115,7 +1434,7 @@ const styles = {
     minHeight: "1100px",
     fontFamily: "'Times New Roman', serif",
     lineHeight: "1.6",
-    borderRadius: "8px",
+    borderRadius: "12px",
   },
   docHeader: {
     textAlign: "center",
@@ -1173,7 +1492,7 @@ const styles = {
     margin: "8px 0",
     textAlign: "justify",
   },
-  table: {
+  docTable: {
     width: "100%",
     borderCollapse: "collapse",
     marginBottom: "24px",
@@ -1192,18 +1511,36 @@ const styles = {
     borderBottom: "1px solid #d1d5db",
     textAlign: "left",
   },
+  emptyState: {
+    textAlign: "center",
+    padding: "60px 20px",
+  },
+  emptyIcon: {
+    fontSize: "64px",
+    marginBottom: "16px",
+  },
+  emptyText: {
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: "8px",
+  },
+  emptyDescription: {
+    fontSize: "14px",
+    color: "#6b7280",
+    marginBottom: "20px",
+  },
   lessonGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
     gap: "20px",
   },
   lessonCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "12px",
-    padding: "20px",
-    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
+    backgroundColor: "#ffffff",
+    borderRadius: "16px",
+    padding: "24px",
+    border: "1px solid rgba(0, 0, 0, 0.06)",
+    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
     transition: "all 0.2s ease",
   },
   lessonCardHeader: {
@@ -1211,24 +1548,25 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: "12px",
-    gap: "8px",
+    gap: "12px",
   },
   lessonCardTitle: {
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#0a3d62",
+    fontSize: "15px",
+    fontWeight: "600",
+    color: "#111827",
     flex: 1,
+    lineHeight: "1.4",
   },
   lessonCardDate: {
     fontSize: "12px",
-    color: "rgba(107, 114, 128, 0.6)",
+    color: "#9ca3af",
     fontWeight: "500",
   },
   lessonCardMeta: {
     fontSize: "13px",
-    color: "rgba(107, 114, 128, 0.8)",
+    color: "#6b7280",
     marginBottom: "16px",
-    lineHeight: "1.5",
+    lineHeight: "1.6",
   },
   lessonCardActions: {
     display: "flex",
@@ -1236,13 +1574,13 @@ const styles = {
   },
   viewButton: {
     flex: 1,
-    padding: "8px 12px",
-    backgroundColor: "rgba(10, 127, 181, 0.3)",
-    color: "#0a3d62",
+    padding: "10px 16px",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#ffffff",
     fontSize: "13px",
     fontWeight: "600",
-    border: "1px solid rgba(10, 127, 181, 0.3)",
-    borderRadius: "8px",
+    border: "none",
+    borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
@@ -1252,13 +1590,13 @@ const styles = {
   },
   deleteButton: {
     flex: 1,
-    padding: "8px 12px",
-    backgroundColor: "rgba(220, 38, 38, 0.2)",
-    color: "#dc2626",
+    padding: "10px 16px",
+    backgroundColor: "#ffffff",
+    color: "#ef4444",
     fontSize: "13px",
     fontWeight: "600",
-    border: "1px solid rgba(220, 38, 38, 0.2)",
-    borderRadius: "8px",
+    border: "1px solid rgba(239, 68, 68, 0.3)",
+    borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s ease",
     display: "flex",
