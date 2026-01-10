@@ -295,12 +295,13 @@ const styles = {
     color: "#ffffff",
   },
   brandTitle: {
-    fontSize: "0.75rem",
+    fontSize: "1.75rem",
     fontWeight: "700",
     color: "#000",
     marginBottom: "0.5rem",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
+    fontFamily:"inter, sans-serif"
   },
   title: {
     fontSize: "1.75rem",
