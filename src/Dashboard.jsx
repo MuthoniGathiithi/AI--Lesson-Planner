@@ -17,6 +17,8 @@ import {
   Check,
   X,
 } from "lucide-react"
+import { generateLessonPlan } from "./services/api"
+import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
 
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -32,11 +34,10 @@ export default function LessonCreator() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [editingField, setEditingField] = useState(null)
   const [editingValue, setEditingValue] = useState("")
-  const [isMobile, setIsMobile] = useState(false)
 
   const [formData, setFormData] = useState({
     schoolName: "",
-    subject: "",
+    subject: "", // ADDED SUBJECT FIELD
     className: "",
     grade: "10",
     term: "1",
@@ -52,18 +53,537 @@ export default function LessonCreator() {
   })
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    loadLessons()
   }, [])
+
+  useEffect(() => {
+    if (activeTab === "archive") {
+      loadLessons()
+    }
+  }, [activeTab])
+
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredLessons(savedLessons)
+    } else {
+      const query = searchQuery.toLowerCase()
+      const filtered = savedLessons.filter((lesson) => {
+        const subject = lesson.administrativeDetails?.subject?.toLowerCase() || ""
+        const grade = lesson.administrativeDetails?.grade?.toString().toLowerCase() || ""
+        const className = lesson.administrativeDetails?.class?.toLowerCase() || ""
+        const teacher = lesson.administrativeDetails?.teacher?.toLowerCase() || ""
+        const question = lesson.guidingQuestion?.toLowerCase() || ""
+
+        return (
+          subject.includes(query) ||
+          grade.includes(query) ||
+          className.includes(query) ||
+          teacher.includes(query) ||
+          question.includes(query)
+        )
+      })
+      setFilteredLessons(filtered)
+    }
+  }, [searchQuery, savedLessons])
+
+  const loadLessons = async () => {
+    setIsLoadingLessons(true)
+    const result = await fetchLessonPlans()
+    if (result.success) {
+      const lessons = result.data.map((lesson) => {
+        const content = typeof lesson.content === "string" ? JSON.parse(lesson.content) : lesson.content
+        return {
+          ...content,
+          dbId: lesson.id,
+          savedDate: new Date(lesson.created_at).toLocaleDateString(),
+          status: lesson.status,
+        }
+      })
+      setSavedLessons(lessons)
+      setFilteredLessons(lessons)
+    } else {
+      alert("Failed to load lessons: " + result.error)
+    }
+    setIsLoadingLessons(false)
+  }
+
+  const handleGenerate = async () => {
+    // Validate required fields
+    if (!formData.subject.trim()) {
+      alert("Please enter a subject (e.g., Biology, Geography, Mathematics)")
+      return
+    }
+    if (!formData.strand.trim()) {
+      alert("Please enter a strand")
+      return
+    }
+    if (!formData.subStrand.trim()) {
+      alert("Please enter a sub-strand")
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const generatedPlan = await generateLessonPlan(formData)
+      setLessonPlan(generatedPlan)
+      setCurrentLessonId(null)
+      console.log("Generated lesson plan:", generatedPlan)
+    } catch (error) {
+      console.error("Error generating lesson plan:", error)
+      alert("Failed to generate lesson plan. Please check: \n- Backend is running\n- Subject name is correct (typos are handled)\n- Strand and sub-strand are provided")
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const handleSave = async () => {
+    if (!lessonPlan) return
+
+    setIsSaving(true)
+    try {
+      let result
+      if (currentLessonId) {
+        result = await updateLessonPlan(currentLessonId, lessonPlan)
+        if (result.success) {
+          alert("Lesson plan updated successfully!")
+        }
+      } else {
+        result = await saveLessonPlan(lessonPlan)
+        if (result.success) {
+          alert("Lesson plan saved successfully!")
+          setCurrentLessonId(result.data.id)
+        }
+      }
+
+      if (!result.success) {
+        alert("Failed to save lesson plan: " + result.error)
+      }
+
+      if (activeTab === "archive") {
+        await loadLessons()
+      }
+    } catch (error) {
+      console.error("Error saving lesson:", error)
+      alert("An error occurred while saving the lesson plan")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Integrated download functions
+  const downloadAsDocx = async (lesson) => {
+    try {
+      // Generate plain text content from lesson plan
+      let content = `LESSON PLAN\n\n`
+      
+      // Administrative Details
+      content += `School: ${lesson.administrativeDetails?.school || 'N/A'}\n`
+      content += `Subject: ${lesson.administrativeDetails?.subject || 'N/A'}\n`
+      content += `Class: ${lesson.administrativeDetails?.class || 'N/A'}\n`
+      content += `Grade: ${lesson.administrativeDetails?.grade || 'N/A'}\n`
+      content += `Teacher: ${lesson.administrativeDetails?.teacher || 'N/A'}\n`
+      content += `Students: ${lesson.administrativeDetails?.studentEnrollment?.total || 'N/A'}\n`
+      content += `Date: ${lesson.administrativeDetails?.date || 'N/A'}\n`
+      content += `Time: ${lesson.administrativeDetails?.time?.start || ''} - ${lesson.administrativeDetails?.time?.end || ''}\n\n`
+      
+      // Guiding Question
+      content += `GUIDING QUESTION\n`
+      content += `${lesson.guidingQuestion || 'N/A'}\n\n`
+      
+      // Learning Outcomes
+      content += `LEARNING OUTCOMES\n`
+      if (lesson.learningOutcomes && lesson.learningOutcomes.length > 0) {
+        lesson.learningOutcomes.forEach(outcome => {
+          content += `${outcome.id}. ${outcome.outcome}\n`
+        })
+      }
+      content += `\n`
+      
+      // Learning Resources
+      content += `LEARNING RESOURCES\n`
+      content += `${lesson.learningResources?.join(", ") || 'N/A'}\n\n`
+      
+      // Lesson Flow
+      content += `LESSON FLOW\n\n`
+      
+      // Introduction
+      content += `Introduction (5 minutes)\n`
+      content += `${lesson.lessonFlow?.introduction?.description || 'N/A'}\n\n`
+      
+      // Development Activities
+      content += `Development Activities\n`
+      if (lesson.lessonFlow?.development && lesson.lessonFlow.development.length > 0) {
+        lesson.lessonFlow.development.forEach(step => {
+          content += `\nStep ${step.step}: ${step.title}\n`
+          content += `Description: ${step.description}\n`
+          content += `Activity: ${step.activity}\n`
+        })
+      }
+      content += `\n`
+      
+      // Conclusion
+      content += `Conclusion (5 minutes)\n`
+      content += `${lesson.lessonFlow?.conclusion?.description || 'N/A'}\n`
+      
+      // Create blob and download
+      const blob = new Blob([content], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${lesson.administrativeDetails?.subject || 'lesson_plan'}_${lesson.administrativeDetails?.class || ''}_${new Date().toISOString().split('T')[0]}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      return { success: true }
+    } catch (error) {
+      console.error("Download error:", error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  const downloadAsPdf = async (lesson) => {
+    try {
+      // For PDF, we'll use the print functionality
+      // Create a printable version
+      const printWindow = window.open('', '', 'width=800,height=600')
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Lesson Plan - ${lesson.administrativeDetails?.subject || 'Untitled'}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            h1 {
+              text-align: center;
+              border-bottom: 2px solid #000;
+              padding-bottom: 10px;
+            }
+            h2 {
+              margin-top: 30px;
+              font-size: 16px;
+              text-transform: uppercase;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 5px;
+            }
+            h3 {
+              margin-top: 20px;
+              font-size: 14px;
+              text-decoration: underline;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+            }
+            td {
+              padding: 8px;
+              border: 1px solid #ddd;
+            }
+            td:nth-child(odd) {
+              font-weight: bold;
+              width: 25%;
+              background: #f5f5f5;
+            }
+            .section {
+              margin: 20px 0;
+            }
+            .step {
+              margin: 15px 0 15px 20px;
+              padding: 10px;
+              background: #f9f9f9;
+              border-left: 3px solid #1976d2;
+            }
+            @media print {
+              body { padding: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>LESSON PLAN</h1>
+          
+          <table>
+            <tr>
+              <td>School:</td>
+              <td>${lesson.administrativeDetails?.school || 'N/A'}</td>
+              <td>Subject:</td>
+              <td>${lesson.administrativeDetails?.subject || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>Class:</td>
+              <td>${lesson.administrativeDetails?.class || 'N/A'}</td>
+              <td>Grade:</td>
+              <td>${lesson.administrativeDetails?.grade || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>Teacher:</td>
+              <td>${lesson.administrativeDetails?.teacher || 'N/A'}</td>
+              <td>Students:</td>
+              <td>${lesson.administrativeDetails?.studentEnrollment?.total || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>Date:</td>
+              <td>${lesson.administrativeDetails?.date || 'N/A'}</td>
+              <td>Time:</td>
+              <td>${lesson.administrativeDetails?.time?.start || ''} - ${lesson.administrativeDetails?.time?.end || ''}</td>
+            </tr>
+          </table>
+          
+          <div class="section">
+            <h2>Guiding Question</h2>
+            <p>${lesson.guidingQuestion || 'N/A'}</p>
+          </div>
+          
+          <div class="section">
+            <h2>Learning Outcomes</h2>
+            ${lesson.learningOutcomes?.map(outcome => 
+              `<p>${outcome.id}. ${outcome.outcome}</p>`
+            ).join('') || '<p>N/A</p>'}
+          </div>
+          
+          <div class="section">
+            <h2>Learning Resources</h2>
+            <p>${lesson.learningResources?.join(", ") || 'N/A'}</p>
+          </div>
+          
+          <div class="section">
+            <h2>Lesson Flow</h2>
+            
+            <h3>Introduction (5 minutes)</h3>
+            <p>${lesson.lessonFlow?.introduction?.description || 'N/A'}</p>
+            
+            <h3>Development Activities</h3>
+            ${lesson.lessonFlow?.development?.map(step => `
+              <div class="step">
+                <strong>Step ${step.step}: ${step.title}</strong><br>
+                <strong>Description:</strong> ${step.description}<br>
+                <strong>Activity:</strong> ${step.activity}
+              </div>
+            `).join('') || '<p>N/A</p>'}
+            
+            <h3>Conclusion (5 minutes)</h3>
+            <p>${lesson.lessonFlow?.conclusion?.description || 'N/A'}</p>
+          </div>
+        </body>
+        </html>
+      `)
+      
+      printWindow.document.close()
+      printWindow.focus()
+      
+      // Wait for content to load, then print
+      setTimeout(() => {
+        printWindow.print()
+        printWindow.close()
+      }, 250)
+      
+      return { success: true }
+    } catch (error) {
+      console.error("PDF generation error:", error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  const handleDownload = async (lesson, format = 'docx') => {
+    setIsDownloading(true)
+    try {
+      let result
+      if (format === 'pdf') {
+        result = await downloadAsPdf(lesson)
+      } else {
+        result = await downloadAsDocx(lesson)
+      }
+
+      if (result.success) {
+        alert(`Lesson plan downloaded successfully as ${format.toUpperCase()}!`)
+      } else {
+        alert(`Failed to download: ${result.error}`)
+      }
+    } catch (error) {
+      console.error("Download error:", error)
+      alert("An error occurred while downloading the lesson plan")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  const handleDelete = async (lesson) => {
+    if (!confirm("Are you sure you want to delete this lesson plan?")) {
+      return
+    }
+
+    const result = await deleteLessonPlan(lesson.dbId)
+    if (result.success) {
+      alert("Lesson plan deleted successfully!")
+      await loadLessons()
+    } else {
+      alert("Failed to delete lesson plan: " + result.error)
+    }
+  }
+
+  const handleViewLesson = (lesson) => {
+    const fullLesson = {
+      administrativeDetails: lesson.administrativeDetails || {},
+      curriculumAlignment: lesson.curriculumAlignment || {},
+      learningOutcomes: lesson.learningOutcomes || [],
+      guidingQuestion: lesson.guidingQuestion || "",
+      learningResources: lesson.learningResources || [],
+      lessonFlow: lesson.lessonFlow || {},
+    }
+    setLessonPlan(fullLesson)
+    setCurrentLessonId(lesson.dbId)
+    setActiveTab("create")
+    setIsMobileMenuOpen(false)
+  }
+
+  const handleCreateNew = () => {
+    setLessonPlan(null)
+    setCurrentLessonId(null)
+    setEditingField(null)
+    setFormData({
+      schoolName: "",
+      subject: "", // Reset subject
+      className: "",
+      grade: "10",
+      term: "1",
+      date: new Date().toISOString().split("T")[0],
+      startTime: "08:00",
+      endTime: "08:40",
+      teacherName: "",
+      tscNumber: "",
+      boys: "0",
+      girls: "0",
+      strand: "",
+      subStrand: "",
+    })
+  }
+
+  const handleLogout = () => {
+    if (confirm("Are you sure you want to logout?")) {
+      setLessonPlan(null)
+      setCurrentLessonId(null)
+      setSavedLessons([])
+      setFilteredLessons([])
+      setActiveTab("dashboard")
+      alert("Logged out successfully!")
+      window.location.href = "/login"
+    }
+  }
+
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return "Good Morning"
+    if (hour < 18) return "Good Afternoon"
+    return "Good Evening"
+  }
+
+  const handleNavClick = (tab) => {
+    setActiveTab(tab)
+    setIsMobileMenuOpen(false)
+  }
+
+  // Inline editing functions
+  const startEditing = (field, value) => {
+    setEditingField(field)
+    setEditingValue(value || "")
+  }
+
+  const cancelEditing = () => {
+    setEditingField(null)
+    setEditingValue("")
+  }
+
+  const saveEdit = (path) => {
+    if (!lessonPlan) return
+    
+    const newPlan = JSON.parse(JSON.stringify(lessonPlan))
+    const keys = path.split('.')
+    
+    let current = newPlan
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]
+      const nextKey = keys[i + 1]
+      
+      // Handle array indices
+      if (!isNaN(nextKey)) {
+        if (!current[key]) current[key] = []
+      } else {
+        if (!current[key]) current[key] = {}
+      }
+      current = current[key]
+    }
+    
+    const finalKey = keys[keys.length - 1]
+    current[finalKey] = editingValue
+    
+    setLessonPlan(newPlan)
+    setEditingField(null)
+    setEditingValue("")
+  }
+
+  const addLearningOutcome = () => {
+    if (!lessonPlan) return
+    const newOutcomes = [...(lessonPlan.learningOutcomes || [])]
+    newOutcomes.push({
+      id: (newOutcomes.length + 1).toString(),
+      outcome: "New learning outcome - click to edit"
+    })
+    setLessonPlan({ ...lessonPlan, learningOutcomes: newOutcomes })
+  }
+
+  const deleteLearningOutcome = (index) => {
+    if (!lessonPlan) return
+    const newOutcomes = lessonPlan.learningOutcomes.filter((_, i) => i !== index)
+    // Renumber outcomes
+    const renumbered = newOutcomes.map((outcome, i) => ({
+      ...outcome,
+      id: (i + 1).toString()
+    }))
+    setLessonPlan({ ...lessonPlan, learningOutcomes: renumbered })
+  }
+
+  const addDevelopmentStep = () => {
+    if (!lessonPlan) return
+    const lessonFlow = lessonPlan.lessonFlow || {}
+    const development = [...(lessonFlow.development || [])]
+    development.push({
+      step: development.length + 1,
+      title: "New Step - click to edit",
+      description: "Step description - click to edit",
+      activity: "Activity description - click to edit"
+    })
+    setLessonPlan({
+      ...lessonPlan,
+      lessonFlow: { ...lessonFlow, development }
+    })
+  }
+
+  const deleteDevelopmentStep = (index) => {
+    if (!lessonPlan) return
+    const lessonFlow = lessonPlan.lessonFlow || {}
+    const development = lessonFlow.development.filter((_, i) => i !== index)
+    // Renumber steps
+    const renumbered = development.map((step, i) => ({
+      ...step,
+      step: i + 1
+    }))
+    setLessonPlan({
+      ...lessonPlan,
+      lessonFlow: { ...lessonFlow, development: renumbered }
+    })
+  }
 
   const renderEditableField = (path, value, multiline = false, placeholder = "Click to edit") => {
     const fieldKey = path
     const isEditing = editingField === fieldKey
-
+    
     return (
       <div style={styles.editableContainer}>
         {isEditing ? (
@@ -76,7 +596,7 @@ export default function LessonCreator() {
                 placeholder={placeholder}
                 autoFocus
                 onKeyDown={(e) => {
-                  if (e.key === "Escape") cancelEditing()
+                  if (e.key === 'Escape') cancelEditing()
                 }}
               />
             ) : (
@@ -88,23 +608,37 @@ export default function LessonCreator() {
                 placeholder={placeholder}
                 autoFocus
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") saveEdit(path)
-                  if (e.key === "Escape") cancelEditing()
+                  if (e.key === 'Enter') saveEdit(path)
+                  if (e.key === 'Escape') cancelEditing()
                 }}
               />
             )}
             <div style={styles.editButtonGroup}>
-              <button onClick={() => saveEdit(path)} style={styles.saveEditBtn} title="Save (Enter)">
+              <button 
+                onClick={() => saveEdit(path)} 
+                style={styles.saveEditBtn}
+                title="Save (Enter)"
+              >
                 <Check size={16} />
               </button>
-              <button onClick={cancelEditing} style={styles.cancelEditBtn} title="Cancel (Esc)">
+              <button 
+                onClick={cancelEditing} 
+                style={styles.cancelEditBtn}
+                title="Cancel (Esc)"
+              >
                 <X size={16} />
               </button>
             </div>
           </div>
         ) : (
-          <div style={styles.editableValue} onClick={() => startEditing(fieldKey, value)} title="Click to edit">
-            <span style={styles.editableText}>{value || placeholder}</span>
+          <div 
+            style={styles.editableValue} 
+            onClick={() => startEditing(fieldKey, value)}
+            title="Click to edit"
+          >
+            <span style={styles.editableText}>
+              {value || placeholder}
+            </span>
             <Edit2 size={14} style={styles.editIcon} />
           </div>
         )}
@@ -119,7 +653,7 @@ export default function LessonCreator() {
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         style={{
           ...styles.mobileMenuButton,
-          display: isMobile ? "block" : "none",
+          display: window.innerWidth <= 768 ? 'block' : 'none'
         }}
         aria-label="Toggle menu"
       >
@@ -131,13 +665,11 @@ export default function LessonCreator() {
       </button>
 
       {/* Sidebar */}
-      <aside
-        style={{
-          ...styles.sidebar,
-          ...(isMobile && !isMobileMenuOpen ? { transform: "translateX(-100%)" } : {}),
-          ...(isMobile && isMobileMenuOpen ? { transform: "translateX(0)" } : {}),
-        }}
-      >
+      <aside style={{
+        ...styles.sidebar,
+        ...(window.innerWidth <= 768 && !isMobileMenuOpen ? { transform: 'translateX(-100%)' } : {}),
+        ...(window.innerWidth <= 768 && isMobileMenuOpen ? { transform: 'translateX(0)' } : {})
+      }}>
         <div style={styles.sidebarHeader}>
           <div style={styles.logo}>
             <div style={styles.logoText}>Funza</div>
@@ -177,7 +709,9 @@ export default function LessonCreator() {
             >
               <Archive size={20} />
               <span>Lesson Archive</span>
-              {savedLessons.length > 0 && <span style={styles.badge}>{savedLessons.length}</span>}
+              {savedLessons.length > 0 && (
+                <span style={styles.badge}>{savedLessons.length}</span>
+              )}
             </button>
           </div>
 
@@ -192,15 +726,18 @@ export default function LessonCreator() {
       </aside>
 
       {/* Overlay for mobile */}
-      {isMobileMenuOpen && isMobile && <div onClick={() => setIsMobileMenuOpen(false)} style={styles.mobileOverlay} />}
+      {isMobileMenuOpen && window.innerWidth <= 768 && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          style={styles.mobileOverlay}
+        />
+      )}
 
       {/* Main Content */}
-      <main
-        style={{
-          ...styles.main,
-          marginLeft: isMobile ? "0" : "260px",
-        }}
-      >
+      <main style={{
+        ...styles.main,
+        marginLeft: window.innerWidth <= 768 ? '0' : '260px'
+      }}>
         {/* Top Bar */}
         <header style={styles.topBar}>
           <div style={styles.topBarLeft}>
@@ -232,18 +769,20 @@ export default function LessonCreator() {
             <div style={styles.dashboardLayout}>
               {/* Stats Cards */}
               <div style={styles.statsRow}>
-                <div style={{ ...styles.statCard, ...styles.statCardBlue }}>
+                <div style={{...styles.statCard, ...styles.statCardBlue}}>
                   <div style={styles.statHeader}>
                     <div style={styles.statIcon}>
                       <FileText size={24} />
                     </div>
-                    <div style={styles.statPercentage}>{savedLessons.length > 0 ? "100%" : "0%"}</div>
+                    <div style={styles.statPercentage}>
+                      {savedLessons.length > 0 ? "100%" : "0%"}
+                    </div>
                   </div>
                   <div style={styles.statValue}>{savedLessons.length.toLocaleString()}</div>
                   <div style={styles.statSubtext}>Total Lessons</div>
                 </div>
 
-                <div style={{ ...styles.statCard, ...styles.statCardPurple }}>
+                <div style={{...styles.statCard, ...styles.statCardPurple}}>
                   <div style={styles.statHeader}>
                     <div style={styles.statIcon}>
                       <Archive size={24} />
@@ -254,20 +793,16 @@ export default function LessonCreator() {
                         const weekAgo = new Date()
                         weekAgo.setDate(weekAgo.getDate() - 7)
                         return lessonDate >= weekAgo
-                      }).length > 0
-                        ? "+12%"
-                        : "0%"}
+                      }).length > 0 ? "+12%" : "0%"}
                     </div>
                   </div>
                   <div style={styles.statValue}>
-                    {savedLessons
-                      .filter((l) => {
-                        const lessonDate = new Date(l.savedDate)
-                        const weekAgo = new Date()
-                        weekAgo.setDate(weekAgo.getDate() - 7)
-                        return lessonDate >= weekAgo
-                      })
-                      .length.toLocaleString()}
+                    {savedLessons.filter((l) => {
+                      const lessonDate = new Date(l.savedDate)
+                      const weekAgo = new Date()
+                      weekAgo.setDate(weekAgo.getDate() - 7)
+                      return lessonDate >= weekAgo
+                    }).length.toLocaleString()}
                   </div>
                   <div style={styles.statSubtext}>This Week</div>
                 </div>
@@ -289,7 +824,9 @@ export default function LessonCreator() {
                         {searchQuery ? "No lessons match your search" : "No lessons yet"}
                       </div>
                       <p style={styles.emptyDescription}>
-                        {searchQuery ? "Try a different search term" : "Create your first lesson plan to get started"}
+                        {searchQuery
+                          ? "Try a different search term"
+                          : "Create your first lesson plan to get started"}
                       </p>
                     </div>
                   ) : (
@@ -298,18 +835,10 @@ export default function LessonCreator() {
                         <thead>
                           <tr style={styles.tableHeader}>
                             <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
-                            <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                              Grade
-                            </th>
-                            <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                              Class
-                            </th>
-                            <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                              Teacher
-                            </th>
-                            <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                              Date
-                            </th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
                             <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
                           </tr>
                         </thead>
@@ -317,30 +846,20 @@ export default function LessonCreator() {
                           {filteredLessons.slice(0, 5).map((lesson) => (
                             <tr key={lesson.dbId} style={styles.tableRow}>
                               <td style={styles.td}>
-                                {lesson.administrativeDetails?.subject ||
-                                  lesson.guidingQuestion?.substring(0, 30) ||
-                                  "Lesson Plan"}
+                                {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
                               </td>
-                              <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                                {lesson.administrativeDetails?.grade || "N/A"}
-                              </td>
-                              <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                                {lesson.administrativeDetails?.class || "N/A"}
-                              </td>
-                              <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                                {lesson.administrativeDetails?.teacher || "N/A"}
-                              </td>
-                              <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                                {lesson.savedDate}
-                              </td>
+                              <td style={styles.td}>{lesson.administrativeDetails?.grade || "N/A"}</td>
+                              <td style={styles.td}>{lesson.administrativeDetails?.class || "N/A"}</td>
+                              <td style={styles.td}>{lesson.administrativeDetails?.teacher || "N/A"}</td>
+                              <td style={styles.td}>{lesson.savedDate}</td>
                               <td style={styles.td}>
                                 <div style={styles.actionButtonGroup}>
                                   <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
                                     <Eye size={16} />
                                     <span>View</span>
                                   </button>
-                                  <button
-                                    onClick={() => handleDownload(lesson, "docx")}
+                                  <button 
+                                    onClick={() => handleDownload(lesson, 'docx')} 
                                     style={styles.downloadButtonSmall}
                                     disabled={isDownloading}
                                     title="Download"
@@ -368,12 +887,7 @@ export default function LessonCreator() {
                   <div style={styles.formGrid}>
                     {[
                       { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text" },
-                      {
-                        label: "Subject",
-                        key: "subject",
-                        placeholder: "e.g. Biology, Geography, Mathematics",
-                        type: "text",
-                      },
+                      { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text" }, // ADDED SUBJECT FIELD
                       { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text" },
                       { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number" },
                       { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number" },
@@ -390,6 +904,7 @@ export default function LessonCreator() {
                       <div key={field.key} style={styles.fieldWrapper}>
                         <label style={styles.label}>
                           {field.label}
+                          {/* Mark required fields */}
                           {(field.key === "subject" || field.key === "strand" || field.key === "subStrand") && (
                             <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
                           )}
@@ -401,29 +916,21 @@ export default function LessonCreator() {
                           onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                           style={{
                             ...styles.input,
+                            // Highlight required fields if empty
                             ...(field.key === "subject" && !formData.subject ? { borderColor: "#fca5a5" } : {}),
                             ...(field.key === "strand" && !formData.strand ? { borderColor: "#fca5a5" } : {}),
-                            ...(field.key === "subStrand" && !formData.subStrand ? { borderColor: "#fca5a5" } : {}),
+                            ...(field.key === "subStrand" && !formData.subStrand ? { borderColor: "#fca5a5" } : {})
                           }}
                         />
                       </div>
                     ))}
                   </div>
-
-                  <div
-                    style={{
-                      marginTop: "16px",
-                      padding: "12px",
-                      backgroundColor: "#f0f9ff",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      color: "#0369a1",
-                    }}
-                  >
-                    💡 <strong>Tip:</strong> The system can handle typos! If you type "Geogrphy" instead of "Geography",
-                    it will automatically match to the correct subject.
+                  
+                  {/* Helper text */}
+                  <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#f0f9ff", borderRadius: "8px", fontSize: "14px", color: "#0369a1" }}>
+                    💡 <strong>Tip:</strong> The system can handle typos! If you type "Geogrphy" instead of "Geography", it will automatically match to the correct subject.
                   </div>
-
+                  
                   <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
                     {isGenerating ? "Generating..." : "Generate Lesson Plan"}
                   </button>
@@ -436,27 +943,25 @@ export default function LessonCreator() {
                       <span>New Plan</span>
                     </button>
                     <div style={styles.actionBarRight}>
-                      <button
-                        onClick={() => handleDownload(lessonPlan, "docx")}
+                      <button 
+                        onClick={() => handleDownload(lessonPlan, 'docx')} 
                         disabled={isDownloading}
                         style={styles.downloadButton}
                       >
                         <Download size={16} />
-                        <span style={{ display: isMobile ? "none" : "inline" }}>Download</span>
+                        <span>{isDownloading ? "Downloading..." : "Download"}</span>
                       </button>
-                      <button
-                        onClick={() => handleDownload(lessonPlan, "pdf")}
+                      <button 
+                        onClick={() => handleDownload(lessonPlan, 'pdf')} 
                         disabled={isDownloading}
                         style={styles.pdfButton}
                       >
                         <Download size={16} />
-                        <span style={{ display: isMobile ? "none" : "inline" }}>Print PDF</span>
+                        <span>{isDownloading ? "Printing..." : "Print PDF"}</span>
                       </button>
                       <button onClick={handleSave} disabled={isSaving} style={styles.saveButton}>
                         <Save size={16} />
-                        <span style={{ display: isMobile ? "none" : "inline" }}>
-                          {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
-                        </span>
+                        <span>{isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}</span>
                       </button>
                     </div>
                   </div>
@@ -473,51 +978,30 @@ export default function LessonCreator() {
                         <tr>
                           <td style={styles.tableLabelCell}>School:</td>
                           <td style={styles.tableValueCell}>
-                            {renderEditableField(
-                              "administrativeDetails.school",
-                              lessonPlan.administrativeDetails?.school,
-                            )}
+                            {renderEditableField("administrativeDetails.school", lessonPlan.administrativeDetails?.school)}
                           </td>
-                          <td style={{ ...styles.tableLabelCell, display: isMobile ? "none" : "table-cell" }}>
-                            Subject:
-                          </td>
-                          <td style={{ ...styles.tableValueCell, display: isMobile ? "none" : "table-cell" }}>
-                            {renderEditableField(
-                              "administrativeDetails.subject",
-                              lessonPlan.administrativeDetails?.subject,
-                            )}
+                          <td style={styles.tableLabelCell}>Subject:</td>
+                          <td style={styles.tableValueCell}>
+                            {renderEditableField("administrativeDetails.subject", lessonPlan.administrativeDetails?.subject)}
                           </td>
                         </tr>
                         <tr>
                           <td style={styles.tableLabelCell}>Class:</td>
                           <td style={styles.tableValueCell}>
-                            {renderEditableField(
-                              "administrativeDetails.class",
-                              lessonPlan.administrativeDetails?.class,
-                            )}
+                            {renderEditableField("administrativeDetails.class", lessonPlan.administrativeDetails?.class)}
                           </td>
-                          <td style={{ ...styles.tableLabelCell, display: isMobile ? "none" : "table-cell" }}>
-                            Grade:
-                          </td>
-                          <td style={{ ...styles.tableValueCell, display: isMobile ? "none" : "table-cell" }}>
-                            {renderEditableField(
-                              "administrativeDetails.grade",
-                              lessonPlan.administrativeDetails?.grade?.toString(),
-                            )}
+                          <td style={styles.tableLabelCell}>Grade:</td>
+                          <td style={styles.tableValueCell}>
+                            {renderEditableField("administrativeDetails.grade", lessonPlan.administrativeDetails?.grade?.toString())}
                           </td>
                         </tr>
                         <tr>
                           <td style={styles.tableLabelCell}>Teacher:</td>
                           <td style={styles.tableValueCell}>
-                            {renderEditableField(
-                              "administrativeDetails.teacher",
-                              lessonPlan.administrativeDetails?.teacher,
-                            )}
+                            {renderEditableField("administrativeDetails.teacher", lessonPlan.administrativeDetails?.teacher)}
                           </td>
-                          <td style={{ ...styles.tableLabelCell, display: isMobile ? "none" : "table-cell" }}>
-                            Students:
-                          </td>
-                          <td style={{ ...styles.tableValueCell, display: isMobile ? "none" : "table-cell" }}>
+                          <td style={styles.tableLabelCell}>Students:</td>
+                          <td style={styles.tableValueCell}>
                             {lessonPlan.administrativeDetails?.studentEnrollment?.total || "N/A"}
                           </td>
                         </tr>
@@ -527,12 +1011,7 @@ export default function LessonCreator() {
                     {/* Editable Guiding Question */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>GUIDING QUESTION</div>
-                      {renderEditableField(
-                        "guidingQuestion",
-                        lessonPlan.guidingQuestion,
-                        true,
-                        "Enter guiding question",
-                      )}
+                      {renderEditableField("guidingQuestion", lessonPlan.guidingQuestion, true, "Enter guiding question")}
                     </div>
 
                     {/* Editable Learning Outcomes */}
@@ -548,15 +1027,10 @@ export default function LessonCreator() {
                         <div key={index} style={styles.outcomeItem}>
                           <div style={styles.outcomeNumber}>{outcome.id}.</div>
                           <div style={styles.outcomeContent}>
-                            {renderEditableField(
-                              `learningOutcomes.${index}.outcome`,
-                              outcome.outcome,
-                              true,
-                              "Enter outcome",
-                            )}
+                            {renderEditableField(`learningOutcomes.${index}.outcome`, outcome.outcome, true, "Enter outcome")}
                           </div>
-                          <button
-                            onClick={() => deleteLearningOutcome(index)}
+                          <button 
+                            onClick={() => deleteLearningOutcome(index)} 
                             style={styles.deleteButton}
                             title="Delete outcome"
                           >
@@ -569,12 +1043,7 @@ export default function LessonCreator() {
                     {/* Editable Learning Resources */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>LEARNING RESOURCES</div>
-                      {renderEditableField(
-                        "learningResources",
-                        lessonPlan.learningResources?.join(", "),
-                        true,
-                        "Enter resources (comma-separated)",
-                      )}
+                      {renderEditableField("learningResources", lessonPlan.learningResources?.join(", "), true, "Enter resources (comma-separated)")}
                     </div>
 
                     {/* Editable Lesson Flow */}
@@ -584,12 +1053,7 @@ export default function LessonCreator() {
                       {/* Introduction */}
                       <div style={styles.subsection}>
                         <div style={styles.subsectionTitle}>Introduction (5 minutes)</div>
-                        {renderEditableField(
-                          "lessonFlow.introduction.description",
-                          lessonPlan.lessonFlow?.introduction?.description,
-                          true,
-                          "Enter introduction description",
-                        )}
+                        {renderEditableField("lessonFlow.introduction.description", lessonPlan.lessonFlow?.introduction?.description, true, "Enter introduction")}
                       </div>
 
                       {/* Development Activities */}
@@ -598,15 +1062,15 @@ export default function LessonCreator() {
                           <div style={styles.subsectionTitle}>Development Activities</div>
                           <button onClick={addDevelopmentStep} style={styles.addButton} title="Add step">
                             <Plus size={16} />
-                            <span>Add</span>
+                            <span>Add Step</span>
                           </button>
                         </div>
                         {lessonPlan.lessonFlow?.development?.map((step, index) => (
-                          <div key={index} style={styles.stepContainer}>
+                          <div key={index} style={styles.stepBlock}>
                             <div style={styles.stepHeader}>
-                              <div style={styles.stepNumber}>Step {step.step}</div>
-                              <button
-                                onClick={() => deleteDevelopmentStep(index)}
+                              <div style={styles.stepTitleText}>Step {step.step}</div>
+                              <button 
+                                onClick={() => deleteDevelopmentStep(index)} 
                                 style={styles.deleteButton}
                                 title="Delete step"
                               >
@@ -614,31 +1078,16 @@ export default function LessonCreator() {
                               </button>
                             </div>
                             <div style={styles.stepField}>
-                              <label style={styles.stepLabel}>Title:</label>
-                              {renderEditableField(
-                                `lessonFlow.development.${index}.title`,
-                                step.title,
-                                false,
-                                "Enter step title",
-                              )}
+                              <strong>Title:</strong>
+                              {renderEditableField(`lessonFlow.development.${index}.title`, step.title, false, "Enter title")}
                             </div>
                             <div style={styles.stepField}>
-                              <label style={styles.stepLabel}>Description:</label>
-                              {renderEditableField(
-                                `lessonFlow.development.${index}.description`,
-                                step.description,
-                                true,
-                                "Enter step description",
-                              )}
+                              <strong>Description:</strong>
+                              {renderEditableField(`lessonFlow.development.${index}.description`, step.description, true, "Enter description")}
                             </div>
                             <div style={styles.stepField}>
-                              <label style={styles.stepLabel}>Activity:</label>
-                              {renderEditableField(
-                                `lessonFlow.development.${index}.activity`,
-                                step.activity,
-                                true,
-                                "Enter activity description",
-                              )}
+                              <strong>Activity:</strong>
+                              {renderEditableField(`lessonFlow.development.${index}.activity`, step.activity, true, "Enter activity")}
                             </div>
                           </div>
                         ))}
@@ -647,12 +1096,7 @@ export default function LessonCreator() {
                       {/* Conclusion */}
                       <div style={styles.subsection}>
                         <div style={styles.subsectionTitle}>Conclusion (5 minutes)</div>
-                        {renderEditableField(
-                          "lessonFlow.conclusion.description",
-                          lessonPlan.lessonFlow?.conclusion?.description,
-                          true,
-                          "Enter conclusion description",
-                        )}
+                        {renderEditableField("lessonFlow.conclusion.description", lessonPlan.lessonFlow?.conclusion?.description, true, "Enter conclusion")}
                       </div>
                     </div>
                   </div>
@@ -662,175 +1106,84 @@ export default function LessonCreator() {
           )}
 
           {activeTab === "archive" && (
-            <div style={styles.lessonsSection}>
-              <div style={styles.sectionHeader}>
-                <h2 style={styles.sectionTitle}>Lesson Archive</h2>
-              </div>
-
-              <div style={styles.tableContainer}>
-                {filteredLessons.length === 0 ? (
-                  <div style={styles.emptyState}>
-                    <div style={styles.emptyText}>
-                      {searchQuery ? "No lessons match your search" : "No archived lessons"}
+            <>
+              {isLoadingLessons ? (
+                <div style={styles.emptyState}>
+                  <div style={styles.emptyText}>Loading lessons...</div>
+                </div>
+              ) : filteredLessons.length === 0 ? (
+                <div style={styles.emptyState}>
+                  <div style={styles.emptyIcon}>📁</div>
+                  <div style={styles.emptyText}>
+                    {searchQuery ? "No lessons match your search" : "No Saved Lessons Yet"}
+                  </div>
+                  <p style={styles.emptyDescription}>
+                    {searchQuery
+                      ? "Try a different search term"
+                      : "Create and save lesson plans to see them here."}
+                  </p>
+                </div>
+              ) : (
+                <div style={styles.lessonGrid}>
+                  {filteredLessons.map((lesson) => (
+                    <div key={lesson.dbId} style={styles.lessonCard}>
+                      <div style={styles.lessonCardHeader}>
+                        <FileText size={24} style={styles.lessonCardIcon} />
+                      </div>
+                      <div style={styles.lessonCardTitle}>
+                        {lesson.administrativeDetails?.subject ||
+                          lesson.guidingQuestion?.substring(0, 50) ||
+                          "Untitled"}
+                      </div>
+                      <div style={styles.lessonCardMeta}>
+                        <div style={styles.metaRow}>
+                          <span style={styles.metaLabel}>Grade:</span>
+                          <span style={styles.metaValue}>{lesson.administrativeDetails?.grade || "N/A"}</span>
+                        </div>
+                        <div style={styles.metaRow}>
+                          <span style={styles.metaLabel}>Class:</span>
+                          <span style={styles.metaValue}>{lesson.administrativeDetails?.class || "N/A"}</span>
+                        </div>
+                        <div style={styles.metaRow}>
+                          <span style={styles.metaLabel}>Teacher:</span>
+                          <span style={styles.metaValue}>{lesson.administrativeDetails?.teacher || "N/A"}</span>
+                        </div>
+                        <div style={styles.metaRow}>
+                          <span style={styles.metaLabel}>Date:</span>
+                          <span style={styles.metaValue}>{lesson.savedDate}</span>
+                        </div>
+                      </div>
+                      <div style={styles.lessonCardActions}>
+                        <button onClick={() => handleViewLesson(lesson)} style={styles.viewButton}>
+                          <Eye size={16} />
+                          <span>View</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDownload(lesson, 'docx')} 
+                          style={styles.downloadButtonCard}
+                          disabled={isDownloading}
+                        >
+                          <Download size={16} />
+                          <span>Download</span>
+                        </button>
+                        <button onClick={() => handleDelete(lesson)} style={styles.deleteButtonCard}>
+                          <Trash2 size={16} />
+                          <span>Delete</span>
+                        </button>
+                      </div>
                     </div>
-                    <p style={styles.emptyDescription}>
-                      {searchQuery ? "Try a different search term" : "Your created lessons will appear here"}
-                    </p>
-                  </div>
-                ) : (
-                  <div style={styles.tableWrapper}>
-                    <table style={styles.table}>
-                      <thead>
-                        <tr style={styles.tableHeader}>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
-                          <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                            Grade
-                          </th>
-                          <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                            Class
-                          </th>
-                          <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                            Teacher
-                          </th>
-                          <th style={{ ...styles.th, textAlign: "left", display: isMobile ? "none" : "table-cell" }}>
-                            Date
-                          </th>
-                          <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredLessons.map((lesson) => (
-                          <tr key={lesson.dbId} style={styles.tableRow}>
-                            <td style={styles.td}>
-                              {lesson.administrativeDetails?.subject ||
-                                lesson.guidingQuestion?.substring(0, 30) ||
-                                "Lesson Plan"}
-                            </td>
-                            <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                              {lesson.administrativeDetails?.grade || "N/A"}
-                            </td>
-                            <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                              {lesson.administrativeDetails?.class || "N/A"}
-                            </td>
-                            <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                              {lesson.administrativeDetails?.teacher || "N/A"}
-                            </td>
-                            <td style={{ ...styles.td, display: isMobile ? "none" : "table-cell" }}>
-                              {lesson.savedDate}
-                            </td>
-                            <td style={styles.td}>
-                              <div style={styles.actionButtonGroup}>
-                                <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
-                                  <Eye size={16} />
-                                </button>
-                                <button
-                                  onClick={() => handleDownload(lesson, "docx")}
-                                  style={styles.downloadButtonSmall}
-                                  disabled={isDownloading}
-                                >
-                                  <Download size={16} />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(lesson)}
-                                  style={styles.deleteButtonSmall}
-                                  title="Delete"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
     </div>
   )
-
-  // ... other functions continue below ...
-
-  function loadLessons() {
-    // Implementation from original
-  }
-
-  function handleGenerate() {
-    // Implementation from original
-  }
-
-  function handleSave() {
-    // Implementation from original
-  }
-
-  function downloadAsDocx(lesson) {
-    // Implementation from original
-  }
-
-  function downloadAsPdf(lesson) {
-    // Implementation from original
-  }
-
-  function handleDownload(lesson, format) {
-    // Implementation from original
-  }
-
-  function handleDelete(lesson) {
-    // Implementation from original
-  }
-
-  function handleViewLesson(lesson) {
-    // Implementation from original
-  }
-
-  function handleCreateNew() {
-    // Implementation from original
-  }
-
-  function handleLogout() {
-    // Implementation from original
-  }
-
-  function getGreeting() {
-    // Implementation from original
-  }
-
-  function handleNavClick(tab) {
-    // Implementation from original
-  }
-
-  function startEditing(field, value) {
-    // Implementation from original
-  }
-
-  function cancelEditing() {
-    // Implementation from original
-  }
-
-  function saveEdit(path) {
-    // Implementation from original
-  }
-
-  function addLearningOutcome() {
-    // Implementation from original
-  }
-
-  function deleteLearningOutcome(index) {
-    // Implementation from original
-  }
-
-  function addDevelopmentStep() {
-    // Implementation from original
-  }
-
-  function deleteDevelopmentStep(index) {
-    // Implementation from original
-  }
 }
+
+
 
 const styles = {
   container: {
@@ -881,10 +1234,6 @@ const styles = {
     overflowY: "auto",
     zIndex: 1000,
     transition: "transform 0.3s ease",
-    "@media (maxWidth: 768px)": {
-      width: "70%",
-      maxWidth: "260px",
-    },
   },
   sidebarHeader: {
     marginBottom: "40px",
@@ -986,11 +1335,6 @@ const styles = {
     borderBottom: "1px solid #e0e0e0",
     flexWrap: "wrap",
     gap: "16px",
-    "@media (maxWidth: 768px)": {
-      padding: "16px 16px 16px 56px",
-      flexDirection: "column",
-      alignItems: "flex-start",
-    },
   },
   topBarLeft: {
     display: "flex",
@@ -1007,9 +1351,6 @@ const styles = {
     fontWeight: "700",
     color: "#000000",
     margin: 0,
-    "@media (maxWidth: 768px)": {
-      fontSize: "20px",
-    },
   },
   topBarRight: {
     display: "flex",
@@ -1017,10 +1358,6 @@ const styles = {
     gap: "12px",
     flex: 1,
     maxWidth: "400px",
-    "@media (maxWidth: 768px)": {
-      flex: 1,
-      maxWidth: "100%",
-    },
   },
   searchBox: {
     position: "relative",
@@ -1050,9 +1387,6 @@ const styles = {
   },
   content: {
     padding: "32px",
-    "@media (maxWidth: 768px)": {
-      padding: "20px 16px",
-    },
   },
   dashboardLayout: {
     display: "flex",
@@ -1063,10 +1397,6 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "24px",
-    "@media (maxWidth: 768px)": {
-      gridTemplateColumns: "1fr",
-      gap: "16px",
-    },
   },
   statCard: {
     borderRadius: "16px",
@@ -1074,9 +1404,6 @@ const styles = {
     border: "none",
     position: "relative",
     overflow: "hidden",
-    "@media (maxWidth: 768px)": {
-      padding: "20px",
-    },
   },
   statCardBlue: {
     backgroundColor: "#d4f1ff",
@@ -1107,9 +1434,6 @@ const styles = {
     fontWeight: "700",
     color: "#000000",
     marginBottom: "8px",
-    "@media (maxWidth: 768px)": {
-      fontSize: "28px",
-    },
   },
   statSubtext: {
     fontSize: "14px",
@@ -1122,9 +1446,6 @@ const styles = {
     borderRadius: "12px",
     padding: "28px",
     border: "1px solid #e0e0e0",
-    "@media (maxWidth: 768px)": {
-      padding: "16px",
-    },
   },
   sectionHeader: {
     display: "flex",
@@ -1138,9 +1459,6 @@ const styles = {
     fontSize: "18px",
     fontWeight: "700",
     color: "#000000",
-    "@media (maxWidth: 768px)": {
-      fontSize: "16px",
-    },
   },
   viewAllButton: {
     padding: "8px 16px",
@@ -1152,10 +1470,6 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    "@media (maxWidth: 768px)": {
-      padding: "6px 12px",
-      fontSize: "12px",
-    },
   },
   tableContainer: {
     overflowX: "auto",
@@ -1179,10 +1493,6 @@ const styles = {
     color: "#666666",
     textAlign: "center",
     whiteSpace: "nowrap",
-    "@media (maxWidth: 768px)": {
-      padding: "10px 8px",
-      fontSize: "12px",
-    },
   },
   tableRow: {
     borderBottom: "1px solid #f0f0f0",
@@ -1193,10 +1503,6 @@ const styles = {
     fontSize: "14px",
     color: "#000000",
     textAlign: "left",
-    "@media (maxWidth: 768px)": {
-      padding: "12px 8px",
-      fontSize: "12px",
-    },
   },
   actionButtonGroup: {
     display: "flex",
@@ -1219,10 +1525,6 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     whiteSpace: "nowrap",
-    "@media (maxWidth: 768px)": {
-      padding: "4px 8px",
-      fontSize: "11px",
-    },
   },
   downloadButtonSmall: {
     display: "flex",
@@ -1237,58 +1539,24 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    "@media (maxWidth: 768px)": {
-      padding: "4px 8px",
-      fontSize: "11px",
-    },
-  },
-  deleteButtonSmall: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    padding: "6px 10px",
-    fontSize: "13px",
-    fontWeight: "500",
-    color: "#ef4444",
-    backgroundColor: "transparent",
-    border: "1px solid #ef4444",
-    borderRadius: "6px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    "@media (maxWidth: 768px)": {
-      padding: "4px 8px",
-      fontSize: "11px",
-    },
   },
   formCard: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
     padding: "32px",
     border: "1px solid #e0e0e0",
-    "@media (maxWidth: 768px)": {
-      padding: "20px 16px",
-      borderRadius: "8px",
-    },
   },
   formTitle: {
     fontSize: "24px",
     fontWeight: "700",
     color: "#000000",
     marginBottom: "28px",
-    "@media (maxWidth: 768px)": {
-      fontSize: "18px",
-      marginBottom: "20px",
-    },
   },
   formGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "20px",
     marginBottom: "28px",
-    "@media (maxWidth: 768px)": {
-      gridTemplateColumns: "1fr",
-      gap: "16px",
-    },
   },
   fieldWrapper: {
     display: "flex",
@@ -1299,9 +1567,6 @@ const styles = {
     fontSize: "14px",
     fontWeight: "600",
     color: "#000000",
-    "@media (maxWidth: 768px)": {
-      fontSize: "12px",
-    },
   },
   input: {
     height: "44px",
@@ -1314,11 +1579,6 @@ const styles = {
     outline: "none",
     transition: "all 0.2s ease",
     fontFamily: "inherit",
-    "@media (maxWidth: 768px)": {
-      height: "40px",
-      fontSize: "12px",
-      padding: "0 12px",
-    },
   },
   generateButton: {
     padding: "14px 32px",
@@ -1331,171 +1591,111 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     width: "100%",
-    "@media (maxWidth: 768px)": {
-      padding: "12px 24px",
-      fontSize: "14px",
-    },
   },
   documentContainer: {
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
-    padding: "28px",
-    border: "1px solid #e0e0e0",
-    "@media (maxWidth: 768px)": {
-      padding: "16px",
-      borderRadius: "8px",
-    },
+    backgroundColor: "transparent",
+    padding: "20px 0",
   },
   actionBar: {
+    maxWidth: "850px",
+    margin: "0 auto 20px auto",
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "24px",
     gap: "12px",
     flexWrap: "wrap",
-    "@media (maxWidth: 768px)": {
-      flexDirection: "column",
-      gap: "8px",
-    },
   },
   actionBarRight: {
     display: "flex",
     gap: "12px",
-    "@media (maxWidth: 768px)": {
-      width: "100%",
-      flexDirection: "column",
-      gap: "8px",
-    },
+    flexWrap: "wrap",
   },
   backButton: {
+    padding: "12px 20px",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#000000",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "10px 16px",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#1976d2",
-    backgroundColor: "#e3f2fd",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    "@media (maxWidth: 768px)": {
-      padding: "8px 12px",
-      fontSize: "12px",
-      width: "100%",
-      justifyContent: "center",
-    },
+    whiteSpace: "nowrap",
   },
   downloadButton: {
+    padding: "12px 20px",
+    backgroundColor: "#4caf50",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "10px 16px",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#4caf50",
-    backgroundColor: "#f1f8f4",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    "@media (maxWidth: 768px)": {
-      flex: 1,
-      padding: "8px 12px",
-      fontSize: "12px",
-    },
+    whiteSpace: "nowrap",
   },
   pdfButton: {
+    padding: "12px 20px",
+    backgroundColor: "#ff9800",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "10px 16px",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#ff9800",
-    backgroundColor: "#fff3e0",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    "@media (maxWidth: 768px)": {
-      flex: 1,
-      padding: "8px 12px",
-      fontSize: "12px",
-    },
+    whiteSpace: "nowrap",
   },
   saveButton: {
+    padding: "12px 20px",
+    backgroundColor: "#1976d2",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "10px 16px",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#ffffff",
-    backgroundColor: "#1976d2",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    "@media (maxWidth: 768px)": {
-      flex: 1,
-      padding: "8px 12px",
-      fontSize: "12px",
-    },
+    whiteSpace: "nowrap",
   },
   documentPage: {
+    maxWidth: "850px",
+    margin: "0 auto",
     backgroundColor: "#ffffff",
-    padding: "32px",
+    padding: "60px 80px",
+    minHeight: "1100px",
+    fontFamily: "'Times New Roman', serif",
+    lineHeight: "1.6",
     borderRadius: "8px",
     border: "1px solid #e0e0e0",
-    "@media (maxWidth: 768px)": {
-      padding: "16px 12px",
-    },
   },
   docHeader: {
-    marginBottom: "24px",
-    borderBottom: "2px solid #000000",
-    paddingBottom: "16px",
+    textAlign: "center",
+    marginBottom: "32px",
   },
   docTitle: {
     fontSize: "24px",
     fontWeight: "700",
     color: "#000000",
-    textAlign: "center",
-    "@media (maxWidth: 768px)": {
-      fontSize: "18px",
-    },
+    letterSpacing: "2px",
+    marginBottom: "12px",
   },
   docDivider: {
     height: "2px",
-    backgroundColor: "#e0e0e0",
-    marginTop: "12px",
-  },
-  docTable: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginBottom: "24px",
-  },
-  tableLabelCell: {
-    padding: "12px",
-    fontWeight: "600",
-    backgroundColor: "#f5f5f5",
-    borderBottom: "1px solid #e0e0e0",
-    fontSize: "13px",
-    "@media (maxWidth: 768px)": {
-      padding: "8px",
-      fontSize: "11px",
-    },
-  },
-  tableValueCell: {
-    padding: "12px",
-    borderBottom: "1px solid #e0e0e0",
-    fontSize: "13px",
-    "@media (maxWidth: 768px)": {
-      padding: "8px",
-      fontSize: "11px",
-    },
+    backgroundColor: "#000000",
+    margin: "16px auto",
+    width: "80px",
   },
   section: {
     marginBottom: "24px",
@@ -1504,204 +1704,307 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "16px",
-    gap: "12px",
+    marginBottom: "12px",
     flexWrap: "wrap",
+    gap: "8px",
   },
   subsection: {
     marginBottom: "20px",
-    paddingLeft: "16px",
-    borderLeft: "3px solid #1976d2",
+    marginLeft: "20px",
   },
   subsectionTitle: {
-    fontSize: "15px",
-    fontWeight: "700",
-    color: "#000000",
-    marginBottom: "12px",
-    "@media (maxWidth: 768px)": {
-      fontSize: "13px",
-    },
-  },
-  outcomeItem: {
-    display: "flex",
-    gap: "12px",
-    marginBottom: "12px",
-    padding: "12px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "6px",
-    "@media (maxWidth: 768px)": {
-      flexDirection: "column",
-      padding: "10px",
-    },
-  },
-  outcomeNumber: {
-    fontWeight: "700",
-    minWidth: "30px",
-    paddingTop: "2px",
-  },
-  outcomeContent: {
-    flex: 1,
-  },
-  stepContainer: {
-    padding: "16px",
-    marginBottom: "12px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "6px",
-    border: "1px solid #e0e0e0",
-    "@media (maxWidth: 768px)": {
-      padding: "12px",
-    },
-  },
-  stepHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "12px",
-  },
-  stepNumber: {
-    fontWeight: "700",
-    fontSize: "14px",
-  },
-  stepField: {
-    marginBottom: "12px",
-  },
-  stepLabel: {
     fontSize: "13px",
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#000000",
-    display: "block",
-    marginBottom: "6px",
-    "@media (maxWidth: 768px)": {
-      fontSize: "11px",
-    },
+    marginBottom: "8px",
+    textDecoration: "underline",
   },
-  addButton: {
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-    padding: "6px 12px",
+  docTable: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginBottom: "24px",
     fontSize: "12px",
-    fontWeight: "600",
-    color: "#1976d2",
-    backgroundColor: "#e3f2fd",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    whiteSpace: "nowrap",
   },
-  deleteButton: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    padding: "6px 10px",
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#ef4444",
-    backgroundColor: "#ffebee",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
+  tableLabelCell: {
+    padding: "8px",
+    fontWeight: "700",
+    color: "#000000",
+    borderBottom: "1px solid #d1d5db",
+    textAlign: "left",
+    width: "25%",
+  },
+  tableValueCell: {
+    padding: "8px",
+    color: "#333333",
+    borderBottom: "1px solid #d1d5db",
+    textAlign: "left",
+    width: "25%",
   },
   editableContainer: {
-    position: "relative",
+    margin: "8px 0",
   },
   editableValue: {
     padding: "8px 12px",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f9f9f9",
     borderRadius: "4px",
+    border: "1px solid #e0e0e0",
     cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
     transition: "all 0.2s ease",
-    minHeight: "32px",
-    "@media (maxWidth: 768px)": {
-      padding: "6px 10px",
-      fontSize: "12px",
-    },
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    minHeight: "36px",
   },
   editableText: {
     flex: 1,
-    wordBreak: "break-word",
+    fontSize: "12px",
+    color: "#333333",
   },
   editIcon: {
-    opacity: 0.5,
-    transition: "opacity 0.2s ease",
+    color: "#1976d2",
+    flexShrink: 0,
+    marginLeft: "8px",
   },
   editingWrapper: {
     display: "flex",
-    gap: "6px",
-    alignItems: "flex-start",
+    flexDirection: "column",
+    gap: "8px",
   },
   editInput: {
-    flex: 1,
-    padding: "6px 10px",
+    padding: "8px 12px",
+    fontSize: "12px",
+    border: "2px solid #1976d2",
     borderRadius: "4px",
-    border: "1px solid #1976d2",
-    fontSize: "13px",
+    outline: "none",
     fontFamily: "inherit",
+    width: "100%",
   },
   editTextarea: {
-    flex: 1,
-    padding: "6px 10px",
+    padding: "8px 12px",
+    fontSize: "12px",
+    border: "2px solid #1976d2",
     borderRadius: "4px",
-    border: "1px solid #1976d2",
-    fontSize: "13px",
+    outline: "none",
     fontFamily: "inherit",
     minHeight: "80px",
     resize: "vertical",
-    "@media (maxWidth: 768px)": {
-      minHeight: "60px",
-      fontSize: "12px",
-    },
+    width: "100%",
   },
   editButtonGroup: {
     display: "flex",
-    gap: "4px",
+    gap: "8px",
   },
   saveEditBtn: {
-    padding: "6px 8px",
+    padding: "6px 12px",
     backgroundColor: "#4caf50",
     color: "#ffffff",
     border: "none",
     borderRadius: "4px",
     cursor: "pointer",
-    transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
+    gap: "4px",
+    fontSize: "12px",
+    fontWeight: "600",
   },
   cancelEditBtn: {
-    padding: "6px 8px",
-    backgroundColor: "#ef4444",
+    padding: "6px 12px",
+    backgroundColor: "#f44336",
     color: "#ffffff",
     border: "none",
     borderRadius: "4px",
     cursor: "pointer",
-    transition: "all 0.2s ease",
     display: "flex",
     alignItems: "center",
+    gap: "4px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+  addButton: {
+    padding: "6px 12px",
+    backgroundColor: "#1976d2",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+  deleteButton: {
+    padding: "4px 8px",
+    backgroundColor: "#f44336",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    fontSize: "11px",
+  },
+  outcomeItem: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "flex-start",
+    marginBottom: "12px",
+    padding: "8px",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "6px",
+  },
+  outcomeNumber: {
+    fontWeight: "700",
+    fontSize: "12px",
+    paddingTop: "8px",
+    minWidth: "24px",
+  },
+  outcomeContent: {
+    flex: 1,
+  },
+  stepBlock: {
+    marginBottom: "16px",
+    marginLeft: "20px",
+    padding: "12px",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "6px",
+    border: "1px solid #e0e0e0",
+  },
+  stepHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "8px",
+  },
+  stepTitleText: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#000000",
+  },
+  stepField: {
+    marginBottom: "8px",
   },
   emptyState: {
     textAlign: "center",
-    padding: "48px 20px",
+    padding: "80px 20px",
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    border: "1px solid #e0e0e0",
+  },
+  emptyIcon: {
+    fontSize: "64px",
+    marginBottom: "16px",
   },
   emptyText: {
-    fontSize: "18px",
+    fontSize: "20px",
     fontWeight: "600",
     color: "#000000",
     marginBottom: "8px",
-    "@media (maxWidth: 768px)": {
-      fontSize: "16px",
-    },
   },
   emptyDescription: {
     fontSize: "14px",
     color: "#666666",
-    margin: 0,
-    "@media (maxWidth: 768px)": {
-      fontSize: "12px",
-    },
+    marginBottom: "20px",
+  },
+  lessonGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+    gap: "24px",
+  },
+  lessonCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: "12px",
+    padding: "24px",
+    border: "1px solid #e0e0e0",
+    transition: "all 0.2s ease",
+  },
+  lessonCardHeader: {
+    marginBottom: "16px",
+  },
+  lessonCardIcon: {
+    color: "#1976d2",
+  },
+  lessonCardTitle: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#000000",
+    marginBottom: "16px",
+    lineHeight: "1.4",
+    wordBreak: "break-word",
+  },
+  lessonCardMeta: {
+    marginBottom: "20px",
+  },
+  metaRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "8px 0",
+    borderBottom: "1px solid #f0f0f0",
+  },
+  metaLabel: {
+    fontSize: "13px",
+    color: "#666666",
+    fontWeight: "500",
+  },
+  metaValue: {
+    fontSize: "13px",
+    color: "#000000",
+    fontWeight: "600",
+  },
+  lessonCardActions: {
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  viewButton: {
+    flex: 1,
+    minWidth: "80px",
+    padding: "10px 14px",
+    backgroundColor: "#1976d2",
+    color: "#ffffff",
+    fontSize: "13px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+  },
+  downloadButtonCard: {
+    flex: 1,
+    minWidth: "100px",
+    padding: "10px 14px",
+    backgroundColor: "#4caf50",
+    color: "#ffffff",
+    fontSize: "13px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+  },
+  deleteButtonCard: {
+    flex: 1,
+    minWidth: "80px",
+    padding: "10px 14px",
+    backgroundColor: "#ffffff",
+    color: "#000000",
+    fontSize: "13px",
+    fontWeight: "600",
+    border: "1px solid #e0e0e0",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
   },
 }
