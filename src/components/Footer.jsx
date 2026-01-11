@@ -50,7 +50,8 @@ export default function Footer() {
             <p style={{
               fontSize: '0.9rem',
               color: '#9CA3AF',
-              lineHeight: '1.6'
+              lineHeight: '1.6',
+              fontFamily: "'Inter', sans-serif"
             }}>
               Empowering educators with AI-powered lesson planning tools.
             </p>
@@ -62,7 +63,8 @@ export default function Footer() {
               fontSize: '0.9rem',
               fontWeight: 600,
               marginBottom: '16px',
-              color: '#fff'
+              color: '#fff',
+              fontFamily: "'Inter', sans-serif"
             }}>
               Product
             </h4>
@@ -85,28 +87,7 @@ export default function Footer() {
           </div>
 
           {/* Legal Links */}
-          <div>
-            <h4 style={{
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              marginBottom: '16px',
-              color: '#fff'
-            }}>
-              Legal
-            </h4>
-            {['Privacy Policy', 'Terms of Service', 'Disclaimer'].map((item, i) => (
-              <div key={i} style={{
-                fontSize: '0.9rem',
-                color: '#9CA3AF',
-                marginBottom: '12px',
-                cursor: 'pointer'
-              }}
-              onMouseOver={(e) => e.target.style.color = '#fff'}
-              onMouseOut={(e) => e.target.style.color = '#9CA3AF'}>
-                {item}
-              </div>
-            ))}
-          </div>
+          
         </div>
 
         {/* Bottom Copyright */}
@@ -115,7 +96,8 @@ export default function Footer() {
           paddingTop: '24px',
           textAlign: 'center',
           fontSize: '0.85rem',
-          color: '#6B7280'
+          color: '#6B7280',
+          fontFamily: "'Inter', sans-serif"
         }}>
           © 2026 FunzoIQ. All rights reserved.
         </div>
