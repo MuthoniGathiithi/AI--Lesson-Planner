@@ -13,10 +13,12 @@ import {
   FileText,
   LogOut,
   Download,
+  Edit2,
+  Check,
+  X,
 } from "lucide-react"
 import { generateLessonPlan } from "./services/api"
 import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
-import { downloadLessonPlanAsDocx, downloadLessonPlanAsPdf } from "./utils/downloadLessonPlan"
 
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -30,6 +32,8 @@ export default function LessonCreator() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredLessons, setFilteredLessons] = useState([])
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [editingField, setEditingField] = useState(null)
+  const [editingValue, setEditingValue] = useState("")
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -58,7 +62,6 @@ export default function LessonCreator() {
   }, [activeTab])
 
   useEffect(() => {
-    // Filter lessons based on search query
     if (searchQuery.trim() === "") {
       setFilteredLessons(savedLessons)
     } else {
@@ -152,16 +155,235 @@ export default function LessonCreator() {
     }
   }
 
+  // Integrated download functions
+  const downloadAsDocx = async (lesson) => {
+    try {
+      // Generate plain text content from lesson plan
+      let content = `LESSON PLAN\n\n`
+      
+      // Administrative Details
+      content += `School: ${lesson.administrativeDetails?.school || 'N/A'}\n`
+      content += `Subject: ${lesson.administrativeDetails?.subject || 'N/A'}\n`
+      content += `Class: ${lesson.administrativeDetails?.class || 'N/A'}\n`
+      content += `Grade: ${lesson.administrativeDetails?.grade || 'N/A'}\n`
+      content += `Teacher: ${lesson.administrativeDetails?.teacher || 'N/A'}\n`
+      content += `Students: ${lesson.administrativeDetails?.studentEnrollment?.total || 'N/A'}\n`
+      content += `Date: ${lesson.administrativeDetails?.date || 'N/A'}\n`
+      content += `Time: ${lesson.administrativeDetails?.time?.start || ''} - ${lesson.administrativeDetails?.time?.end || ''}\n\n`
+      
+      // Guiding Question
+      content += `GUIDING QUESTION\n`
+      content += `${lesson.guidingQuestion || 'N/A'}\n\n`
+      
+      // Learning Outcomes
+      content += `LEARNING OUTCOMES\n`
+      if (lesson.learningOutcomes && lesson.learningOutcomes.length > 0) {
+        lesson.learningOutcomes.forEach(outcome => {
+          content += `${outcome.id}. ${outcome.outcome}\n`
+        })
+      }
+      content += `\n`
+      
+      // Learning Resources
+      content += `LEARNING RESOURCES\n`
+      content += `${lesson.learningResources?.join(", ") || 'N/A'}\n\n`
+      
+      // Lesson Flow
+      content += `LESSON FLOW\n\n`
+      
+      // Introduction
+      content += `Introduction (5 minutes)\n`
+      content += `${lesson.lessonFlow?.introduction?.description || 'N/A'}\n\n`
+      
+      // Development Activities
+      content += `Development Activities\n`
+      if (lesson.lessonFlow?.development && lesson.lessonFlow.development.length > 0) {
+        lesson.lessonFlow.development.forEach(step => {
+          content += `\nStep ${step.step}: ${step.title}\n`
+          content += `Description: ${step.description}\n`
+          content += `Activity: ${step.activity}\n`
+        })
+      }
+      content += `\n`
+      
+      // Conclusion
+      content += `Conclusion (5 minutes)\n`
+      content += `${lesson.lessonFlow?.conclusion?.description || 'N/A'}\n`
+      
+      // Create blob and download
+      const blob = new Blob([content], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${lesson.administrativeDetails?.subject || 'lesson_plan'}_${lesson.administrativeDetails?.class || ''}_${new Date().toISOString().split('T')[0]}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      return { success: true }
+    } catch (error) {
+      console.error("Download error:", error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  const downloadAsPdf = async (lesson) => {
+    try {
+      // For PDF, we'll use the print functionality
+      // Create a printable version
+      const printWindow = window.open('', '', 'width=800,height=600')
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Lesson Plan - ${lesson.administrativeDetails?.subject || 'Untitled'}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            h1 {
+              text-align: center;
+              border-bottom: 2px solid #000;
+              padding-bottom: 10px;
+            }
+            h2 {
+              margin-top: 30px;
+              font-size: 16px;
+              text-transform: uppercase;
+              border-bottom: 1px solid #ccc;
+              padding-bottom: 5px;
+            }
+            h3 {
+              margin-top: 20px;
+              font-size: 14px;
+              text-decoration: underline;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+            }
+            td {
+              padding: 8px;
+              border: 1px solid #ddd;
+            }
+            td:nth-child(odd) {
+              font-weight: bold;
+              width: 25%;
+              background: #f5f5f5;
+            }
+            .section {
+              margin: 20px 0;
+            }
+            .step {
+              margin: 15px 0 15px 20px;
+              padding: 10px;
+              background: #f9f9f9;
+              border-left: 3px solid #1976d2;
+            }
+            @media print {
+              body { padding: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>LESSON PLAN</h1>
+          
+          <table>
+            <tr>
+              <td>School:</td>
+              <td>${lesson.administrativeDetails?.school || 'N/A'}</td>
+              <td>Subject:</td>
+              <td>${lesson.administrativeDetails?.subject || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>Class:</td>
+              <td>${lesson.administrativeDetails?.class || 'N/A'}</td>
+              <td>Grade:</td>
+              <td>${lesson.administrativeDetails?.grade || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>Teacher:</td>
+              <td>${lesson.administrativeDetails?.teacher || 'N/A'}</td>
+              <td>Students:</td>
+              <td>${lesson.administrativeDetails?.studentEnrollment?.total || 'N/A'}</td>
+            </tr>
+            <tr>
+              <td>Date:</td>
+              <td>${lesson.administrativeDetails?.date || 'N/A'}</td>
+              <td>Time:</td>
+              <td>${lesson.administrativeDetails?.time?.start || ''} - ${lesson.administrativeDetails?.time?.end || ''}</td>
+            </tr>
+          </table>
+          
+          <div class="section">
+            <h2>Guiding Question</h2>
+            <p>${lesson.guidingQuestion || 'N/A'}</p>
+          </div>
+          
+          <div class="section">
+            <h2>Learning Outcomes</h2>
+            ${lesson.learningOutcomes?.map(outcome => 
+              `<p>${outcome.id}. ${outcome.outcome}</p>`
+            ).join('') || '<p>N/A</p>'}
+          </div>
+          
+          <div class="section">
+            <h2>Learning Resources</h2>
+            <p>${lesson.learningResources?.join(", ") || 'N/A'}</p>
+          </div>
+          
+          <div class="section">
+            <h2>Lesson Flow</h2>
+            
+            <h3>Introduction (5 minutes)</h3>
+            <p>${lesson.lessonFlow?.introduction?.description || 'N/A'}</p>
+            
+            <h3>Development Activities</h3>
+            ${lesson.lessonFlow?.development?.map(step => `
+              <div class="step">
+                <strong>Step ${step.step}: ${step.title}</strong><br>
+                <strong>Description:</strong> ${step.description}<br>
+                <strong>Activity:</strong> ${step.activity}
+              </div>
+            `).join('') || '<p>N/A</p>'}
+            
+            <h3>Conclusion (5 minutes)</h3>
+            <p>${lesson.lessonFlow?.conclusion?.description || 'N/A'}</p>
+          </div>
+        </body>
+        </html>
+      `)
+      
+      printWindow.document.close()
+      printWindow.focus()
+      
+      // Wait for content to load, then print
+      setTimeout(() => {
+        printWindow.print()
+        printWindow.close()
+      }, 250)
+      
+      return { success: true }
+    } catch (error) {
+      console.error("PDF generation error:", error)
+      return { success: false, error: error.message }
+    }
+  }
+
   const handleDownload = async (lesson, format = 'docx') => {
     setIsDownloading(true)
     try {
-      const fileName = `${lesson.administrativeDetails?.subject || 'lesson_plan'}_${lesson.administrativeDetails?.class || ''}_${new Date().toISOString().split('T')[0]}.${format}`
-      
       let result
       if (format === 'pdf') {
-        result = await downloadLessonPlanAsPdf(lesson, fileName)
+        result = await downloadAsPdf(lesson)
       } else {
-        result = await downloadLessonPlanAsDocx(lesson, fileName)
+        result = await downloadAsDocx(lesson)
       }
 
       if (result.success) {
@@ -209,6 +431,7 @@ export default function LessonCreator() {
   const handleCreateNew = () => {
     setLessonPlan(null)
     setCurrentLessonId(null)
+    setEditingField(null)
     setFormData({
       schoolName: "",
       className: "",
@@ -228,17 +451,13 @@ export default function LessonCreator() {
 
   const handleLogout = () => {
     if (confirm("Are you sure you want to logout?")) {
-      // Clear any stored data
       setLessonPlan(null)
       setCurrentLessonId(null)
       setSavedLessons([])
       setFilteredLessons([])
       setActiveTab("dashboard")
-      
-      // Redirect to login or home page
-      // In a real app, you would clear authentication tokens and redirect
       alert("Logged out successfully!")
-      window.location.href = "/login" // Change this to your login route
+      window.location.href = "/login"
     }
   }
 
@@ -254,12 +473,172 @@ export default function LessonCreator() {
     setIsMobileMenuOpen(false)
   }
 
+  // Inline editing functions
+  const startEditing = (field, value) => {
+    setEditingField(field)
+    setEditingValue(value || "")
+  }
+
+  const cancelEditing = () => {
+    setEditingField(null)
+    setEditingValue("")
+  }
+
+  const saveEdit = (path) => {
+    if (!lessonPlan) return
+    
+    const newPlan = JSON.parse(JSON.stringify(lessonPlan))
+    const keys = path.split('.')
+    
+    let current = newPlan
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]
+      const nextKey = keys[i + 1]
+      
+      // Handle array indices
+      if (!isNaN(nextKey)) {
+        if (!current[key]) current[key] = []
+      } else {
+        if (!current[key]) current[key] = {}
+      }
+      current = current[key]
+    }
+    
+    const finalKey = keys[keys.length - 1]
+    current[finalKey] = editingValue
+    
+    setLessonPlan(newPlan)
+    setEditingField(null)
+    setEditingValue("")
+  }
+
+  const addLearningOutcome = () => {
+    if (!lessonPlan) return
+    const newOutcomes = [...(lessonPlan.learningOutcomes || [])]
+    newOutcomes.push({
+      id: (newOutcomes.length + 1).toString(),
+      outcome: "New learning outcome - click to edit"
+    })
+    setLessonPlan({ ...lessonPlan, learningOutcomes: newOutcomes })
+  }
+
+  const deleteLearningOutcome = (index) => {
+    if (!lessonPlan) return
+    const newOutcomes = lessonPlan.learningOutcomes.filter((_, i) => i !== index)
+    // Renumber outcomes
+    const renumbered = newOutcomes.map((outcome, i) => ({
+      ...outcome,
+      id: (i + 1).toString()
+    }))
+    setLessonPlan({ ...lessonPlan, learningOutcomes: renumbered })
+  }
+
+  const addDevelopmentStep = () => {
+    if (!lessonPlan) return
+    const lessonFlow = lessonPlan.lessonFlow || {}
+    const development = [...(lessonFlow.development || [])]
+    development.push({
+      step: development.length + 1,
+      title: "New Step - click to edit",
+      description: "Step description - click to edit",
+      activity: "Activity description - click to edit"
+    })
+    setLessonPlan({
+      ...lessonPlan,
+      lessonFlow: { ...lessonFlow, development }
+    })
+  }
+
+  const deleteDevelopmentStep = (index) => {
+    if (!lessonPlan) return
+    const lessonFlow = lessonPlan.lessonFlow || {}
+    const development = lessonFlow.development.filter((_, i) => i !== index)
+    // Renumber steps
+    const renumbered = development.map((step, i) => ({
+      ...step,
+      step: i + 1
+    }))
+    setLessonPlan({
+      ...lessonPlan,
+      lessonFlow: { ...lessonFlow, development: renumbered }
+    })
+  }
+
+  const renderEditableField = (path, value, multiline = false, placeholder = "Click to edit") => {
+    const fieldKey = path
+    const isEditing = editingField === fieldKey
+    
+    return (
+      <div style={styles.editableContainer}>
+        {isEditing ? (
+          <div style={styles.editingWrapper}>
+            {multiline ? (
+              <textarea
+                value={editingValue}
+                onChange={(e) => setEditingValue(e.target.value)}
+                style={styles.editTextarea}
+                placeholder={placeholder}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') cancelEditing()
+                }}
+              />
+            ) : (
+              <input
+                type="text"
+                value={editingValue}
+                onChange={(e) => setEditingValue(e.target.value)}
+                style={styles.editInput}
+                placeholder={placeholder}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveEdit(path)
+                  if (e.key === 'Escape') cancelEditing()
+                }}
+              />
+            )}
+            <div style={styles.editButtonGroup}>
+              <button 
+                onClick={() => saveEdit(path)} 
+                style={styles.saveEditBtn}
+                title="Save (Enter)"
+              >
+                <Check size={16} />
+              </button>
+              <button 
+                onClick={cancelEditing} 
+                style={styles.cancelEditBtn}
+                title="Cancel (Esc)"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div 
+            style={styles.editableValue} 
+            onClick={() => startEditing(fieldKey, value)}
+            title="Click to edit"
+          >
+            <span style={styles.editableText}>
+              {value || placeholder}
+            </span>
+            <Edit2 size={14} style={styles.editIcon} />
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div style={styles.container}>
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        style={styles.mobileMenuButton}
+        style={{
+          ...styles.mobileMenuButton,
+          display: window.innerWidth <= 768 ? 'block' : 'none'
+        }}
         aria-label="Toggle menu"
       >
         <div style={styles.hamburger}>
@@ -272,7 +651,8 @@ export default function LessonCreator() {
       {/* Sidebar */}
       <aside style={{
         ...styles.sidebar,
-        ...(isMobileMenuOpen ? styles.sidebarMobileOpen : {})
+        ...(window.innerWidth <= 768 && !isMobileMenuOpen ? { transform: 'translateX(-100%)' } : {}),
+        ...(window.innerWidth <= 768 && isMobileMenuOpen ? { transform: 'translateX(0)' } : {})
       }}>
         <div style={styles.sidebarHeader}>
           <div style={styles.logo}>
@@ -330,7 +710,7 @@ export default function LessonCreator() {
       </aside>
 
       {/* Overlay for mobile */}
-      {isMobileMenuOpen && (
+      {isMobileMenuOpen && window.innerWidth <= 768 && (
         <div
           onClick={() => setIsMobileMenuOpen(false)}
           style={styles.mobileOverlay}
@@ -338,7 +718,10 @@ export default function LessonCreator() {
       )}
 
       {/* Main Content */}
-      <main style={styles.main}>
+      <main style={{
+        ...styles.main,
+        marginLeft: window.innerWidth <= 768 ? '0' : '260px'
+      }}>
         {/* Top Bar */}
         <header style={styles.topBar}>
           <div style={styles.topBarLeft}>
@@ -431,47 +814,49 @@ export default function LessonCreator() {
                       </p>
                     </div>
                   ) : (
-                    <table style={styles.table}>
-                      <thead>
-                        <tr style={styles.tableHeader}>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
-                          <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
-                          <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredLessons.slice(0, 5).map((lesson) => (
-                          <tr key={lesson.dbId} style={styles.tableRow}>
-                            <td style={styles.td}>
-                              {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
-                            </td>
-                            <td style={styles.td}>{lesson.administrativeDetails?.grade || "N/A"}</td>
-                            <td style={styles.td}>{lesson.administrativeDetails?.class || "N/A"}</td>
-                            <td style={styles.td}>{lesson.administrativeDetails?.teacher || "N/A"}</td>
-                            <td style={styles.td}>{lesson.savedDate}</td>
-                            <td style={styles.td}>
-                              <div style={styles.actionButtonGroup}>
-                                <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
-                                  <Eye size={16} />
-                                  View
-                                </button>
-                                <button 
-                                  onClick={() => handleDownload(lesson, 'docx')} 
-                                  style={styles.downloadButtonSmall}
-                                  disabled={isDownloading}
-                                  title="Download as DOCX"
-                                >
-                                  <Download size={16} />
-                                </button>
-                              </div>
-                            </td>
+                    <div style={styles.tableWrapper}>
+                      <table style={styles.table}>
+                        <thead>
+                          <tr style={styles.tableHeader}>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
+                            <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {filteredLessons.slice(0, 5).map((lesson) => (
+                            <tr key={lesson.dbId} style={styles.tableRow}>
+                              <td style={styles.td}>
+                                {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
+                              </td>
+                              <td style={styles.td}>{lesson.administrativeDetails?.grade || "N/A"}</td>
+                              <td style={styles.td}>{lesson.administrativeDetails?.class || "N/A"}</td>
+                              <td style={styles.td}>{lesson.administrativeDetails?.teacher || "N/A"}</td>
+                              <td style={styles.td}>{lesson.savedDate}</td>
+                              <td style={styles.td}>
+                                <div style={styles.actionButtonGroup}>
+                                  <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
+                                    <Eye size={16} />
+                                    <span>View</span>
+                                  </button>
+                                  <button 
+                                    onClick={() => handleDownload(lesson, 'docx')} 
+                                    style={styles.downloadButtonSmall}
+                                    disabled={isDownloading}
+                                    title="Download"
+                                  >
+                                    <Download size={16} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   )}
                 </div>
               </div>
@@ -520,7 +905,7 @@ export default function LessonCreator() {
                   <div style={styles.actionBar}>
                     <button onClick={handleCreateNew} style={styles.backButton}>
                       <ArrowLeft size={16} />
-                      Create New
+                      <span>New Plan</span>
                     </button>
                     <div style={styles.actionBarRight}>
                       <button 
@@ -529,19 +914,19 @@ export default function LessonCreator() {
                         style={styles.downloadButton}
                       >
                         <Download size={16} />
-                        {isDownloading ? "Downloading..." : "Download DOCX"}
+                        <span>{isDownloading ? "Downloading..." : "Download"}</span>
                       </button>
                       <button 
                         onClick={() => handleDownload(lessonPlan, 'pdf')} 
                         disabled={isDownloading}
-                        style={styles.downloadButton}
+                        style={styles.pdfButton}
                       >
                         <Download size={16} />
-                        {isDownloading ? "Downloading..." : "Download PDF"}
+                        <span>{isDownloading ? "Printing..." : "Print PDF"}</span>
                       </button>
                       <button onClick={handleSave} disabled={isSaving} style={styles.saveButton}>
                         <Save size={16} />
-                        {isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}
+                        <span>{isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}</span>
                       </button>
                     </div>
                   </div>
@@ -552,74 +937,131 @@ export default function LessonCreator() {
                       <div style={styles.docDivider}></div>
                     </div>
 
+                    {/* Editable Administrative Details */}
                     <table style={styles.docTable}>
                       <tbody>
                         <tr>
                           <td style={styles.tableLabelCell}>School:</td>
-                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.school}</td>
+                          <td style={styles.tableValueCell}>
+                            {renderEditableField("administrativeDetails.school", lessonPlan.administrativeDetails?.school)}
+                          </td>
                           <td style={styles.tableLabelCell}>Subject:</td>
-                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.subject}</td>
+                          <td style={styles.tableValueCell}>
+                            {renderEditableField("administrativeDetails.subject", lessonPlan.administrativeDetails?.subject)}
+                          </td>
                         </tr>
                         <tr>
                           <td style={styles.tableLabelCell}>Class:</td>
-                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.class}</td>
+                          <td style={styles.tableValueCell}>
+                            {renderEditableField("administrativeDetails.class", lessonPlan.administrativeDetails?.class)}
+                          </td>
                           <td style={styles.tableLabelCell}>Grade:</td>
-                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.grade}</td>
+                          <td style={styles.tableValueCell}>
+                            {renderEditableField("administrativeDetails.grade", lessonPlan.administrativeDetails?.grade?.toString())}
+                          </td>
                         </tr>
                         <tr>
                           <td style={styles.tableLabelCell}>Teacher:</td>
-                          <td style={styles.tableValueCell}>{lessonPlan.administrativeDetails?.teacher}</td>
+                          <td style={styles.tableValueCell}>
+                            {renderEditableField("administrativeDetails.teacher", lessonPlan.administrativeDetails?.teacher)}
+                          </td>
                           <td style={styles.tableLabelCell}>Students:</td>
                           <td style={styles.tableValueCell}>
-                            {lessonPlan.administrativeDetails?.studentEnrollment?.total}
+                            {lessonPlan.administrativeDetails?.studentEnrollment?.total || "N/A"}
                           </td>
                         </tr>
                       </tbody>
                     </table>
 
+                    {/* Editable Guiding Question */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>GUIDING QUESTION</div>
-                      <p style={styles.docText}>{lessonPlan.guidingQuestion}</p>
+                      {renderEditableField("guidingQuestion", lessonPlan.guidingQuestion, true, "Enter guiding question")}
                     </div>
 
+                    {/* Editable Learning Outcomes */}
                     <div style={styles.section}>
-                      <div style={styles.sectionTitle}>LEARNING OUTCOMES</div>
-                      {lessonPlan.learningOutcomes?.map((outcome) => (
-                        <p key={outcome.id} style={styles.docText}>
-                          {outcome.id}. {outcome.outcome}
-                        </p>
+                      <div style={styles.sectionHeaderWithButton}>
+                        <div style={styles.sectionTitle}>LEARNING OUTCOMES</div>
+                        <button onClick={addLearningOutcome} style={styles.addButton} title="Add outcome">
+                          <Plus size={16} />
+                          <span>Add</span>
+                        </button>
+                      </div>
+                      {lessonPlan.learningOutcomes?.map((outcome, index) => (
+                        <div key={index} style={styles.outcomeItem}>
+                          <div style={styles.outcomeNumber}>{outcome.id}.</div>
+                          <div style={styles.outcomeContent}>
+                            {renderEditableField(`learningOutcomes.${index}.outcome`, outcome.outcome, true, "Enter outcome")}
+                          </div>
+                          <button 
+                            onClick={() => deleteLearningOutcome(index)} 
+                            style={styles.deleteButton}
+                            title="Delete outcome"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       ))}
                     </div>
 
+                    {/* Editable Learning Resources */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>LEARNING RESOURCES</div>
-                      <p style={styles.docText}>{lessonPlan.learningResources?.join(", ")}</p>
+                      {renderEditableField("learningResources", lessonPlan.learningResources?.join(", "), true, "Enter resources (comma-separated)")}
                     </div>
 
+                    {/* Editable Lesson Flow */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>LESSON FLOW</div>
 
+                      {/* Introduction */}
                       <div style={styles.subsection}>
                         <div style={styles.subsectionTitle}>Introduction (5 minutes)</div>
-                        <p style={styles.docText}>{lessonPlan.lessonFlow?.introduction?.description}</p>
+                        {renderEditableField("lessonFlow.introduction.description", lessonPlan.lessonFlow?.introduction?.description, true, "Enter introduction")}
                       </div>
 
+                      {/* Development Activities */}
                       <div style={styles.subsection}>
-                        <div style={styles.subsectionTitle}>Development Activities</div>
-                        {lessonPlan.lessonFlow?.development?.map((step) => (
-                          <div key={step.step} style={styles.stepContainer}>
-                            <div style={styles.stepTitle}>
-                              Step {step.step}: {step.title}
+                        <div style={styles.sectionHeaderWithButton}>
+                          <div style={styles.subsectionTitle}>Development Activities</div>
+                          <button onClick={addDevelopmentStep} style={styles.addButton} title="Add step">
+                            <Plus size={16} />
+                            <span>Add Step</span>
+                          </button>
+                        </div>
+                        {lessonPlan.lessonFlow?.development?.map((step, index) => (
+                          <div key={index} style={styles.stepBlock}>
+                            <div style={styles.stepHeader}>
+                              <div style={styles.stepTitleText}>Step {step.step}</div>
+                              <button 
+                                onClick={() => deleteDevelopmentStep(index)} 
+                                style={styles.deleteButton}
+                                title="Delete step"
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
-                            <p style={styles.docText}>Description: {step.description}</p>
-                            <p style={styles.docText}>Activity: {step.activity}</p>
+                            <div style={styles.stepField}>
+                              <strong>Title:</strong>
+                              {renderEditableField(`lessonFlow.development.${index}.title`, step.title, false, "Enter title")}
+                            </div>
+                            <div style={styles.stepField}>
+                              <strong>Description:</strong>
+                              {renderEditableField(`lessonFlow.development.${index}.description`, step.description, true, "Enter description")}
+                            </div>
+                            <div style={styles.stepField}>
+                              <strong>Activity:</strong>
+                              {renderEditableField(`lessonFlow.development.${index}.activity`, step.activity, true, "Enter activity")}
+                            </div>
                           </div>
                         ))}
                       </div>
 
+                      {/* Conclusion */}
                       <div style={styles.subsection}>
                         <div style={styles.subsectionTitle}>Conclusion (5 minutes)</div>
-                        <p style={styles.docText}>{lessonPlan.lessonFlow?.conclusion?.description}</p>
+                        {renderEditableField("lessonFlow.conclusion.description", lessonPlan.lessonFlow?.conclusion?.description, true, "Enter conclusion")}
                       </div>
                     </div>
                   </div>
@@ -679,20 +1121,19 @@ export default function LessonCreator() {
                       <div style={styles.lessonCardActions}>
                         <button onClick={() => handleViewLesson(lesson)} style={styles.viewButton}>
                           <Eye size={16} />
-                          View
+                          <span>View</span>
                         </button>
                         <button 
                           onClick={() => handleDownload(lesson, 'docx')} 
                           style={styles.downloadButtonCard}
                           disabled={isDownloading}
-                          title="Download as DOCX"
                         >
                           <Download size={16} />
-                          Download
+                          <span>Download</span>
                         </button>
-                        <button onClick={() => handleDelete(lesson)} style={styles.deleteButton}>
+                        <button onClick={() => handleDelete(lesson)} style={styles.deleteButtonCard}>
                           <Trash2 size={16} />
-                          Delete
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>
@@ -715,7 +1156,6 @@ const styles = {
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   mobileMenuButton: {
-    display: "none",
     position: "fixed",
     top: "16px",
     left: "16px",
@@ -725,9 +1165,6 @@ const styles = {
     borderRadius: "8px",
     padding: "12px",
     cursor: "pointer",
-    "@media (max-width: 768px)": {
-      display: "block",
-    },
   },
   hamburger: {
     display: "flex",
@@ -741,7 +1178,6 @@ const styles = {
     borderRadius: "2px",
   },
   mobileOverlay: {
-    display: "none",
     position: "fixed",
     top: 0,
     left: 0,
@@ -749,9 +1185,6 @@ const styles = {
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 999,
-    "@media (max-width: 768px)": {
-      display: "block",
-    },
   },
   sidebar: {
     width: "260px",
@@ -764,14 +1197,6 @@ const styles = {
     overflowY: "auto",
     zIndex: 1000,
     transition: "transform 0.3s ease",
-    "@media (max-width: 768px)": {
-      transform: "translateX(-100%)",
-    },
-  },
-  sidebarMobileOpen: {
-    "@media (max-width: 768px)": {
-      transform: "translateX(0)",
-    },
   },
   sidebarHeader: {
     marginBottom: "40px",
@@ -860,13 +1285,9 @@ const styles = {
     textAlign: "center",
   },
   main: {
-    marginLeft: "260px",
     flex: 1,
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
-    "@media (max-width: 768px)": {
-      marginLeft: 0,
-    },
   },
   topBar: {
     display: "flex",
@@ -875,12 +1296,8 @@ const styles = {
     padding: "24px 32px",
     backgroundColor: "#ffffff",
     borderBottom: "1px solid #e0e0e0",
-    "@media (max-width: 768px)": {
-      padding: "80px 16px 16px 16px",
-      flexDirection: "column",
-      gap: "16px",
-      alignItems: "flex-start",
-    },
+    flexWrap: "wrap",
+    gap: "16px",
   },
   topBarLeft: {
     display: "flex",
@@ -897,25 +1314,19 @@ const styles = {
     fontWeight: "700",
     color: "#000000",
     margin: 0,
-    "@media (max-width: 768px)": {
-      fontSize: "24px",
-    },
   },
   topBarRight: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    "@media (max-width: 768px)": {
-      width: "100%",
-    },
+    flex: 1,
+    maxWidth: "400px",
   },
   searchBox: {
     position: "relative",
     display: "flex",
     alignItems: "center",
-    "@media (max-width: 768px)": {
-      width: "100%",
-    },
+    width: "100%",
   },
   searchIcon: {
     position: "absolute",
@@ -934,17 +1345,11 @@ const styles = {
     color: "#000000",
     outline: "none",
     transition: "all 0.2s ease",
-    width: "300px",
+    width: "100%",
     fontFamily: "inherit",
-    "@media (max-width: 768px)": {
-      width: "100%",
-    },
   },
   content: {
     padding: "32px",
-    "@media (max-width: 768px)": {
-      padding: "16px",
-    },
   },
   dashboardLayout: {
     display: "flex",
@@ -1004,20 +1409,14 @@ const styles = {
     borderRadius: "12px",
     padding: "28px",
     border: "1px solid #e0e0e0",
-    "@media (max-width: 768px)": {
-      padding: "20px",
-    },
   },
   sectionHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "24px",
-    "@media (max-width: 768px)": {
-      flexDirection: "column",
-      alignItems: "flex-start",
-      gap: "12px",
-    },
+    flexWrap: "wrap",
+    gap: "12px",
   },
   sectionTitle: {
     fontSize: "18px",
@@ -1038,12 +1437,14 @@ const styles = {
   tableContainer: {
     overflowX: "auto",
   },
+  tableWrapper: {
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch",
+  },
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    "@media (max-width: 768px)": {
-      fontSize: "13px",
-    },
+    minWidth: "600px",
   },
   tableHeader: {
     borderBottom: "2px solid #e0e0e0",
@@ -1054,10 +1455,7 @@ const styles = {
     fontWeight: "600",
     color: "#666666",
     textAlign: "center",
-    "@media (max-width: 768px)": {
-      padding: "10px 8px",
-      fontSize: "12px",
-    },
+    whiteSpace: "nowrap",
   },
   tableRow: {
     borderBottom: "1px solid #f0f0f0",
@@ -1068,19 +1466,13 @@ const styles = {
     fontSize: "14px",
     color: "#000000",
     textAlign: "left",
-    "@media (max-width: 768px)": {
-      padding: "10px 8px",
-      fontSize: "13px",
-    },
   },
   actionButtonGroup: {
     display: "flex",
     gap: "8px",
     alignItems: "center",
-    "@media (max-width: 768px)": {
-      flexDirection: "column",
-      gap: "4px",
-    },
+    justifyContent: "center",
+    flexWrap: "wrap",
   },
   viewButtonSmall: {
     display: "flex",
@@ -1095,10 +1487,7 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    "@media (max-width: 768px)": {
-      width: "100%",
-      justifyContent: "center",
-    },
+    whiteSpace: "nowrap",
   },
   downloadButtonSmall: {
     display: "flex",
@@ -1113,37 +1502,24 @@ const styles = {
     borderRadius: "6px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    "@media (max-width: 768px)": {
-      width: "100%",
-      justifyContent: "center",
-    },
   },
   formCard: {
     backgroundColor: "#ffffff",
     borderRadius: "12px",
     padding: "32px",
     border: "1px solid #e0e0e0",
-    "@media (max-width: 768px)": {
-      padding: "20px",
-    },
   },
   formTitle: {
     fontSize: "24px",
     fontWeight: "700",
     color: "#000000",
     marginBottom: "28px",
-    "@media (max-width: 768px)": {
-      fontSize: "20px",
-    },
   },
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "20px",
     marginBottom: "28px",
-    "@media (max-width: 768px)": {
-      gridTemplateColumns: "1fr",
-    },
   },
   fieldWrapper: {
     display: "flex",
@@ -1178,9 +1554,6 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     width: "100%",
-    "@media (min-width: 768px)": {
-      width: "auto",
-    },
   },
   documentContainer: {
     backgroundColor: "transparent",
@@ -1192,16 +1565,12 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     gap: "12px",
-    "@media (max-width: 768px)": {
-      flexDirection: "column",
-    },
+    flexWrap: "wrap",
   },
   actionBarRight: {
     display: "flex",
     gap: "12px",
-    "@media (max-width: 768px)": {
-      flexDirection: "column",
-    },
+    flexWrap: "wrap",
   },
   backButton: {
     padding: "12px 20px",
@@ -1216,7 +1585,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    justifyContent: "center",
+    whiteSpace: "nowrap",
   },
   downloadButton: {
     padding: "12px 20px",
@@ -1231,7 +1600,22 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    justifyContent: "center",
+    whiteSpace: "nowrap",
+  },
+  pdfButton: {
+    padding: "12px 20px",
+    backgroundColor: "#ff9800",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "600",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    whiteSpace: "nowrap",
   },
   saveButton: {
     padding: "12px 20px",
@@ -1246,7 +1630,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    justifyContent: "center",
+    whiteSpace: "nowrap",
   },
   documentPage: {
     maxWidth: "850px",
@@ -1258,9 +1642,6 @@ const styles = {
     lineHeight: "1.6",
     borderRadius: "8px",
     border: "1px solid #e0e0e0",
-    "@media (max-width: 768px)": {
-      padding: "30px 20px",
-    },
   },
   docHeader: {
     textAlign: "center",
@@ -1282,13 +1663,13 @@ const styles = {
   section: {
     marginBottom: "24px",
   },
-  sectionTitle: {
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#000000",
-    letterSpacing: "1px",
+  sectionHeaderWithButton: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: "12px",
-    textTransform: "uppercase",
+    flexWrap: "wrap",
+    gap: "8px",
   },
   subsection: {
     marginBottom: "20px",
@@ -1300,23 +1681,6 @@ const styles = {
     color: "#000000",
     marginBottom: "8px",
     textDecoration: "underline",
-  },
-  stepContainer: {
-    marginBottom: "12px",
-    marginLeft: "20px",
-  },
-  stepTitle: {
-    fontSize: "12px",
-    fontWeight: "700",
-    color: "#000000",
-    marginBottom: "4px",
-  },
-  docText: {
-    fontSize: "12px",
-    color: "#333333",
-    lineHeight: "1.6",
-    margin: "8px 0",
-    textAlign: "justify",
   },
   docTable: {
     width: "100%",
@@ -1330,12 +1694,158 @@ const styles = {
     color: "#000000",
     borderBottom: "1px solid #d1d5db",
     textAlign: "left",
+    width: "25%",
   },
   tableValueCell: {
     padding: "8px",
     color: "#333333",
     borderBottom: "1px solid #d1d5db",
     textAlign: "left",
+    width: "25%",
+  },
+  editableContainer: {
+    margin: "8px 0",
+  },
+  editableValue: {
+    padding: "8px 12px",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "4px",
+    border: "1px solid #e0e0e0",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    minHeight: "36px",
+  },
+  editableText: {
+    flex: 1,
+    fontSize: "12px",
+    color: "#333333",
+  },
+  editIcon: {
+    color: "#1976d2",
+    flexShrink: 0,
+    marginLeft: "8px",
+  },
+  editingWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  editInput: {
+    padding: "8px 12px",
+    fontSize: "12px",
+    border: "2px solid #1976d2",
+    borderRadius: "4px",
+    outline: "none",
+    fontFamily: "inherit",
+    width: "100%",
+  },
+  editTextarea: {
+    padding: "8px 12px",
+    fontSize: "12px",
+    border: "2px solid #1976d2",
+    borderRadius: "4px",
+    outline: "none",
+    fontFamily: "inherit",
+    minHeight: "80px",
+    resize: "vertical",
+    width: "100%",
+  },
+  editButtonGroup: {
+    display: "flex",
+    gap: "8px",
+  },
+  saveEditBtn: {
+    padding: "6px 12px",
+    backgroundColor: "#4caf50",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+  cancelEditBtn: {
+    padding: "6px 12px",
+    backgroundColor: "#f44336",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+  addButton: {
+    padding: "6px 12px",
+    backgroundColor: "#1976d2",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+  deleteButton: {
+    padding: "4px 8px",
+    backgroundColor: "#f44336",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    fontSize: "11px",
+  },
+  outcomeItem: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "flex-start",
+    marginBottom: "12px",
+    padding: "8px",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "6px",
+  },
+  outcomeNumber: {
+    fontWeight: "700",
+    fontSize: "12px",
+    paddingTop: "8px",
+    minWidth: "24px",
+  },
+  outcomeContent: {
+    flex: 1,
+  },
+  stepBlock: {
+    marginBottom: "16px",
+    marginLeft: "20px",
+    padding: "12px",
+    backgroundColor: "#f9f9f9",
+    borderRadius: "6px",
+    border: "1px solid #e0e0e0",
+  },
+  stepHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "8px",
+  },
+  stepTitleText: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#000000",
+  },
+  stepField: {
+    marginBottom: "8px",
   },
   emptyState: {
     textAlign: "center",
@@ -1361,11 +1871,8 @@ const styles = {
   },
   lessonGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
     gap: "24px",
-    "@media (max-width: 768px)": {
-      gridTemplateColumns: "1fr",
-    },
   },
   lessonCard: {
     backgroundColor: "#ffffff",
@@ -1386,6 +1893,7 @@ const styles = {
     color: "#000000",
     marginBottom: "16px",
     lineHeight: "1.4",
+    wordBreak: "break-word",
   },
   lessonCardMeta: {
     marginBottom: "20px",
@@ -1413,6 +1921,7 @@ const styles = {
   },
   viewButton: {
     flex: 1,
+    minWidth: "80px",
     padding: "10px 14px",
     backgroundColor: "#1976d2",
     color: "#ffffff",
@@ -1426,10 +1935,10 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "6px",
-    minWidth: "90px",
   },
   downloadButtonCard: {
     flex: 1,
+    minWidth: "100px",
     padding: "10px 14px",
     backgroundColor: "#4caf50",
     color: "#ffffff",
@@ -1443,10 +1952,10 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "6px",
-    minWidth: "110px",
   },
-  deleteButton: {
+  deleteButtonCard: {
     flex: 1,
+    minWidth: "80px",
     padding: "10px 14px",
     backgroundColor: "#ffffff",
     color: "#000000",
@@ -1460,6 +1969,5 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "6px",
-    minWidth: "90px",
   },
 }
