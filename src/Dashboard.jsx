@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -35,10 +34,11 @@ export default function LessonCreator() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [editingField, setEditingField] = useState(null)
   const [editingValue, setEditingValue] = useState("")
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
   const [formData, setFormData] = useState({
     schoolName: "",
-    subject: "", // ADDED SUBJECT FIELD
+    subject: "",
     className: "",
     grade: "10",
     term: "1",
@@ -55,6 +55,15 @@ export default function LessonCreator() {
 
   useEffect(() => {
     loadLessons()
+    
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
   useEffect(() => {
@@ -109,7 +118,6 @@ export default function LessonCreator() {
   }
 
   const handleGenerate = async () => {
-    // Validate required fields
     if (!formData.subject.trim()) {
       alert("Please enter a subject (e.g., Biology, Geography, Mathematics)")
       return
@@ -171,13 +179,10 @@ export default function LessonCreator() {
     }
   }
 
-  // Integrated download functions
   const downloadAsDocx = async (lesson) => {
     try {
-      // Generate plain text content from lesson plan
       let content = `LESSON PLAN\n\n`
       
-      // Administrative Details
       content += `School: ${lesson.administrativeDetails?.school || 'N/A'}\n`
       content += `Subject: ${lesson.administrativeDetails?.subject || 'N/A'}\n`
       content += `Class: ${lesson.administrativeDetails?.class || 'N/A'}\n`
@@ -187,11 +192,9 @@ export default function LessonCreator() {
       content += `Date: ${lesson.administrativeDetails?.date || 'N/A'}\n`
       content += `Time: ${lesson.administrativeDetails?.time?.start || ''} - ${lesson.administrativeDetails?.time?.end || ''}\n\n`
       
-      // Guiding Question
       content += `GUIDING QUESTION\n`
       content += `${lesson.guidingQuestion || 'N/A'}\n\n`
       
-      // Learning Outcomes
       content += `LEARNING OUTCOMES\n`
       if (lesson.learningOutcomes && lesson.learningOutcomes.length > 0) {
         lesson.learningOutcomes.forEach(outcome => {
@@ -200,18 +203,14 @@ export default function LessonCreator() {
       }
       content += `\n`
       
-      // Learning Resources
       content += `LEARNING RESOURCES\n`
       content += `${lesson.learningResources?.join(", ") || 'N/A'}\n\n`
       
-      // Lesson Flow
       content += `LESSON FLOW\n\n`
       
-      // Introduction
       content += `Introduction (5 minutes)\n`
       content += `${lesson.lessonFlow?.introduction?.description || 'N/A'}\n\n`
       
-      // Development Activities
       content += `Development Activities\n`
       if (lesson.lessonFlow?.development && lesson.lessonFlow.development.length > 0) {
         lesson.lessonFlow.development.forEach(step => {
@@ -222,11 +221,9 @@ export default function LessonCreator() {
       }
       content += `\n`
       
-      // Conclusion
       content += `Conclusion (5 minutes)\n`
       content += `${lesson.lessonFlow?.conclusion?.description || 'N/A'}\n`
       
-      // Create blob and download
       const blob = new Blob([content], { type: 'text/plain' })
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -246,8 +243,6 @@ export default function LessonCreator() {
 
   const downloadAsPdf = async (lesson) => {
     try {
-      // For PDF, we'll use the print functionality
-      // Create a printable version
       const printWindow = window.open('', '', 'width=800,height=600')
       
       printWindow.document.write(`
@@ -379,7 +374,6 @@ export default function LessonCreator() {
       printWindow.document.close()
       printWindow.focus()
       
-      // Wait for content to load, then print
       setTimeout(() => {
         printWindow.print()
         printWindow.close()
@@ -450,7 +444,7 @@ export default function LessonCreator() {
     setEditingField(null)
     setFormData({
       schoolName: "",
-      subject: "", // Reset subject
+      subject: "",
       className: "",
       grade: "10",
       term: "1",
@@ -490,7 +484,6 @@ export default function LessonCreator() {
     setIsMobileMenuOpen(false)
   }
 
-  // Inline editing functions
   const startEditing = (field, value) => {
     setEditingField(field)
     setEditingValue(value || "")
@@ -512,7 +505,6 @@ export default function LessonCreator() {
       const key = keys[i]
       const nextKey = keys[i + 1]
       
-      // Handle array indices
       if (!isNaN(nextKey)) {
         if (!current[key]) current[key] = []
       } else {
@@ -542,7 +534,6 @@ export default function LessonCreator() {
   const deleteLearningOutcome = (index) => {
     if (!lessonPlan) return
     const newOutcomes = lessonPlan.learningOutcomes.filter((_, i) => i !== index)
-    // Renumber outcomes
     const renumbered = newOutcomes.map((outcome, i) => ({
       ...outcome,
       id: (i + 1).toString()
@@ -570,7 +561,6 @@ export default function LessonCreator() {
     if (!lessonPlan) return
     const lessonFlow = lessonPlan.lessonFlow || {}
     const development = lessonFlow.development.filter((_, i) => i !== index)
-    // Renumber steps
     const renumbered = development.map((step, i) => ({
       ...step,
       step: i + 1
@@ -647,14 +637,38 @@ export default function LessonCreator() {
     )
   }
 
+  const isMobile = windowWidth <= 768
+
   return (
     <div style={styles.container}>
-      {/* Mobile Menu Button */}
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .mobile-menu-button { display: block !important; }
+          .sidebar-mobile-hidden { transform: translateX(-100%) !important; }
+          .sidebar-mobile-visible { transform: translateX(0) !important; }
+          .main-mobile { margin-left: 0 !important; }
+          .top-bar-mobile { padding: 60px 16px 16px 16px !important; }
+          .page-title-mobile { font-size: 20px !important; }
+          .search-box-mobile { max-width: 100% !important; }
+          .content-mobile { padding: 16px !important; }
+          .form-grid-mobile { grid-template-columns: 1fr !important; }
+          .stats-row-mobile { grid-template-columns: 1fr !important; }
+          .lesson-grid-mobile { grid-template-columns: 1fr !important; }
+          .document-page-mobile { padding: 20px 16px !important; }
+          .action-bar-mobile { flex-direction: column !important; }
+          .action-bar-right-mobile { width: 100% !important; flex-direction: column !important; }
+          .doc-table-mobile { font-size: 10px !important; }
+          .table-label-cell-mobile { padding: 4px !important; }
+          .table-value-cell-mobile { padding: 4px !important; }
+        }
+      `}</style>
+
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="mobile-menu-button"
         style={{
           ...styles.mobileMenuButton,
-          display: window.innerWidth <= 768 ? 'block' : 'none'
+          display: isMobile ? 'block' : 'none'
         }}
         aria-label="Toggle menu"
       >
@@ -665,12 +679,10 @@ export default function LessonCreator() {
         </div>
       </button>
 
-      {/* Sidebar */}
-      <aside style={{
-        ...styles.sidebar,
-        ...(window.innerWidth <= 768 && !isMobileMenuOpen ? { transform: 'translateX(-100%)' } : {}),
-        ...(window.innerWidth <= 768 && isMobileMenuOpen ? { transform: 'translateX(0)' } : {})
-      }}>
+      <aside 
+        className={isMobile ? (isMobileMenuOpen ? 'sidebar-mobile-visible' : 'sidebar-mobile-hidden') : ''}
+        style={styles.sidebar}
+      >
         <div style={styles.sidebarHeader}>
           <div style={styles.logo}>
             <div style={styles.logoText}>Funza</div>
@@ -726,31 +738,40 @@ export default function LessonCreator() {
         </nav>
       </aside>
 
-      {/* Overlay for mobile */}
-      {isMobileMenuOpen && window.innerWidth <= 768 && (
+      {isMobileMenuOpen && isMobile && (
         <div
           onClick={() => setIsMobileMenuOpen(false)}
           style={styles.mobileOverlay}
         />
       )}
 
-      {/* Main Content */}
-      <main style={{
-        ...styles.main,
-        marginLeft: window.innerWidth <= 768 ? '0' : '260px'
-      }}>
-        {/* Top Bar */}
-        <header style={styles.topBar}>
+      <main 
+        className={isMobile ? 'main-mobile' : ''}
+        style={{
+          ...styles.main,
+          marginLeft: isMobile ? '0' : '260px'
+        }}
+      >
+        <header 
+          className={isMobile ? 'top-bar-mobile' : ''}
+          style={styles.topBar}
+        >
           <div style={styles.topBarLeft}>
             <div style={styles.greeting}>{getGreeting()}</div>
-            <h1 style={styles.pageTitle}>
+            <h1 
+              className={isMobile ? 'page-title-mobile' : ''}
+              style={styles.pageTitle}
+            >
               {activeTab === "dashboard" && "Dashboard"}
               {activeTab === "create" && "Lesson Planner"}
               {activeTab === "archive" && "Lesson Archive"}
             </h1>
           </div>
 
-          <div style={styles.topBarRight}>
+          <div 
+            className={isMobile ? 'search-box-mobile' : ''}
+            style={styles.topBarRight}
+          >
             <div style={styles.searchBox}>
               <Search size={18} style={styles.searchIcon} />
               <input
@@ -764,12 +785,16 @@ export default function LessonCreator() {
           </div>
         </header>
 
-        {/* Content Area */}
-        <div style={styles.content}>
+        <div 
+          className={isMobile ? 'content-mobile' : ''}
+          style={styles.content}
+        >
           {activeTab === "dashboard" && (
             <div style={styles.dashboardLayout}>
-              {/* Stats Cards */}
-              <div style={styles.statsRow}>
+              <div 
+                className={isMobile ? 'stats-row-mobile' : ''}
+                style={styles.statsRow}
+              >
                 <div style={{...styles.statCard, ...styles.statCardBlue}}>
                   <div style={styles.statHeader}>
                     <div style={styles.statIcon}>
@@ -809,7 +834,6 @@ export default function LessonCreator() {
                 </div>
               </div>
 
-              {/* Recent Lessons */}
               <div style={styles.lessonsSection}>
                 <div style={styles.sectionHeader}>
                   <h2 style={styles.sectionTitle}>Recent Lessons</h2>
@@ -885,10 +909,13 @@ export default function LessonCreator() {
               {!lessonPlan ? (
                 <div style={styles.formCard}>
                   <h2 style={styles.formTitle}>Create New Lesson Plan</h2>
-                  <div style={styles.formGrid}>
+                  <div 
+                    className={isMobile ? 'form-grid-mobile' : ''}
+                    style={styles.formGrid}
+                  >
                     {[
                       { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text" },
-                      { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text" }, // ADDED SUBJECT FIELD
+                      { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text" },
                       { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text" },
                       { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number" },
                       { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number" },
@@ -905,7 +932,6 @@ export default function LessonCreator() {
                       <div key={field.key} style={styles.fieldWrapper}>
                         <label style={styles.label}>
                           {field.label}
-                          {/* Mark required fields */}
                           {(field.key === "subject" || field.key === "strand" || field.key === "subStrand") && (
                             <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
                           )}
@@ -917,7 +943,6 @@ export default function LessonCreator() {
                           onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                           style={{
                             ...styles.input,
-                            // Highlight required fields if empty
                             ...(field.key === "subject" && !formData.subject ? { borderColor: "#fca5a5" } : {}),
                             ...(field.key === "strand" && !formData.strand ? { borderColor: "#fca5a5" } : {}),
                             ...(field.key === "subStrand" && !formData.subStrand ? { borderColor: "#fca5a5" } : {})
@@ -927,7 +952,6 @@ export default function LessonCreator() {
                     ))}
                   </div>
                   
-                  {/* Helper text */}
                   <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#f0f9ff", borderRadius: "8px", fontSize: "14px", color: "#0369a1" }}>
                     💡 <strong>Tip:</strong> The system can handle typos! If you type "Geogrphy" instead of "Geography", it will automatically match to the correct subject.
                   </div>
@@ -938,12 +962,18 @@ export default function LessonCreator() {
                 </div>
               ) : (
                 <div style={styles.documentContainer}>
-                  <div style={styles.actionBar}>
+                  <div 
+                    className={isMobile ? 'action-bar-mobile' : ''}
+                    style={styles.actionBar}
+                  >
                     <button onClick={handleCreateNew} style={styles.backButton}>
                       <ArrowLeft size={16} />
                       <span>New Plan</span>
                     </button>
-                    <div style={styles.actionBarRight}>
+                    <div 
+                      className={isMobile ? 'action-bar-right-mobile' : ''}
+                      style={styles.actionBarRight}
+                    >
                       <button 
                         onClick={() => handleDownload(lessonPlan, 'docx')} 
                         disabled={isDownloading}
@@ -967,55 +997,94 @@ export default function LessonCreator() {
                     </div>
                   </div>
 
-                  <div style={styles.documentPage}>
+                  <div 
+                    className={isMobile ? 'document-page-mobile' : ''}
+                    style={styles.documentPage}
+                  >
                     <div style={styles.docHeader}>
                       <div style={styles.docTitle}>LESSON PLAN</div>
                       <div style={styles.docDivider}></div>
                     </div>
 
-                    {/* Editable Administrative Details */}
-                    <table style={styles.docTable}>
+                    <table 
+                      className={isMobile ? 'doc-table-mobile' : ''}
+                      style={styles.docTable}
+                    >
                       <tbody>
                         <tr>
-                          <td style={styles.tableLabelCell}>School:</td>
-                          <td style={styles.tableValueCell}>
+                          <td 
+                            className={isMobile ? 'table-label-cell-mobile' : ''}
+                            style={styles.tableLabelCell}
+                          >School:</td>
+                          <td 
+                            className={isMobile ? 'table-value-cell-mobile' : ''}
+                            style={styles.tableValueCell}
+                          >
                             {renderEditableField("administrativeDetails.school", lessonPlan.administrativeDetails?.school)}
                           </td>
-                          <td style={styles.tableLabelCell}>Subject:</td>
-                          <td style={styles.tableValueCell}>
+                          <td 
+                            className={isMobile ? 'table-label-cell-mobile' : ''}
+                            style={styles.tableLabelCell}
+                          >Subject:</td>
+                          <td 
+                            className={isMobile ? 'table-value-cell-mobile' : ''}
+                            style={styles.tableValueCell}
+                          >
                             {renderEditableField("administrativeDetails.subject", lessonPlan.administrativeDetails?.subject)}
                           </td>
                         </tr>
                         <tr>
-                          <td style={styles.tableLabelCell}>Class:</td>
-                          <td style={styles.tableValueCell}>
+                          <td 
+                            className={isMobile ? 'table-label-cell-mobile' : ''}
+                            style={styles.tableLabelCell}
+                          >Class:</td>
+                          <td 
+                            className={isMobile ? 'table-value-cell-mobile' : ''}
+                            style={styles.tableValueCell}
+                          >
                             {renderEditableField("administrativeDetails.class", lessonPlan.administrativeDetails?.class)}
                           </td>
-                          <td style={styles.tableLabelCell}>Grade:</td>
-                          <td style={styles.tableValueCell}>
+                          <td 
+                            className={isMobile ? 'table-label-cell-mobile' : ''}
+                            style={styles.tableLabelCell}
+                          >Grade:</td>
+                          <td 
+                            className={isMobile ? 'table-value-cell-mobile' : ''}
+                            style={styles.tableValueCell}
+                          >
                             {renderEditableField("administrativeDetails.grade", lessonPlan.administrativeDetails?.grade?.toString())}
                           </td>
                         </tr>
                         <tr>
-                          <td style={styles.tableLabelCell}>Teacher:</td>
-                          <td style={styles.tableValueCell}>
+                          <td 
+                            className={isMobile ? 'table-label-cell-mobile' : ''}
+                            style={styles.tableLabelCell}
+                          >Teacher:</td>
+                          <td 
+                            className={isMobile ? 'table-value-cell-mobile' : ''}
+                            style={styles.tableValueCell}
+                          >
                             {renderEditableField("administrativeDetails.teacher", lessonPlan.administrativeDetails?.teacher)}
                           </td>
-                          <td style={styles.tableLabelCell}>Students:</td>
-                          <td style={styles.tableValueCell}>
+                          <td 
+                            className={isMobile ? 'table-label-cell-mobile' : ''}
+                            style={styles.tableLabelCell}
+                          >Students:</td>
+                          <td 
+                            className={isMobile ? 'table-value-cell-mobile' : ''}
+                            style={styles.tableValueCell}
+                          >
                             {lessonPlan.administrativeDetails?.studentEnrollment?.total || "N/A"}
                           </td>
                         </tr>
                       </tbody>
                     </table>
 
-                    {/* Editable Guiding Question */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>GUIDING QUESTION</div>
                       {renderEditableField("guidingQuestion", lessonPlan.guidingQuestion, true, "Enter guiding question")}
                     </div>
 
-                    {/* Editable Learning Outcomes */}
                     <div style={styles.section}>
                       <div style={styles.sectionHeaderWithButton}>
                         <div style={styles.sectionTitle}>LEARNING OUTCOMES</div>
@@ -1041,23 +1110,19 @@ export default function LessonCreator() {
                       ))}
                     </div>
 
-                    {/* Editable Learning Resources */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>LEARNING RESOURCES</div>
                       {renderEditableField("learningResources", lessonPlan.learningResources?.join(", "), true, "Enter resources (comma-separated)")}
                     </div>
 
-                    {/* Editable Lesson Flow */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>LESSON FLOW</div>
 
-                      {/* Introduction */}
                       <div style={styles.subsection}>
                         <div style={styles.subsectionTitle}>Introduction (5 minutes)</div>
                         {renderEditableField("lessonFlow.introduction.description", lessonPlan.lessonFlow?.introduction?.description, true, "Enter introduction")}
                       </div>
 
-                      {/* Development Activities */}
                       <div style={styles.subsection}>
                         <div style={styles.sectionHeaderWithButton}>
                           <div style={styles.subsectionTitle}>Development Activities</div>
@@ -1094,7 +1159,6 @@ export default function LessonCreator() {
                         ))}
                       </div>
 
-                      {/* Conclusion */}
                       <div style={styles.subsection}>
                         <div style={styles.subsectionTitle}>Conclusion (5 minutes)</div>
                         {renderEditableField("lessonFlow.conclusion.description", lessonPlan.lessonFlow?.conclusion?.description, true, "Enter conclusion")}
@@ -1125,7 +1189,10 @@ export default function LessonCreator() {
                   </p>
                 </div>
               ) : (
-                <div style={styles.lessonGrid}>
+                <div 
+                  className={isMobile ? 'lesson-grid-mobile' : ''}
+                  style={styles.lessonGrid}
+                >
                   {filteredLessons.map((lesson) => (
                     <div key={lesson.dbId} style={styles.lessonCard}>
                       <div style={styles.lessonCardHeader}>
@@ -1183,8 +1250,6 @@ export default function LessonCreator() {
     </div>
   )
 }
-
-
 
 const styles = {
   container: {
