@@ -640,75 +640,75 @@ export default function LessonCreator() {
           width: windowWidth <= 768 ? (isMobileMenuOpen ? "260px" : "0") : "260px",
           transform: windowWidth <= 768 && !isMobileMenuOpen ? "translateX(-100%)" : "translateX(0)",
           borderRight: windowWidth > 768 || isMobileMenuOpen ? "1px solid #e5e7eb" : "none",
-          boxShadow: windowWidth <= 768 && !isMobileMenuOpen ? "none" : "0 1px 3px rgba(0, 0, 0, 0.1)",
         }}
       >
         <div style={styles.sidebarHeader}>
-          <h2
-            style={{
-              ...styles.sidebarTitle,
-              fontSize: windowWidth <= 640 ? "16px" : "18px",
-            }}
-          >
-            Lesson <br /> Creator
-          </h2>
-          <button onClick={() => setIsMobileMenuOpen(false)} style={styles.closeMenuButton}>
-            <X size={20} />
-          </button>
+          <h2 style={styles.sidebarTitle}>Lesson Creator</h2>
+          {windowWidth <= 768 && isMobileMenuOpen && (
+            <button onClick={() => setIsMobileMenuOpen(false)} style={styles.closeMenuButton} aria-label="Close menu">
+              <X size={24} />
+            </button>
+          )}
         </div>
+
         <nav style={styles.nav}>
           <button
             onClick={() => handleNavClick("dashboard")}
             style={{
               ...styles.navLink,
-              backgroundColor: activeTab === "dashboard" ? "#e0f2fe" : "transparent",
-              color: activeTab === "dashboard" ? "#0c4a6e" : "#6b7280",
-              fontSize: windowWidth <= 640 ? "13px" : "14px",
+              ...(activeTab === "dashboard" ? { backgroundColor: "#e0e7ff", color: "#2563eb", fontWeight: "600" } : {}),
             }}
           >
-            <LayoutDashboard size={windowWidth <= 640 ? 16 : 18} />
+            <LayoutDashboard size={20} />
             <span>Dashboard</span>
           </button>
+
           <button
             onClick={() => handleNavClick("create")}
             style={{
               ...styles.navLink,
-              backgroundColor: activeTab === "create" ? "#e0f2fe" : "transparent",
-              color: activeTab === "create" ? "#0c4a6e" : "#6b7280",
-              fontSize: windowWidth <= 640 ? "13px" : "14px",
+              ...(activeTab === "create" ? { backgroundColor: "#e0e7ff", color: "#2563eb", fontWeight: "600" } : {}),
             }}
           >
-            <Plus size={windowWidth <= 640 ? 16 : 18} />
+            <Plus size={20} />
             <span>Create Lesson</span>
           </button>
+
           <button
             onClick={() => handleNavClick("archive")}
             style={{
               ...styles.navLink,
-              backgroundColor: activeTab === "archive" ? "#e0f2fe" : "transparent",
-              color: activeTab === "archive" ? "#0c4a6e" : "#6b7280",
-              fontSize: windowWidth <= 640 ? "13px" : "14px",
+              ...(activeTab === "archive" ? { backgroundColor: "#e0e7ff", color: "#2563eb", fontWeight: "600" } : {}),
             }}
           >
-            <Archive size={windowWidth <= 640 ? 16 : 18} />
+            <Archive size={20} />
             <span>Lesson Archive</span>
           </button>
         </nav>
+
         <div style={styles.sidebarFooter}>
-          <button
-            onClick={handleLogout}
-            style={{
-              ...styles.logoutButton,
-              width: windowWidth <= 640 ? "100%" : "auto",
-              padding: windowWidth <= 640 ? "10px 16px" : "10px 16px",
-              fontSize: windowWidth <= 640 ? "13px" : "14px",
-            }}
-          >
-            <LogOut size={windowWidth <= 640 ? 16 : 18} />
+          <button onClick={handleLogout} style={styles.logoutButton}>
+            <LogOut size={20} />
             <span>Logout</span>
           </button>
         </div>
       </aside>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && windowWidth <= 768 && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
+            zIndex: 999,
+          }}
+        />
+      )}
 
       {/* Main Content */}
       <main
@@ -718,19 +718,13 @@ export default function LessonCreator() {
         }}
       >
         {/* Top Bar */}
-        <header
-          style={{
-            ...styles.topBar,
-            flexDirection: windowWidth <= 640 ? "column" : "row",
-            gap: windowWidth <= 640 ? "12px" : "0",
-          }}
-        >
+        <header style={styles.topBar}>
           <div style={styles.topBarLeft}>
             <div style={styles.greeting}>{getGreeting()}</div>
             <h1
               style={{
                 ...styles.pageTitle,
-                fontSize: windowWidth <= 640 ? "20px" : windowWidth <= 768 ? "24px" : "28px",
+                fontSize: windowWidth <= 640 ? "20px" : "28px",
               }}
             >
               {activeTab === "dashboard" && "Dashboard"}
