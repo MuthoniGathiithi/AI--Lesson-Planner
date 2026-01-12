@@ -993,43 +993,41 @@ export default function LessonCreator() {
                     className={isMobile ? 'form-grid-mobile' : ''}
                     style={styles.formGrid}
                   >
-                    {[
-                      { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text" },
-                      { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text" },
-                      { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text" },
-                      { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number" },
-                      { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number" },
-                      { label: "Date", key: "date", placeholder: "", type: "date" },
-                      { label: "Start Time", key: "startTime", placeholder: "", type: "time" },
-                      { label: "End Time", key: "endTime", placeholder: "", type: "time" },
-                      { label: "Teacher Name", key: "teacherName", placeholder: "Enter teacher name", type: "text" },
-                      { label: "TSC Number", key: "tscNumber", placeholder: "Enter TSC number", type: "text" },
-                      { label: "Number of Boys", key: "boys", placeholder: "0", type: "number" },
-                      { label: "Number of Girls", key: "girls", placeholder: "0", type: "number" },
-                      { label: "Strand", key: "strand", placeholder: "e.g. Biodiversity", type: "text" },
-                      { label: "Sub-strand", key: "subStrand", placeholder: "e.g. Classification", type: "text" },
-                    ].map((field) => (
-                      <div key={field.key} style={styles.fieldWrapper}>
-                        <label style={styles.label}>
-                          {field.label}
-                          {(field.key === "subject" || field.key === "strand" || field.key === "subStrand") && (
-                            <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
-                          )}
-                        </label>
-                        <input
-                          type={field.type}
-                          placeholder={field.placeholder}
-                          value={formData[field.key]}
-                          onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                          style={{
-                            ...styles.input,
-                            ...(field.key === "subject" && !formData.subject ? { borderColor: "#fca5a5" } : {}),
-                            ...(field.key === "strand" && !formData.strand ? { borderColor: "#fca5a5" } : {}),
-                            ...(field.key === "subStrand" && !formData.subStrand ? { borderColor: "#fca5a5" } : {})
-                          }}
-                        />
-                      </div>
-                    ))}
+                   {[
+  { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
+  { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
+  { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text", required: true },
+  { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: false },
+  { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number", required: false },
+  { label: "Date", key: "date", placeholder: "", type: "date", required: false },
+  { label: "Start Time", key: "startTime", placeholder: "", type: "time", required: false },
+  { label: "End Time", key: "endTime", placeholder: "", type: "time", required: false },
+  { label: "Teacher Name", key: "teacherName", placeholder: "Enter teacher name", type: "text", required: true },
+  { label: "TSC Number", key: "tscNumber", placeholder: "Enter TSC number", type: "text", required: false },
+  { label: "Number of Boys", key: "boys", placeholder: "0", type: "number", required: false },
+  { label: "Number of Girls", key: "girls", placeholder: "0", type: "number", required: false },
+  { label: "Strand", key: "strand", placeholder: "e.g. Biodiversity", type: "text", required: true },
+  { label: "Sub-strand", key: "subStrand", placeholder: "e.g. Classification", type: "text", required: true },
+].map((field) => (
+  <div key={field.key} style={styles.fieldWrapper}>
+    <label style={styles.label}>
+      {field.label}
+      {field.required && (
+        <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
+      )}
+    </label>
+    <input
+      type={field.type}
+      placeholder={field.placeholder}
+      value={formData[field.key]}
+      onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+      style={{
+        ...styles.input,
+        ...(field.required && !formData[field.key].trim() ? { borderColor: "#fca5a5" } : {})
+      }}
+    />
+  </div>
+))}
                   </div>
                   
                   <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#f0f9ff", borderRadius: "8px", fontSize: "14px", color: "#0369a1" }}>
