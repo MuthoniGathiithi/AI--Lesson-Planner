@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import jsPDF from 'jspdf'
 import {
   LayoutDashboard,
   Plus,
@@ -117,36 +118,35 @@ export default function LessonCreator() {
     }
     setIsLoadingLessons(false)
   }
+
   const handleGenerate = async () => {
-  // Validate required fields
-  const errors = []
-  
-  if (!formData.schoolName.trim()) errors.push("School Name")
-  if (!formData.subject.trim()) errors.push("Subject")
-  if (!formData.className.trim()) errors.push("Class")
-  if (!formData.teacherName.trim()) errors.push("Teacher Name")
-  if (!formData.strand.trim()) errors.push("Strand")
-  if (!formData.subStrand.trim()) errors.push("Sub-strand")
-  
-  if (errors.length > 0) {
-    alert(`Please fill in the following required fields:\n- ${errors.join('\n- ')}`)
-    return
-  }
+    const errors = []
+    
+    if (!formData.schoolName.trim()) errors.push("School Name")
+    if (!formData.subject.trim()) errors.push("Subject")
+    if (!formData.className.trim()) errors.push("Class")
+    if (!formData.teacherName.trim()) errors.push("Teacher Name")
+    if (!formData.strand.trim()) errors.push("Strand")
+    if (!formData.subStrand.trim()) errors.push("Sub-strand")
+    
+    if (errors.length > 0) {
+      alert(`Please fill in the following required fields:\n- ${errors.join('\n- ')}`)
+      return
+    }
 
-  setIsGenerating(true)
-  try {
-    const generatedPlan = await generateLessonPlan(formData)
-    setLessonPlan(generatedPlan)
-    setCurrentLessonId(null)
-    console.log("Generated lesson plan:", generatedPlan)
-  } catch (error) {
-    console.error("Error generating lesson plan:", error)
-    alert("Failed to generate lesson plan. Please check:\n- Backend is running\n- All required fields are filled\n- Strand and sub-strand are provided")
-  } finally {
-    setIsGenerating(false)
+    setIsGenerating(true)
+    try {
+      const generatedPlan = await generateLessonPlan(formData)
+      setLessonPlan(generatedPlan)
+      setCurrentLessonId(null)
+      console.log("Generated lesson plan:", generatedPlan)
+    } catch (error) {
+      console.error("Error generating lesson plan:", error)
+      alert("Failed to generate lesson plan. Please check:\n- Backend is running\n- All required fields are filled\n- Strand and sub-strand are provided")
+    } finally {
+      setIsGenerating(false)
+    }
   }
-}
-
 
   const handleSave = async () => {
     if (!lessonPlan) return
@@ -169,9 +169,7 @@ export default function LessonCreator() {
 
       if (!result.success) {
         alert("Failed to save lesson plan: " + result.error)
-      }
-
-      if (activeTab === "archive") {
+      } else {
         await loadLessons()
       }
     } catch (error) {
@@ -193,181 +191,120 @@ export default function LessonCreator() {
       
       const timeString = typeof admin.time === 'string' ? admin.time : (admin.time?.start ? `${admin.time.start} - ${admin.time.end}` : 'N/A')
       
-      const printWindow = window.open('', '', 'width=800,height=600')
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
       
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Lesson Plan - ${admin.subject || 'Untitled'}</title>
-          <style>
-            body {
-              font-family: 'Times New Roman', serif;
-              padding: 40px;
-              max-width: 850px;
-              margin: 0 auto;
-              line-height: 1.6;
-            }
-            h1 {
-              text-align: center;
-              font-size: 24px;
-              font-weight: 700;
-              letter-spacing: 2px;
-              border-bottom: 2px solid #000;
-              padding-bottom: 10px;
-              margin-bottom: 30px;
-            }
-            h2 {
-              font-size: 14px;
-              font-weight: 700;
-              text-transform: uppercase;
-              margin-top: 25px;
-              margin-bottom: 12px;
-            }
-            h3 {
-              font-size: 13px;
-              font-weight: 700;
-              margin-top: 18px;
-              margin-bottom: 8px;
-              text-decoration: underline;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 20px 0;
-              font-size: 12px;
-            }
-            td {
-              padding: 8px;
-              border-bottom: 1px solid #d1d5db;
-            }
-            td:nth-child(odd) {
-              font-weight: 700;
-              width: 25%;
-            }
-            .section {
-              margin: 20px 0;
-              font-size: 12px;
-            }
-            .outcomes-statement {
-              font-style: italic;
-              margin-bottom: 8px;
-            }
-            .outcome-item {
-              margin-left: 20px;
-              margin-bottom: 6px;
-            }
-            .step {
-              margin: 12px 0 12px 20px;
-              padding: 10px;
-              background: #f9f9f9;
-              border-left: 2px solid #000;
-            }
-            @media print {
-              body { padding: 20px; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>LESSON PLAN</h1>
-          
-          <h2>Administrative Details</h2>
-          <table>
-            <tr>
-              <td>School:</td>
-              <td>${admin.school || 'N/A'}</td>
-              <td>Subject:</td>
-              <td>${admin.subject || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td>Year:</td>
-              <td>${admin.year || new Date().getFullYear()}</td>
-              <td>Term:</td>
-              <td>${admin.term || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td>Date:</td>
-              <td>${admin.date || 'N/A'}</td>
-              <td>Time:</td>
-              <td>${timeString}</td>
-            </tr>
-            <tr>
-              <td>Grade:</td>
-              <td>${admin.grade || 'N/A'}</td>
-              <td>Roll:</td>
-              <td>Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}</td>
-            </tr>
-          </table>
-          
-          <h2>Teacher Details</h2>
-          <table>
-            <tr>
-              <td>Name:</td>
-              <td>${teacher.name || admin.teacher || 'N/A'}</td>
-              <td>TSC Number:</td>
-              <td>${teacher.tscNumber || admin.teacherTSCNumber || 'N/A'}</td>
-            </tr>
-          </table>
-          
-          <div class="section">
-            <h2>Strand</h2>
-            <p>${plan.strand || plan.curriculumAlignment?.strand || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Sub-strand</h2>
-            <p>${plan.subStrand || plan.curriculumAlignment?.substrand || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Lesson Learning Outcomes</h2>
-            ${outcomes.length > 0 ? `
-              <div class="outcomes-statement">${outcomesData.statement || "By the end of the lesson, the learner should be able to:"}</div>
-              ${outcomes.map(outcome => 
-                `<div class="outcome-item">${outcome.id}) ${outcome.outcome}</div>`
-              ).join('')}
-            ` : '<p>N/A</p>'}
-          </div>
-          
-          <div class="section">
-            <h2>Key Inquiry Question</h2>
-            <p>${plan.keyInquiryQuestion || plan.guidingQuestion || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Learning Resources</h2>
-            <p>${(plan.learningResources || []).join(", ") || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Lesson Flow</h2>
-            
-            <h3>Introduction</h3>
-            <p>${plan.lessonFlow?.introduction?.description || 'N/A'}</p>
-            
-            <h3>Development</h3>
-            ${(plan.lessonFlow?.development || []).map(step => `
-              <div class="step">
-                <strong>Step ${step.step}:</strong><br>
-                ${step.description || step.title || 'N/A'}
-                ${step.activity ? `<br><strong>Activity:</strong> ${step.activity}` : ''}
-              </div>
-            `).join('') || '<p>N/A</p>'}
-            
-            <h3>Conclusion</h3>
-            <p>${plan.lessonFlow?.conclusion?.description || 'N/A'}</p>
-          </div>
-        </body>
-        </html>
-      `)
+      let yPosition = 20
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const margin = 15
+      const contentWidth = pageWidth - (2 * margin)
       
-      printWindow.document.close()
-      printWindow.focus()
+      const addText = (text, fontSize = 11, isBold = false, indent = 0) => {
+        doc.setFontSize(fontSize)
+        doc.setFont('helvetica', isBold ? 'bold' : 'normal')
+        
+        const lines = doc.splitTextToSize(text, contentWidth - indent)
+        
+        lines.forEach(line => {
+          if (yPosition > 280) {
+            doc.addPage()
+            yPosition = 20
+          }
+          doc.text(line, margin + indent, yPosition)
+          yPosition += fontSize * 0.5
+        })
+        yPosition += 2
+      }
       
-      setTimeout(() => {
-        printWindow.print()
-        printWindow.close()
-      }, 250)
+      const addSection = (title) => {
+        yPosition += 5
+        doc.setFontSize(12)
+        doc.setFont('helvetica', 'bold')
+        doc.text(title.toUpperCase(), margin, yPosition)
+        yPosition += 7
+        doc.line(margin, yPosition, pageWidth - margin, yPosition)
+        yPosition += 5
+      }
+      
+      doc.setFontSize(18)
+      doc.setFont('helvetica', 'bold')
+      doc.text('LESSON PLAN', pageWidth / 2, yPosition, { align: 'center' })
+      yPosition += 10
+      doc.line(margin, yPosition, pageWidth - margin, yPosition)
+      yPosition += 10
+      
+      addSection('Administrative Details')
+      addText(`School: ${admin.school || 'N/A'}`, 10)
+      addText(`Subject: ${admin.subject || 'N/A'}`, 10)
+      addText(`Year: ${admin.year || new Date().getFullYear()} | Term: ${admin.term || 'N/A'}`, 10)
+      addText(`Date: ${admin.date || 'N/A'} | Time: ${timeString}`, 10)
+      addText(`Grade: ${admin.grade || 'N/A'}`, 10)
+      addText(`Roll: Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}`, 10)
+      
+      addSection('Teacher Details')
+      addText(`Name: ${teacher.name || admin.teacher || 'N/A'}`, 10)
+      addText(`TSC Number: ${teacher.tscNumber || admin.teacherTSCNumber || 'N/A'}`, 10)
+      
+      addSection('Strand')
+      addText(plan.strand || plan.curriculumAlignment?.strand || 'N/A', 10)
+      
+      addSection('Sub-strand')
+      addText(plan.subStrand || plan.curriculumAlignment?.substrand || 'N/A', 10)
+      
+      addSection('Lesson Learning Outcomes')
+      addText(outcomesData.statement || "By the end of the lesson, the learner should be able to:", 10, true)
+      yPosition += 2
+      outcomes.forEach(outcome => {
+        addText(`${outcome.id}) ${outcome.outcome}`, 10, false, 5)
+      })
+      
+      addSection('Key Inquiry Question')
+      addText(plan.keyInquiryQuestion || plan.guidingQuestion || 'N/A', 10)
+      
+      addSection('Learning Resources')
+      const resources = plan.learningResources || []
+      if (resources.length > 0) {
+        addText(resources.join(", "), 10)
+      } else {
+        addText('N/A', 10)
+      }
+      
+      addSection('Lesson Flow')
+      
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Introduction:', margin, yPosition)
+      yPosition += 5
+      addText(plan.lessonFlow?.introduction?.description || 'N/A', 10)
+      
+      yPosition += 3
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Development:', margin, yPosition)
+      yPosition += 5
+      
+      const development = plan.lessonFlow?.development || []
+      development.forEach((step, index) => {
+        addText(`Step ${step.step}:`, 10, true)
+        addText(step.description || step.title || 'N/A', 10, false, 5)
+        if (step.activity) {
+          addText(`Activity: ${step.activity}`, 10, false, 5)
+        }
+        if (index < development.length - 1) yPosition += 3
+      })
+      
+      yPosition += 3
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Conclusion:', margin, yPosition)
+      yPosition += 5
+      addText(plan.lessonFlow?.conclusion?.description || 'N/A', 10)
+      
+      const fileName = `lesson-plan-${admin.subject || 'untitled'}-${admin.date || 'no-date'}.pdf`
+      doc.save(fileName)
       
       return { success: true }
     } catch (error) {
@@ -382,7 +319,7 @@ export default function LessonCreator() {
       const result = await downloadAsPdf(lesson)
 
       if (result.success) {
-        alert(`Lesson plan downloaded successfully as PDF!`)
+        alert(`Lesson plan downloaded successfully!`)
       } else {
         alert(`Failed to download: ${result.error}`)
       }
@@ -861,126 +798,216 @@ export default function LessonCreator() {
         >
           {activeTab === "dashboard" && (
             <div style={styles.dashboardLayout}>
-              <div 
-                className={isMobile ? 'stats-row-mobile' : ''}
-                style={styles.statsRow}
-              >
-                <div style={{...styles.statCard, ...styles.statCardBlue}}>
-                  <div style={styles.statHeader}>
-                    <div style={styles.statIcon}>
-                      <FileText size={24} />
-                    </div>
-                    <div style={styles.statPercentage}>
-                      {savedLessons.length > 0 ? "100%" : "0%"}
-                    </div>
+              {savedLessons.length === 0 ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '400px',
+                  padding: '40px 20px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    fontSize: '64px',
+                    marginBottom: '20px'
+                  }}>📚</div>
+                  <div style={{
+                    fontSize: '24px',
+                    fontWeight: '600',
+                    color: '#1f2937',
+                    marginBottom: '10px'
+                  }}>
+                    No Lessons Yet
                   </div>
-                  <div style={styles.statValue}>{savedLessons.length.toLocaleString()}</div>
-                  <div style={styles.statSubtext}>Total Lessons</div>
-                </div>
-
-                <div style={{...styles.statCard, ...styles.statCardPurple}}>
-                  <div style={styles.statHeader}>
-                    <div style={styles.statIcon}>
-                      <Archive size={24} />
-                    </div>
-                    <div style={styles.statPercentage}>
-                      {savedLessons.filter((l) => {
-                        const lessonDate = new Date(l.savedDate)
-                        const weekAgo = new Date()
-                        weekAgo.setDate(weekAgo.getDate() - 7)
-                        return lessonDate >= weekAgo
-                      }).length > 0 ? "+12%" : "0%"}
-                    </div>
-                  </div>
-                  <div style={styles.statValue}>
-                    {savedLessons.filter((l) => {
-                      const lessonDate = new Date(l.savedDate)
-                      const weekAgo = new Date()
-                      weekAgo.setDate(weekAgo.getDate() - 7)
-                      return lessonDate >= weekAgo
-                    }).length.toLocaleString()}
-                  </div>
-                  <div style={styles.statSubtext}>This Week</div>
-                </div>
-              </div>
-
-              <div style={styles.lessonsSection}>
-                <div style={styles.sectionHeader}>
-                  <h2 style={styles.sectionTitle}>Recent Lessons</h2>
-                  <button onClick={() => setActiveTab("archive")} style={styles.viewAllButton}>
-                    View All
+                  <p style={{
+                    fontSize: '16px',
+                    color: '#6b7280',
+                    marginBottom: '30px',
+                    maxWidth: '400px'
+                  }}>
+                    Create your first lesson plan to get started. It only takes a few minutes!
+                  </p>
+                  <button 
+                    onClick={() => setActiveTab("create")} 
+                    style={{
+                      padding: '14px 28px',
+                      backgroundColor: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#2563eb'
+                      e.target.style.transform = 'translateY(-2px)'
+                      e.target.style.boxShadow = '0 6px 8px rgba(59, 130, 246, 0.4)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = '#3b82f6'
+                      e.target.style.transform = 'translateY(0)'
+                      e.target.style.boxShadow = '0 4px 6px rgba(59, 130, 246, 0.3)'
+                    }}
+                  >
+                    <Plus size={22} />
+                    <span>Create Your First Lesson Plan</span>
                   </button>
                 </div>
-
-                <div style={styles.tableContainer}>
-                  {filteredLessons.length === 0 ? (
-                    <div style={styles.emptyState}>
-                      <div style={styles.emptyText}>
-                        {searchQuery ? "No lessons match your search" : "No lessons yet"}
+              ) : (
+                <>
+                  <div 
+                    className={isMobile ? 'stats-row-mobile' : ''}
+                    style={styles.statsRow}
+                  >
+                    <div style={{...styles.statCard, ...styles.statCardBlue}}>
+                      <div style={styles.statHeader}>
+                        <div style={styles.statIcon}>
+                          <FileText size={24} />
+                        </div>
+                        <div style={styles.statPercentage}>
+                          {savedLessons.length > 0 ? "100%" : "0%"}
+                        </div>
                       </div>
-                      <p style={styles.emptyDescription}>
-                        {searchQuery
-                          ? "Try a different search term"
-                          : "Create your first lesson plan to get started"}
-                      </p>
+                      <div style={styles.statValue}>{savedLessons.length.toLocaleString()}</div>
+                      <div style={styles.statSubtext}>Total Lessons</div>
                     </div>
-                  ) : (
-                    <div style={styles.tableWrapper}>
-                      <table style={styles.table}>
-                        <thead>
-                          <tr style={styles.tableHeader}>
-                            <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
-                            <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
-                            <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
-                            <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
-                            <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
-                            <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredLessons.slice(0, 5).map((lesson) => {
-                            const plan = lesson.lessonPlan || lesson
-                            return (
-                              <tr key={lesson.dbId} style={styles.tableRow}>
-                                <td style={styles.td}>
-                                  {plan.administrativeDetails?.subject || plan.keyInquiryQuestion?.substring(0, 30) || plan.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
-                                </td>
-                                <td style={styles.td}>{plan.administrativeDetails?.grade || "N/A"}</td>
-                                <td style={styles.td}>{plan.administrativeDetails?.class || "N/A"}</td>
-                                <td style={styles.td}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</td>
-                                <td style={styles.td}>{lesson.savedDate}</td>
-                                <td style={styles.td}>
-                                  <div style={styles.actionButtonGroup}>
-                                    <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
-                                      <Eye size={16} />
-                                      <span>View</span>
-                                    </button>
-                                    <button 
-                                      onClick={() => handleDownload(lesson, 'pdf')} 
-                                      style={styles.downloadButtonSmall}
-                                      disabled={isDownloading}
-                                      title="Download"
-                                    >
-                                      <Download size={16} />
-                                    </button>
-                                    <button 
-                                      onClick={() => handleDelete(lesson)} 
-                                      style={styles.deleteButtonSmall}
-                                      title="Delete"
-                                    >
-                                      <Trash2 size={16} />
-                                    </button>
-                                  </div>
-                                </td>
+
+                    <div style={{...styles.statCard, ...styles.statCardPurple}}>
+                      <div style={styles.statHeader}>
+                        <div style={styles.statIcon}>
+                          <Archive size={24} />
+                        </div>
+                        <div style={styles.statPercentage}>
+                          {savedLessons.filter((l) => {
+                            const lessonDate = new Date(l.savedDate)
+                            const weekAgo = new Date()
+                            weekAgo.setDate(weekAgo.getDate() - 7)
+                            return lessonDate >= weekAgo
+                          }).length > 0 ? "+12%" : "0%"}
+                        </div>
+                      </div>
+                      <div style={styles.statValue}>
+                        {savedLessons.filter((l) => {
+                          const lessonDate = new Date(l.savedDate)
+                          const weekAgo = new Date()
+                          weekAgo.setDate(weekAgo.getDate() - 7)
+                          return lessonDate >= weekAgo
+                        }).length.toLocaleString()}
+                      </div>
+                      <div style={styles.statSubtext}>This Week</div>
+                    </div>
+                  </div>
+
+                  <div style={styles.lessonsSection}>
+                    <div style={styles.sectionHeader}>
+                      <h2 style={styles.sectionTitle}>Recent Lessons</h2>
+                      <div style={{display: 'flex', gap: '10px'}}>
+                        <button 
+                          onClick={() => setActiveTab("create")} 
+                          style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#3b82f6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'background-color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                        >
+                          <Plus size={16} />
+                          <span>New Lesson</span>
+                        </button>
+                        <button onClick={() => setActiveTab("archive")} style={styles.viewAllButton}>
+                          View All
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={styles.tableContainer}>
+                      {filteredLessons.length === 0 ? (
+                        <div style={styles.emptyState}>
+                          <div style={styles.emptyText}>
+                            {searchQuery ? "No lessons match your search" : "No lessons yet"}
+                          </div>
+                          <p style={styles.emptyDescription}>
+                            {searchQuery
+                              ? "Try a different search term"
+                              : "Create your first lesson plan to get started"}
+                          </p>
+                        </div>
+                      ) : (
+                        <div style={styles.tableWrapper}>
+                          <table style={styles.table}>
+                            <thead>
+                              <tr style={styles.tableHeader}>
+                                <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
+                                <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
+                                <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
+                                <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
+                                <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
+                                <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
                               </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
+                            </thead>
+                            <tbody>
+                              {filteredLessons.slice(0, 5).map((lesson) => {
+                                const plan = lesson.lessonPlan || lesson
+                                return (
+                                  <tr key={lesson.dbId} style={styles.tableRow}>
+                                    <td style={styles.td}>
+                                      {plan.administrativeDetails?.subject || plan.keyInquiryQuestion?.substring(0, 30) || plan.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
+                                    </td>
+                                    <td style={styles.td}>{plan.administrativeDetails?.grade || "N/A"}</td>
+                                    <td style={styles.td}>{plan.administrativeDetails?.class || "N/A"}</td>
+                                    <td style={styles.td}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</td>
+                                    <td style={styles.td}>{lesson.savedDate}</td>
+                                    <td style={styles.td}>
+                                      <div style={styles.actionButtonGroup}>
+                                        <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
+                                          <Eye size={16} />
+                                          <span>View</span>
+                                        </button>
+                                        <button 
+                                          onClick={() => handleDownload(lesson, 'pdf')} 
+                                          style={styles.downloadButtonSmall}
+                                          disabled={isDownloading}
+                                          title="Download"
+                                        >
+                                          <Download size={16} />
+                                        </button>
+                                        <button 
+                                          onClick={() => handleDelete(lesson)} 
+                                          style={styles.deleteButtonSmall}
+                                          title="Delete"
+                                        >
+                                          <Trash2 size={16} />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                )
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -1058,7 +1085,7 @@ export default function LessonCreator() {
                         style={styles.pdfButton}
                       >
                         <Download size={16} />
-                        <span>{isDownloading ? "Printing..." : "Print PDF"}</span>
+                        <span>{isDownloading ? "Downloading..." : "Download PDF"}</span>
                       </button>
                       <button onClick={handleSave} disabled={isSaving} style={styles.saveButton}>
                         <Save size={16} />
@@ -1351,6 +1378,8 @@ export default function LessonCreator() {
 }
 
 const styles = {
+  // Add your styles object here
+
   container: {
     display: "flex",
     minHeight: "100vh",
