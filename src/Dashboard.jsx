@@ -754,7 +754,7 @@ export default function LessonCreator() {
       >
         <div style={styles.sidebarHeader}>
           <div style={styles.logo}>
-            <div style={styles.logoText}>Funza</div>
+            <div style={styles.logoText}>FunzoIQ</div>
           </div>
         </div>
 
