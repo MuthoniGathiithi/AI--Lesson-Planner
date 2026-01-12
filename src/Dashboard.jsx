@@ -811,7 +811,7 @@ export default function LessonCreator() {
                   <div style={{
                     fontSize: '64px',
                     marginBottom: '20px'
-                  }}>📚</div>
+                  }}></div>
                   <div style={{
                     fontSize: '24px',
                     fontWeight: '600',
@@ -824,9 +824,10 @@ export default function LessonCreator() {
                     fontSize: '16px',
                     color: '#6b7280',
                     marginBottom: '30px',
-                    maxWidth: '400px'
+                    maxWidth: '400px',
+                    fontFamily: 'Inter, sans-serif'
                   }}>
-                    Create your first lesson plan to get started. It only takes a few minutes!
+                    Create your first lesson plan to get started.
                   </p>
                   <button 
                     onClick={() => setActiveTab("create")} 
