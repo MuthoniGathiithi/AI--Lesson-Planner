@@ -78,11 +78,12 @@ export default function LessonCreator() {
     } else {
       const query = searchQuery.toLowerCase()
       const filtered = savedLessons.filter((lesson) => {
-        const subject = lesson.administrativeDetails?.subject?.toLowerCase() || ""
-        const grade = lesson.administrativeDetails?.grade?.toString().toLowerCase() || ""
-        const className = lesson.administrativeDetails?.class?.toLowerCase() || ""
-        const teacher = lesson.administrativeDetails?.teacher?.toLowerCase() || ""
-        const question = lesson.guidingQuestion?.toLowerCase() || ""
+        const plan = lesson.lessonPlan || lesson
+        const subject = plan.administrativeDetails?.subject?.toLowerCase() || ""
+        const grade = plan.administrativeDetails?.grade?.toString().toLowerCase() || ""
+        const className = plan.administrativeDetails?.class?.toLowerCase() || ""
+        const teacher = plan.teacherDetails?.name?.toLowerCase() || plan.administrativeDetails?.teacher?.toLowerCase() || ""
+        const question = plan.keyInquiryQuestion?.toLowerCase() || plan.guidingQuestion?.toLowerCase() || ""
 
         return (
           subject.includes(query) ||
@@ -188,6 +189,8 @@ export default function LessonCreator() {
       const outcomesData = plan.lessonLearningOutcomes || {}
       const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
       
+      const timeString = typeof admin.time === 'string' ? admin.time : (admin.time?.start ? `${admin.time.start} - ${admin.time.end}` : 'N/A')
+      
       const printWindow = window.open('', '', 'width=800,height=600')
       
       printWindow.document.write(`
@@ -284,7 +287,7 @@ export default function LessonCreator() {
               <td>Date:</td>
               <td>${admin.date || 'N/A'}</td>
               <td>Time:</td>
-              <td>${admin.time || 'N/A'}</td>
+              <td>${timeString}</td>
             </tr>
             <tr>
               <td>Grade:</td>
@@ -403,42 +406,44 @@ export default function LessonCreator() {
     }
   }
 
-const handleViewLesson = (lesson) => {
-  // Check if lesson already has lessonPlan root (new structure)
-  if (lesson.lessonPlan) {
-    // New structure - use as-is
-    setLessonPlan(lesson)
-  } else {
-    // Old structure - wrap it
-    setLessonPlan({
-      lessonPlan: {
-        administrativeDetails: lesson.administrativeDetails || {},
-        teacherDetails: {
-          name: lesson.administrativeDetails?.teacher || '',
-          tscNumber: lesson.administrativeDetails?.teacherTSCNumber || ''
-        },
-        strand: lesson.curriculumAlignment?.strand || '',
-        subStrand: lesson.curriculumAlignment?.substrand || '',
-        lessonLearningOutcomes: {
-          statement: "By the end of the lesson, the learner should be able to:",
-          outcomes: lesson.learningOutcomes || []
-        },
-        keyInquiryQuestion: lesson.guidingQuestion || '',
-        learningResources: lesson.learningResources || [],
-        lessonFlow: lesson.lessonFlow || {
-          introduction: { description: '' },
-          development: [],
-          conclusion: { description: '' }
+  const handleViewLesson = (lesson) => {
+    if (lesson.lessonPlan) {
+      setLessonPlan(lesson)
+    } else {
+      const timeObj = lesson.administrativeDetails?.time
+      const timeString = typeof timeObj === 'string' ? timeObj : (timeObj?.start ? `${timeObj.start} - ${timeObj.end}` : '')
+      
+      setLessonPlan({
+        lessonPlan: {
+          administrativeDetails: {
+            ...lesson.administrativeDetails,
+            time: timeString
+          },
+          teacherDetails: {
+            name: lesson.administrativeDetails?.teacher || '',
+            tscNumber: lesson.administrativeDetails?.teacherTSCNumber || ''
+          },
+          strand: lesson.curriculumAlignment?.strand || '',
+          subStrand: lesson.curriculumAlignment?.substrand || '',
+          lessonLearningOutcomes: {
+            statement: "By the end of the lesson, the learner should be able to:",
+            outcomes: lesson.learningOutcomes || []
+          },
+          keyInquiryQuestion: lesson.guidingQuestion || '',
+          learningResources: lesson.learningResources || [],
+          lessonFlow: lesson.lessonFlow || {
+            introduction: { description: '' },
+            development: [],
+            conclusion: { description: '' }
+          }
         }
-      }
-    })
+      })
+    }
+    
+    setCurrentLessonId(lesson.dbId)
+    setActiveTab("create")
+    setIsMobileMenuOpen(false)
   }
-  
-  setCurrentLessonId(lesson.dbId)
-  setActiveTab("create")
-  setIsMobileMenuOpen(false)
-}
-   
 
   const handleCreateNew = () => {
     setLessonPlan(null)
@@ -531,7 +536,7 @@ const handleViewLesson = (lesson) => {
     const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
     
     const newOutcomes = [...outcomes]
-    const nextLetter = String.fromCharCode(97 + newOutcomes.length) // a, b, c, d...
+    const nextLetter = String.fromCharCode(97 + newOutcomes.length)
     newOutcomes.push({
       id: nextLetter,
       outcome: "New learning outcome - click to edit"
@@ -563,7 +568,7 @@ const handleViewLesson = (lesson) => {
     const newOutcomes = outcomes.filter((_, i) => i !== index)
     const renumbered = newOutcomes.map((outcome, i) => ({
       ...outcome,
-      id: String.fromCharCode(97 + i) // a, b, c, d...
+      id: String.fromCharCode(97 + i)
     }))
     
     if (lessonPlan.lessonPlan) {
@@ -719,8 +724,8 @@ const handleViewLesson = (lesson) => {
           .stats-row-mobile { grid-template-columns: 1fr !important; }
           .lesson-grid-mobile { grid-template-columns: 1fr !important; }
           .document-page-mobile { padding: 20px 16px !important; }
-          .action-bar-mobile { flex-direction: column !important; }
-          .action-bar-right-mobile { width: 100% !important; flex-direction: column !important; }
+          .action-bar-mobile { flex-direction: column !important; gap: 8px !important; }
+          .action-bar-right-mobile { width: 100% !important; flex-direction: column !important; gap: 8px !important; }
           .doc-table-mobile { font-size: 10px !important; }
           .table-label-cell-mobile { padding: 4px !important; }
           .table-value-cell-mobile { padding: 4px !important; }
@@ -793,7 +798,6 @@ const handleViewLesson = (lesson) => {
           </div>
 
           <div style={styles.navSectionBottom}>
-            <div style={styles.dividerLine}></div>
             <button onClick={handleLogout} style={styles.logoutButton}>
               <LogOut size={20} />
               <span>Log out</span>
@@ -932,33 +936,43 @@ const handleViewLesson = (lesson) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredLessons.slice(0, 5).map((lesson) => (
-                            <tr key={lesson.dbId} style={styles.tableRow}>
-                              <td style={styles.td}>
-                                {lesson.administrativeDetails?.subject || lesson.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
-                              </td>
-                              <td style={styles.td}>{lesson.administrativeDetails?.grade || "N/A"}</td>
-                              <td style={styles.td}>{lesson.administrativeDetails?.class || "N/A"}</td>
-                              <td style={styles.td}>{lesson.administrativeDetails?.teacher || "N/A"}</td>
-                              <td style={styles.td}>{lesson.savedDate}</td>
-                              <td style={styles.td}>
-                                <div style={styles.actionButtonGroup}>
-                                  <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
-                                    <Eye size={16} />
-                                    <span>View</span>
-                                  </button>
-                                  <button 
-                                    onClick={() => handleDownload(lesson, 'pdf')} 
-                                    style={styles.downloadButtonSmall}
-                                    disabled={isDownloading}
-                                    title="Download"
-                                  >
-                                    <Download size={16} />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
+                          {filteredLessons.slice(0, 5).map((lesson) => {
+                            const plan = lesson.lessonPlan || lesson
+                            return (
+                              <tr key={lesson.dbId} style={styles.tableRow}>
+                                <td style={styles.td}>
+                                  {plan.administrativeDetails?.subject || plan.keyInquiryQuestion?.substring(0, 30) || plan.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
+                                </td>
+                                <td style={styles.td}>{plan.administrativeDetails?.grade || "N/A"}</td>
+                                <td style={styles.td}>{plan.administrativeDetails?.class || "N/A"}</td>
+                                <td style={styles.td}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</td>
+                                <td style={styles.td}>{lesson.savedDate}</td>
+                                <td style={styles.td}>
+                                  <div style={styles.actionButtonGroup}>
+                                    <button onClick={() => handleViewLesson(lesson)} style={styles.viewButtonSmall}>
+                                      <Eye size={16} />
+                                      <span>View</span>
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDownload(lesson, 'pdf')} 
+                                      style={styles.downloadButtonSmall}
+                                      disabled={isDownloading}
+                                      title="Download"
+                                    >
+                                      <Download size={16} />
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDelete(lesson)} 
+                                      style={styles.deleteButtonSmall}
+                                      title="Delete"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -1062,7 +1076,6 @@ const handleViewLesson = (lesson) => {
                       <div style={styles.docDivider}></div>
                     </div>
 
-                    {/* ADMINISTRATIVE DETAILS */}
                     <h3 style={styles.sectionTitle}>ADMINISTRATIVE DETAILS</h3>
                     <table 
                       className={isMobile ? 'doc-table-mobile' : ''}
@@ -1096,7 +1109,12 @@ const handleViewLesson = (lesson) => {
                           </td>
                           <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Time:</td>
                           <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.administrativeDetails.time", lessonPlan?.lessonPlan?.administrativeDetails?.time || (lessonPlan?.administrativeDetails?.time?.start ? lessonPlan?.administrativeDetails?.time?.start + " - " + lessonPlan?.administrativeDetails?.time?.end : "N/A"))}
+                            {(() => {
+                              const plan = lessonPlan?.lessonPlan || lessonPlan
+                              const timeValue = plan?.administrativeDetails?.time
+                              const timeString = typeof timeValue === 'string' ? timeValue : (timeValue?.start ? `${timeValue.start} - ${timeValue.end}` : "N/A")
+                              return renderEditableField("lessonPlan.administrativeDetails.time", timeString)
+                            })()}
                           </td>
                         </tr>
                         <tr>
@@ -1116,7 +1134,6 @@ const handleViewLesson = (lesson) => {
                       </tbody>
                     </table>
 
-                    {/* TEACHER DETAILS */}
                     <h3 style={styles.sectionTitle}>TEACHER DETAILS</h3>
                     <table 
                       className={isMobile ? 'doc-table-mobile' : ''}
@@ -1136,19 +1153,16 @@ const handleViewLesson = (lesson) => {
                       </tbody>
                     </table>
 
-                    {/* STRAND */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>STRAND</div>
                       {renderEditableField("lessonPlan.strand", lessonPlan?.lessonPlan?.strand || lessonPlan?.strand || lessonPlan?.curriculumAlignment?.strand, false, "Enter strand")}
                     </div>
 
-                    {/* SUB-STRAND */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>SUB-STRAND</div>
                       {renderEditableField("lessonPlan.subStrand", lessonPlan?.lessonPlan?.subStrand || lessonPlan?.subStrand || lessonPlan?.curriculumAlignment?.substrand, false, "Enter sub-strand")}
                     </div>
 
-                    {/* LESSON LEARNING OUTCOMES */}
                     <div style={styles.section}>
                       <div style={styles.sectionHeaderWithButton}>
                         <div style={styles.sectionTitle}>LESSON LEARNING OUTCOMES</div>
@@ -1181,13 +1195,11 @@ const handleViewLesson = (lesson) => {
                       })()}
                     </div>
 
-                    {/* KEY INQUIRY QUESTION */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>KEY INQUIRY QUESTION</div>
                       {renderEditableField("lessonPlan.keyInquiryQuestion", lessonPlan?.lessonPlan?.keyInquiryQuestion || lessonPlan?.keyInquiryQuestion || lessonPlan?.guidingQuestion, true, "Enter key inquiry question")}
                     </div>
 
-                    {/* LEARNING RESOURCES */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>LEARNING RESOURCES</div>
                       {(() => {
@@ -1197,7 +1209,6 @@ const handleViewLesson = (lesson) => {
                       })()}
                     </div>
 
-                    {/* LESSON FLOW */}
                     <div style={styles.section}>
                       <div style={styles.sectionTitle}>LESSON FLOW</div>
 
@@ -1277,54 +1288,58 @@ const handleViewLesson = (lesson) => {
                   className={isMobile ? 'lesson-grid-mobile' : ''}
                   style={styles.lessonGrid}
                 >
-                  {filteredLessons.map((lesson) => (
-                    <div key={lesson.dbId} style={styles.lessonCard}>
-                      <div style={styles.lessonCardHeader}>
-                        <FileText size={24} style={styles.lessonCardIcon} />
-                      </div>
-                      <div style={styles.lessonCardTitle}>
-                        {lesson.administrativeDetails?.subject ||
-                          lesson.guidingQuestion?.substring(0, 50) ||
-                          "Untitled"}
-                      </div>
-                      <div style={styles.lessonCardMeta}>
-                        <div style={styles.metaRow}>
-                          <span style={styles.metaLabel}>Grade:</span>
-                          <span style={styles.metaValue}>{lesson.administrativeDetails?.grade || "N/A"}</span>
+                  {filteredLessons.map((lesson) => {
+                    const plan = lesson.lessonPlan || lesson
+                    return (
+                      <div key={lesson.dbId} style={styles.lessonCard}>
+                        <div style={styles.lessonCardHeader}>
+                          <FileText size={24} style={styles.lessonCardIcon} />
                         </div>
-                        <div style={styles.metaRow}>
-                          <span style={styles.metaLabel}>Class:</span>
-                          <span style={styles.metaValue}>{lesson.administrativeDetails?.class || "N/A"}</span>
+                        <div style={styles.lessonCardTitle}>
+                          {plan.administrativeDetails?.subject ||
+                            plan.keyInquiryQuestion?.substring(0, 50) ||
+                            plan.guidingQuestion?.substring(0, 50) ||
+                            "Untitled"}
                         </div>
-                        <div style={styles.metaRow}>
-                          <span style={styles.metaLabel}>Teacher:</span>
-                          <span style={styles.metaValue}>{lesson.administrativeDetails?.teacher || "N/A"}</span>
+                        <div style={styles.lessonCardMeta}>
+                          <div style={styles.metaRow}>
+                            <span style={styles.metaLabel}>Grade:</span>
+                            <span style={styles.metaValue}>{plan.administrativeDetails?.grade || "N/A"}</span>
+                          </div>
+                          <div style={styles.metaRow}>
+                            <span style={styles.metaLabel}>Class:</span>
+                            <span style={styles.metaValue}>{plan.administrativeDetails?.class || "N/A"}</span>
+                          </div>
+                          <div style={styles.metaRow}>
+                            <span style={styles.metaLabel}>Teacher:</span>
+                            <span style={styles.metaValue}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</span>
+                          </div>
+                          <div style={styles.metaRow}>
+                            <span style={styles.metaLabel}>Date:</span>
+                            <span style={styles.metaValue}>{lesson.savedDate}</span>
+                          </div>
                         </div>
-                        <div style={styles.metaRow}>
-                          <span style={styles.metaLabel}>Date:</span>
-                          <span style={styles.metaValue}>{lesson.savedDate}</span>
+                        <div style={styles.lessonCardActions}>
+                          <button onClick={() => handleViewLesson(lesson)} style={styles.viewButton}>
+                            <Eye size={16} />
+                            <span>View</span>
+                          </button>
+                          <button 
+                            onClick={() => handleDownload(lesson, 'pdf')} 
+                            style={styles.downloadButtonCard}
+                            disabled={isDownloading}
+                          >
+                            <Download size={16} />
+                            <span>Download</span>
+                          </button>
+                          <button onClick={() => handleDelete(lesson)} style={styles.deleteButtonCard}>
+                            <Trash2 size={16} />
+                            <span>Delete</span>
+                          </button>
                         </div>
                       </div>
-                      <div style={styles.lessonCardActions}>
-                        <button onClick={() => handleViewLesson(lesson)} style={styles.viewButton}>
-                          <Eye size={16} />
-                          <span>View</span>
-                        </button>
-                        <button 
-                          onClick={() => handleDownload(lesson, 'pdf')} 
-                          style={styles.downloadButtonCard}
-                          disabled={isDownloading}
-                        >
-                          <Download size={16} />
-                          <span>Download</span>
-                        </button>
-                        <button onClick={() => handleDelete(lesson)} style={styles.deleteButtonCard}>
-                          <Trash2 size={16} />
-                          <span>Delete</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </>
@@ -1334,12 +1349,6 @@ const handleViewLesson = (lesson) => {
     </div>
   )
 }
-
-//
-
-
-
-// ADD YOUR STYLES OBJECT HERE (const styles = { ... })
 
 const styles = {
   container: {
