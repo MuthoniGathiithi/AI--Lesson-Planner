@@ -404,19 +404,16 @@ export default function LessonCreator() {
   }
 
   const handleViewLesson = (lesson) => {
-    const fullLesson = {
-      administrativeDetails: lesson.administrativeDetails || {},
-      curriculumAlignment: lesson.curriculumAlignment || {},
-      learningOutcomes: lesson.learningOutcomes || [],
-      guidingQuestion: lesson.guidingQuestion || "",
-      learningResources: lesson.learningResources || [],
-      lessonFlow: lesson.lessonFlow || {},
-    }
-    setLessonPlan(fullLesson)
-    setCurrentLessonId(lesson.dbId)
-    setActiveTab("create")
-    setIsMobileMenuOpen(false)
-  }
+  // If lesson has lessonPlan root (new structure), use it directly
+  // Otherwise, wrap it (old structure)
+  const fullLesson = lesson.lessonPlan ? lesson : { lessonPlan: lesson }
+  
+  setLessonPlan(fullLesson)
+  setCurrentLessonId(lesson.dbId)
+  setActiveTab("create")
+  setIsMobileMenuOpen(false)
+}
+   
 
   const handleCreateNew = () => {
     setLessonPlan(null)
