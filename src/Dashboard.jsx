@@ -117,34 +117,36 @@ export default function LessonCreator() {
     }
     setIsLoadingLessons(false)
   }
-
   const handleGenerate = async () => {
-    if (!formData.subject.trim()) {
-      alert("Please enter a subject (e.g., Biology, Geography, Mathematics)")
-      return
-    }
-    if (!formData.strand.trim()) {
-      alert("Please enter a strand")
-      return
-    }
-    if (!formData.subStrand.trim()) {
-      alert("Please enter a sub-strand")
-      return
-    }
-
-    setIsGenerating(true)
-    try {
-      const generatedPlan = await generateLessonPlan(formData)
-      setLessonPlan(generatedPlan)
-      setCurrentLessonId(null)
-      console.log("Generated lesson plan:", generatedPlan)
-    } catch (error) {
-      console.error("Error generating lesson plan:", error)
-      alert("Failed to generate lesson plan. Please check: \n- Backend is running\n- Subject name is correct (typos are handled)\n- Strand and sub-strand are provided")
-    } finally {
-      setIsGenerating(false)
-    }
+  // Validate required fields
+  const errors = []
+  
+  if (!formData.schoolName.trim()) errors.push("School Name")
+  if (!formData.subject.trim()) errors.push("Subject")
+  if (!formData.className.trim()) errors.push("Class")
+  if (!formData.teacherName.trim()) errors.push("Teacher Name")
+  if (!formData.strand.trim()) errors.push("Strand")
+  if (!formData.subStrand.trim()) errors.push("Sub-strand")
+  
+  if (errors.length > 0) {
+    alert(`Please fill in the following required fields:\n- ${errors.join('\n- ')}`)
+    return
   }
+
+  setIsGenerating(true)
+  try {
+    const generatedPlan = await generateLessonPlan(formData)
+    setLessonPlan(generatedPlan)
+    setCurrentLessonId(null)
+    console.log("Generated lesson plan:", generatedPlan)
+  } catch (error) {
+    console.error("Error generating lesson plan:", error)
+    alert("Failed to generate lesson plan. Please check:\n- Backend is running\n- All required fields are filled\n- Strand and sub-strand are provided")
+  } finally {
+    setIsGenerating(false)
+  }
+}
+
 
   const handleSave = async () => {
     if (!lessonPlan) return
