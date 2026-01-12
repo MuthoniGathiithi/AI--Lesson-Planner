@@ -403,12 +403,37 @@ export default function LessonCreator() {
     }
   }
 
-  const handleViewLesson = (lesson) => {
-  // If lesson has lessonPlan root (new structure), use it directly
-  // Otherwise, wrap it (old structure)
-  const fullLesson = lesson.lessonPlan ? lesson : { lessonPlan: lesson }
+const handleViewLesson = (lesson) => {
+  // Check if lesson already has lessonPlan root (new structure)
+  if (lesson.lessonPlan) {
+    // New structure - use as-is
+    setLessonPlan(lesson)
+  } else {
+    // Old structure - wrap it
+    setLessonPlan({
+      lessonPlan: {
+        administrativeDetails: lesson.administrativeDetails || {},
+        teacherDetails: {
+          name: lesson.administrativeDetails?.teacher || '',
+          tscNumber: lesson.administrativeDetails?.teacherTSCNumber || ''
+        },
+        strand: lesson.curriculumAlignment?.strand || '',
+        subStrand: lesson.curriculumAlignment?.substrand || '',
+        lessonLearningOutcomes: {
+          statement: "By the end of the lesson, the learner should be able to:",
+          outcomes: lesson.learningOutcomes || []
+        },
+        keyInquiryQuestion: lesson.guidingQuestion || '',
+        learningResources: lesson.learningResources || [],
+        lessonFlow: lesson.lessonFlow || {
+          introduction: { description: '' },
+          development: [],
+          conclusion: { description: '' }
+        }
+      }
+    })
+  }
   
-  setLessonPlan(fullLesson)
   setCurrentLessonId(lesson.dbId)
   setActiveTab("create")
   setIsMobileMenuOpen(false)
