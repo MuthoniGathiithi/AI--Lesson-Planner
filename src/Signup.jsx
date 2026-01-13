@@ -1,4 +1,5 @@
 "use client"
+import { Link } from "react-router-dom";
 import { useState } from "react"
 import { supabase } from "./supabaseClient"
 import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
@@ -271,16 +272,8 @@ export default function SignUp() {
                   onChange={handleChange}
                   style={styles.checkbox}
                 />
-                <span style={styles.checkboxText}>
-                  I agree to the{" "}
-                  <a href="/terms" style={styles.link}>
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a href="/privacy" style={styles.link}>
-                    Privacy Policy
-                  </a>
-                </span>
+                
+              
               </label>
               {errors.agreeTerms && (
                 <p style={styles.errorText}>{errors.agreeTerms}</p>
@@ -311,12 +304,15 @@ export default function SignUp() {
           </form>
 
           {/* Footer */}
-          <div style={styles.footer}>
-            Already have an account?{" "}
-            <a href="/signin" style={styles.signupLink}>
-              Sign in
-            </a>
-          </div>
+         import { Link } from "react-router-dom";
+
+<div style={styles.footer}>
+  Already have an account?{" "}
+  <Link to="/signin" style={styles.signupLink}>
+    Sign in
+  </Link>
+</div>
+
         </div>
       </div>
     </div>
