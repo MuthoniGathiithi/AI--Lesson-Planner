@@ -1,8 +1,22 @@
 "use client"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 export default function HomePage() {
   const navigate = useNavigate()
+
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" })
+
+  const contactEmail = "gathiithijoyce74@gmail.com"
+
+  const handleContactSubmit = (e) => {
+    e.preventDefault()
+
+    const subject = `FunzoIQ Contact - ${contactForm.name || "Visitor"}`
+    const body = `Name: ${contactForm.name}\nEmail: ${contactForm.email}\n\nMessage:\n${contactForm.message}`
+    const mailto = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.location.href = mailto
+  }
 
   const handleGetStartedClick = () => {
     navigate("/signup")
@@ -34,6 +48,7 @@ export default function HomePage() {
           .mockup-grid { grid-template-columns: 1fr; padding: 20px; }
           .about-grid { grid-template-columns: 1fr; padding: 40px 20px; gap: 40px; }
           .how-it-works-grid { grid-template-columns: 1fr; gap: 40px; }
+          .contact-grid { grid-template-columns: 1fr; padding: 40px 20px; gap: 40px; }
         }
 
         @media (max-width: 768px) {
@@ -54,6 +69,10 @@ export default function HomePage() {
           .step-title { font-size: 1.15rem; }
           .step-desc { font-size: 0.95rem; }
           .mockup-visual { padding: 32px; }
+          .contact-section { padding: 60px 16px !important; }
+          .contact-grid { padding: 32px 16px; gap: 32px; }
+          .contact-grid h2 { font-size: 2rem; }
+          .contact-form-row { grid-template-columns: 1fr !important; }
         }
 
         @media (max-width: 640px) {
@@ -79,6 +98,9 @@ export default function HomePage() {
           .step-desc { font-size: 0.9rem; line-height: 1.6; }
           .mockup-visual { padding: 24px; border-radius: 8px; min-height: 300px; }
           .about-visual { height: auto; min-height: 200px; padding: 24px; }
+          .contact-section { padding: 40px 12px !important; }
+          .contact-grid { padding: 20px 12px; gap: 24px; }
+          .contact-grid h2 { font-size: 1.5rem; margin-bottom: 16px !important; }
         }
 
         @media (max-width: 480px) {
@@ -506,6 +528,159 @@ export default function HomePage() {
             >
               {/* Grid overlay and mockup elements */}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="contact-section"
+        id="contact"
+        style={{ padding: "100px 40px", backgroundColor: "#F3F4F6", borderTop: "1px solid #E5E7EB" }}
+      >
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          <div
+            className="contact-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "60px",
+              alignItems: "start",
+              backgroundColor: "#FFFFFF",
+              borderRadius: "16px",
+              padding: "60px",
+              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.06)",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  display: "inline-block",
+                  padding: "8px 20px",
+                  backgroundColor: "#4F46E5",
+                  color: "#FFFFFF",
+                  borderRadius: "6px",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  marginBottom: "24px",
+                }}
+              >
+                Contact
+              </div>
+              <h2
+                style={{
+                  fontSize: "2.75rem",
+                  fontWeight: 700,
+                  color: "#000",
+                  margin: "0 0 16px 0",
+                  letterSpacing: "-1px",
+                  lineHeight: "1.2",
+                }}
+              >
+                Get in touch
+              </h2>
+              <p style={{ fontSize: "1.05rem", color: "#6B7280", lineHeight: "1.8", margin: "0 0 28px 0" }}>
+                Send a message and I’ll get back to you.
+              </p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <div style={{ fontSize: "0.95rem", color: "#111827", fontWeight: 600 }}>WhatsApp</div>
+                <a
+                  href="https://wa.me/254742278735"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "14px 18px",
+                    backgroundColor: "#111827",
+                    color: "#FFFFFF",
+                    borderRadius: "10px",
+                    textDecoration: "none",
+                    fontWeight: 600,
+                    width: "fit-content",
+                  }}
+                >
+                  Message on WhatsApp (0742278735)
+                </a>
+              </div>
+            </div>
+
+            <form onSubmit={handleContactSubmit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }} className="contact-form-row">
+                <input
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Your name"
+                  style={{
+                    padding: "14px 14px",
+                    borderRadius: "10px",
+                    border: "1px solid #E5E7EB",
+                    outline: "none",
+                    fontSize: "0.95rem",
+                    backgroundColor: "#FFFFFF",
+                  }}
+                />
+                <input
+                  value={contactForm.email}
+                  onChange={(e) => setContactForm((p) => ({ ...p, email: e.target.value }))}
+                  placeholder="Your email"
+                  type="email"
+                  required
+                  style={{
+                    padding: "14px 14px",
+                    borderRadius: "10px",
+                    border: "1px solid #E5E7EB",
+                    outline: "none",
+                    fontSize: "0.95rem",
+                    backgroundColor: "#FFFFFF",
+                  }}
+                />
+              </div>
+              <textarea
+                value={contactForm.message}
+                onChange={(e) => setContactForm((p) => ({ ...p, message: e.target.value }))}
+                placeholder="Your message"
+                required
+                rows={7}
+                style={{
+                  padding: "14px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid #E5E7EB",
+                  outline: "none",
+                  fontSize: "0.95rem",
+                  backgroundColor: "#FFFFFF",
+                  resize: "vertical",
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: "14px 18px",
+                  backgroundColor: "#4F46E5",
+                  color: "#FFFFFF",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = "#4338CA"
+                  e.target.style.transform = "translateY(-2px)"
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = "#4F46E5"
+                  e.target.style.transform = "translateY(0)"
+                }}
+              >
+                Send Email
+              </button>
+              <div style={{ fontSize: "0.85rem", color: "#6B7280" }}>
+                This opens your email app and pre-fills the message.
+              </div>
+            </form>
           </div>
         </div>
       </section>

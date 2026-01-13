@@ -84,6 +84,14 @@ export default function Footer() {
             >
               How It Works
             </div>
+            <div
+              style={{ fontSize: '0.9rem', color: '#9CA3AF', marginBottom: '12px', cursor: 'pointer' }}
+              onClick={() => goToSection('contact')}
+              onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#9CA3AF'}
+            >
+              Contact
+            </div>
           </div>
 
           {/* Legal Links */}

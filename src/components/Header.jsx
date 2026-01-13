@@ -20,7 +20,7 @@ export default function Header() {
       const sections = [
         { id: 'about', name: 'about' },
         { id: 'how-it-works', name: 'how-it-works' },
-        { id: 'pricing', name: 'pricing' }
+        { id: 'contact', name: 'contact' }
       ];
 
       let currentSection = '';
@@ -107,7 +107,7 @@ export default function Header() {
           <button onClick={() => scrollToSection('home')} style={{ ...linkStyle, color: activeSection === 'home' ? activeColor : inactiveColor }}>Home</button>
           <button onClick={() => scrollToSection('about')} style={{ ...linkStyle, color: activeSection === 'about' ? activeColor : inactiveColor }}>About Us</button>
           <button onClick={() => scrollToSection('how-it-works')} style={{ ...linkStyle, color: activeSection === 'how-it-works' ? activeColor : inactiveColor }}>How It Works</button>
-          <button onClick={() => scrollToSection('pricing')} style={{ ...linkStyle, color: activeSection === 'pricing' ? activeColor : inactiveColor }}>Contacts</button>
+          <button onClick={() => scrollToSection('contact')} style={{ ...linkStyle, color: activeSection === 'contact' ? activeColor : inactiveColor }}>Contact</button>
 
           <button onClick={handleSignInClick} style={{ ...linkStyle, fontWeight: 500, color: isActive('/signin') ? activeColor : inactiveColor }}>Sign In</button>
           <button onClick={handleGetStartedClick} style={{
@@ -147,7 +147,7 @@ export default function Header() {
           <button onClick={() => scrollToSection('home')} style={{ ...linkStyle, color: activeSection === 'home' ? activeColor : inactiveColor }}>Home</button>
           <button onClick={() => scrollToSection('about')} style={{ ...linkStyle, color: activeSection === 'about' ? activeColor : inactiveColor }}>About Us</button>
           <button onClick={() => scrollToSection('how-it-works')} style={{ ...linkStyle, color: activeSection === 'how-it-works' ? activeColor : inactiveColor }}>How It Works</button>
-          <button onClick={() => scrollToSection('pricing')} style={{ ...linkStyle, color: activeSection === 'pricing' ? activeColor : inactiveColor }}>Contacts</button>
+          <button onClick={() => scrollToSection('contact')} style={{ ...linkStyle, color: activeSection === 'contact' ? activeColor : inactiveColor }}>Contact</button>
           <button onClick={handleSignInClick} style={{ ...linkStyle, fontWeight: 500, color: isActive('/signin') ? activeColor : inactiveColor }}>Sign In</button>
           <button onClick={handleGetStartedClick} style={{
             background: primaryButtonBg,
