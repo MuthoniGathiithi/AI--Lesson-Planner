@@ -2,6 +2,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { jsPDF } from "jspdf"
+import { saveAs } from "file-saver"
 import {
   LayoutDashboard,
   Plus,
@@ -191,185 +193,142 @@ export default function LessonCreator() {
       const roll = admin.roll || admin.studentEnrollment || {}
       const outcomesData = plan.lessonLearningOutcomes || {}
       const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
-      
-      const timeString = typeof admin.time === 'string' ? admin.time : (admin.time?.start ? `${admin.time.start} - ${admin.time.end}` : 'N/A')
-      
-      const printWindow = window.open('', '', 'width=800,height=600')
-      
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Lesson Plan - ${admin.subject || 'Untitled'}</title>
-          <style>
-            body {
-              font-family: 'Times New Roman', serif;
-              padding: 40px;
-              max-width: 850px;
-              margin: 0 auto;
-              line-height: 1.6;
-            }
-            h1 {
-              text-align: center;
-              font-size: 24px;
-              font-weight: 700;
-              letter-spacing: 2px;
-              border-bottom: 2px solid #000;
-              padding-bottom: 10px;
-              margin-bottom: 30px;
-            }
-            h2 {
-              font-size: 14px;
-              font-weight: 700;
-              text-transform: uppercase;
-              margin-top: 25px;
-              margin-bottom: 12px;
-            }
-            h3 {
-              font-size: 13px;
-              font-weight: 700;
-              margin-top: 18px;
-              margin-bottom: 8px;
-              text-decoration: underline;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 20px 0;
-              font-size: 12px;
-            }
-            td {
-              padding: 8px;
-              border-bottom: 1px solid #d1d5db;
-            }
-            td:nth-child(odd) {
-              font-weight: 700;
-              width: 25%;
-            }
-            .section {
-              margin: 20px 0;
-              font-size: 12px;
-            }
-            .outcomes-statement {
-              font-style: italic;
-              margin-bottom: 8px;
-            }
-            .outcome-item {
-              margin-left: 20px;
-              margin-bottom: 6px;
-            }
-            .step {
-              margin: 12px 0 12px 20px;
-              padding: 10px;
-              background: #f9f9f9;
-              border-left: 2px solid #000;
-            }
-            @media print {
-              body { padding: 20px; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>LESSON PLAN</h1>
-          
-          <h2>Administrative Details</h2>
-          <table>
-            <tr>
-              <td>School:</td>
-              <td>${admin.school || 'N/A'}</td>
-              <td>Subject:</td>
-              <td>${admin.subject || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td>Year:</td>
-              <td>${admin.year || new Date().getFullYear()}</td>
-              <td>Term:</td>
-              <td>${admin.term || 'N/A'}</td>
-            </tr>
-            <tr>
-              <td>Date:</td>
-              <td>${admin.date || 'N/A'}</td>
-              <td>Time:</td>
-              <td>${timeString}</td>
-            </tr>
-            <tr>
-              <td>Grade:</td>
-              <td>${admin.grade || 'N/A'}</td>
-              <td>Roll:</td>
-              <td>Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}</td>
-            </tr>
-          </table>
-          
-          <h2>Teacher Details</h2>
-          <table>
-            <tr>
-              <td>Name:</td>
-              <td>${teacher.name || admin.teacher || 'N/A'}</td>
-              <td>TSC Number:</td>
-              <td>${teacher.tscNumber || admin.teacherTSCNumber || 'N/A'}</td>
-            </tr>
-          </table>
-          
-          <div class="section">
-            <h2>Strand</h2>
-            <p>${plan.strand || plan.curriculumAlignment?.strand || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Sub-strand</h2>
-            <p>${plan.subStrand || plan.curriculumAlignment?.substrand || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Lesson Learning Outcomes</h2>
-            ${outcomes.length > 0 ? `
-              <div class="outcomes-statement">${outcomesData.statement || "By the end of the lesson, the learner should be able to:"}</div>
-              ${outcomes.map(outcome => 
-                `<div class="outcome-item">${outcome.id}) ${outcome.outcome}</div>`
-              ).join('')}
-            ` : '<p>N/A</p>'}
-          </div>
-          
-          <div class="section">
-            <h2>Key Inquiry Question</h2>
-            <p>${plan.keyInquiryQuestion || plan.guidingQuestion || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Learning Resources</h2>
-            <p>${(plan.learningResources || []).join(", ") || 'N/A'}</p>
-          </div>
-          
-          <div class="section">
-            <h2>Lesson Flow</h2>
-            
-            <h3>Introduction</h3>
-            <p>${plan.lessonFlow?.introduction?.description || 'N/A'}</p>
-            
-            <h3>Development</h3>
-            ${(plan.lessonFlow?.development || []).map(step => `
-              <div class="step">
-                <strong>Step ${step.step}:</strong><br>
-                ${step.description || step.title || 'N/A'}
-                ${step.activity ? `<br><strong>Activity:</strong> ${step.activity}` : ''}
-              </div>
-            `).join('') || '<p>N/A</p>'}
-            
-            <h3>Conclusion</h3>
-            <p>${plan.lessonFlow?.conclusion?.description || 'N/A'}</p>
-          </div>
-        </body>
-        </html>
-      `)
-      
-      printWindow.document.close()
-      printWindow.focus()
-      
-      setTimeout(() => {
-        printWindow.print()
-        printWindow.close()
-      }, 250)
-      
+
+      const subject = admin.subject || "Untitled Lesson"
+      const dateString = admin.date || new Date().toISOString().split("T")[0]
+      const safeSubject = String(subject).replace(/[^a-z0-9\- _]/gi, "").trim() || "Lesson Plan"
+      const filename = `${safeSubject} - ${dateString}.pdf`
+
+      const timeString =
+        typeof admin.time === "string" ? admin.time : admin.time?.start ? `${admin.time.start} - ${admin.time.end}` : "N/A"
+
+      const doc = new jsPDF({ unit: "pt", format: "a4" })
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const margin = 48
+      const maxWidth = pageWidth - margin * 2
+      let y = margin
+
+      const ensureSpace = (needed = 18) => {
+        if (y + needed > pageHeight - margin) {
+          doc.addPage()
+          y = margin
+        }
+      }
+
+      const addTitle = (text) => {
+        doc.setFont("times", "bold")
+        doc.setFontSize(18)
+        ensureSpace(28)
+        doc.text(text, pageWidth / 2, y, { align: "center" })
+        y += 26
+      }
+
+      const addSection = (text) => {
+        doc.setFont("times", "bold")
+        doc.setFontSize(13)
+        ensureSpace(22)
+        doc.text(String(text).toUpperCase(), margin, y)
+        y += 18
+        doc.setDrawColor(0)
+        doc.setLineWidth(0.5)
+        doc.line(margin, y, pageWidth - margin, y)
+        y += 14
+      }
+
+      const addKeyValue = (label, value) => {
+        doc.setFontSize(11)
+        doc.setFont("times", "bold")
+        const labelText = `${label}: `
+        doc.text(labelText, margin, y)
+
+        const labelWidth = doc.getTextWidth(labelText)
+        doc.setFont("times", "normal")
+        const valueLines = doc.splitTextToSize(String(value ?? "N/A"), maxWidth - labelWidth)
+        ensureSpace(valueLines.length * 14 + 6)
+        doc.text(valueLines, margin + labelWidth, y)
+        y += valueLines.length * 14 + 6
+      }
+
+      const addParagraph = (text) => {
+        doc.setFont("times", "normal")
+        doc.setFontSize(11)
+        const lines = doc.splitTextToSize(String(text ?? "N/A"), maxWidth)
+        ensureSpace(lines.length * 14 + 6)
+        doc.text(lines, margin, y)
+        y += lines.length * 14 + 6
+      }
+
+      addTitle("LESSON PLAN")
+
+      addSection("Administrative Details")
+      addKeyValue("School", admin.school)
+      addKeyValue("Subject", subject)
+      addKeyValue("Year", admin.year || new Date().getFullYear())
+      addKeyValue("Term", admin.term)
+      addKeyValue("Date", admin.date)
+      addKeyValue("Time", timeString)
+      addKeyValue(
+        "Roll",
+        `Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}`
+      )
+
+      addSection("Teacher Details")
+      addKeyValue("Name", teacher.name || admin.teacher)
+      addKeyValue("TSC Number", teacher.tscNumber || admin.teacherTSCNumber)
+
+      addSection("Strand")
+      addParagraph(plan.strand || plan.curriculumAlignment?.strand)
+
+      addSection("Sub-strand")
+      addParagraph(plan.subStrand || plan.curriculumAlignment?.substrand)
+
+      addSection("Lesson Learning Outcomes")
+      addParagraph(outcomesData.statement || "By the end of the lesson, the learner should be able to:")
+      if (outcomes.length > 0) {
+        outcomes.forEach((o) => {
+          addParagraph(`${o.id || "-"}) ${o.outcome || ""}`)
+        })
+      } else {
+        addParagraph("N/A")
+      }
+
+      addSection("Key Inquiry Question")
+      addParagraph(plan.keyInquiryQuestion || plan.guidingQuestion)
+
+      addSection("Learning Resources")
+      addParagraph((plan.learningResources || []).join(", ") || "N/A")
+
+      addSection("Lesson Flow")
+      addKeyValue("Introduction", plan.lessonFlow?.introduction?.description || "N/A")
+      addSection("Development")
+      const devSteps = plan.lessonFlow?.development || []
+      if (devSteps.length > 0) {
+        devSteps.forEach((step) => {
+          addParagraph(`Step ${step.step || ""}: ${step.description || step.title || "N/A"}`)
+          if (step.activity) addParagraph(`Activity: ${step.activity}`)
+        })
+      } else {
+        addParagraph("N/A")
+      }
+      addSection("Conclusion")
+      addParagraph(plan.lessonFlow?.conclusion?.description || "N/A")
+
+      const blob = doc.output("blob")
+      const file = new File([blob], filename, { type: "application/pdf" })
+
+      if (typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename })
+      } else {
+        try {
+          saveAs(blob, filename)
+        } catch (e) {
+          const url = URL.createObjectURL(blob)
+          window.open(url, "_blank")
+          setTimeout(() => URL.revokeObjectURL(url), 60_000)
+        }
+      }
+
       return { success: true }
     } catch (error) {
       console.error("PDF generation error:", error)
@@ -935,7 +894,7 @@ export default function LessonCreator() {
               <div style={styles.lessonsSection}>
                 <div style={styles.sectionHeader}>
                   <h2 style={styles.sectionTitle}>Recent Lessons</h2>
-                  <div style={styles.sectionHeaderActions}>
+                  <div style={{ ...styles.sectionHeaderActions, ...(isMobile ? styles.sectionHeaderActionsMobile : {}) }}>
                     <button
                       onClick={() => {
                         handleCreateNew()
@@ -1483,6 +1442,12 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "12px",
+  },
+  sectionHeaderActionsMobile: {
+    width: "100%",
+    justifyContent: "flex-start",
+    flexDirection: "column",
+    alignItems: "stretch",
   },
   createPlanButton: {
     display: "flex",
