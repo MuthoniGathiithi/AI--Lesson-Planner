@@ -17,7 +17,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [infoMessage, setInfoMessage] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
 
   const validateForm = () => {
     const newErrors = {}
@@ -40,12 +40,14 @@ export default function SignUp() {
       [name]: type === "checkbox" ? checked : value,
     }))
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }))
-    setInfoMessage("")
+    setSuccessMessage("")
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setInfoMessage("")
+    setSuccessMessage("")
+    setErrors({})
+    
     const newErrors = validateForm()
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -54,17 +56,33 @@ export default function SignUp() {
 
     setLoading(true)
     try {
+      // Check if user already exists
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', formData.email)
+        .single()
+
+      if (existingUser) {
+        setErrors({ email: "This email is already registered. Please sign in." })
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          data: { full_name: formData.name },
+          data: { 
+            full_name: formData.name 
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
         },
       })
 
       if (error) {
-        if (error.message.includes("already registered")) {
-          setErrors({ email: "This email is already in use" })
+        if (error.message.includes("already registered") || error.message.includes("User already registered")) {
+          setErrors({ email: "This email is already registered. Please sign in." })
         } else {
           setErrors({ general: error.message })
         }
@@ -72,24 +90,25 @@ export default function SignUp() {
         return
       }
 
-      if (data.user?.confirmation_sent_at) {
-        setInfoMessage(
-          "Account created! Please check your email to verify your account before signing in."
-        )
-        setLoading(false)
-        return
-      }
-
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
+      // Show success message
+      setSuccessMessage(
+        "Account created successfully! Please check your email to verify your account before signing in."
+      )
+      
+      // Clear form
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        agreeTerms: false,
       })
 
-      if (signInError) {
-        setErrors({ general: signInError.message })
-      } else {
-        navigate("/dashboard")
-      }
+      // Redirect to sign in after 3 seconds
+      setTimeout(() => {
+        navigate("/signin")
+      }, 3000)
+
     } catch (err) {
       setErrors({ general: "Something went wrong. Please try again." })
       console.error(err)
@@ -270,9 +289,9 @@ export default function SignUp() {
               )}
             </div>
 
-            {/* Info message */}
-            {infoMessage && (
-              <div style={styles.infoMessage}>{infoMessage}</div>
+            {/* Success message */}
+            {successMessage && (
+              <div style={styles.successMessage}>{successMessage}</div>
             )}
 
             {/* General error */}
@@ -397,11 +416,27 @@ const styles = {
   errorText: { marginTop: "0.25rem", fontSize: "0.75rem", color: "#ef4444" },
   termsWrapper: { marginTop: "0.25rem" },
   checkboxLabel: { display: "flex", alignItems: "flex-start", gap: "0.5rem", cursor: "pointer" },
-  checkbox: { width: "1rem", height: "1rem", accentColor: "#0f172a", borderRadius: "0.25rem" },
+  checkbox: { width: "1rem", height: "1rem", accentColor: "#0f172a", borderRadius: "0.25rem", marginTop: "0.125rem" },
   checkboxText: { fontSize: "0.8125rem", fontWeight: 500, color: "#64748b", lineHeight: 1.4 },
   link: { fontSize: "0.8125rem", fontWeight: 600, color: "#0f172a", textDecoration: "none" },
-  infoMessage: { padding: "0.5rem", backgroundColor: "#dbeafe", color: "#1e40af", borderRadius: "0.375rem", fontSize: "0.8125rem" },
-  generalError: { padding: "0.5rem", backgroundColor: "#fee2e2", color: "#991b1b", borderRadius: "0.375rem", fontSize: "0.8125rem" },
+  successMessage: { 
+    padding: "0.75rem", 
+    backgroundColor: "#d1fae5", 
+    color: "#065f46", 
+    borderRadius: "0.5rem", 
+    fontSize: "0.8125rem",
+    fontWeight: 500,
+    border: "1px solid #10b981"
+  },
+  generalError: { 
+    padding: "0.75rem", 
+    backgroundColor: "#fee2e2", 
+    color: "#991b1b", 
+    borderRadius: "0.5rem", 
+    fontSize: "0.8125rem",
+    fontWeight: 500,
+    border: "1px solid #ef4444"
+  },
   submitButton: {
     width: "100%",
     backgroundColor: "#000",

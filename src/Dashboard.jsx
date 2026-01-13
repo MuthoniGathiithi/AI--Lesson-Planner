@@ -1351,7 +1351,6 @@ export default function LessonCreator() {
   )
 }
 
-
 const styles = {
   // Add your styles object here
 
