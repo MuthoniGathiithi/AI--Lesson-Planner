@@ -951,7 +951,6 @@ export default function LessonCreator() {
                           <tr style={styles.tableHeader}>
                             <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
-                            <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
                             <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
@@ -966,7 +965,6 @@ export default function LessonCreator() {
                                   {plan.administrativeDetails?.subject || plan.keyInquiryQuestion?.substring(0, 30) || plan.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
                                 </td>
                                 <td style={styles.td}>{plan.administrativeDetails?.grade || "N/A"}</td>
-                                <td style={styles.td}>{plan.administrativeDetails?.class || "N/A"}</td>
                                 <td style={styles.td}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</td>
                                 <td style={styles.td}>{lesson.savedDate}</td>
                                 <td style={styles.td}>
