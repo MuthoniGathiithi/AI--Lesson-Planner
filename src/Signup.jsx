@@ -12,6 +12,7 @@ export default function SignUp() {
     email: "",
     password: "",
     confirmPassword: "",
+    agreeTerms: false,
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
@@ -28,6 +29,8 @@ export default function SignUp() {
       newErrors.password = "Password must be at least 8 characters"
     if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = "Passwords do not match"
+    if (!formData.agreeTerms)
+      newErrors.agreeTerms = "You must agree to the terms"
     return newErrors
   }
 
@@ -100,6 +103,7 @@ export default function SignUp() {
         email: "",
         password: "",
         confirmPassword: "",
+        agreeTerms: false,
       })
 
       // Redirect to sign in after 3 seconds
@@ -261,6 +265,24 @@ export default function SignUp() {
               )}
             </div>
 
+            {/* Terms Agreement */}
+            <div style={styles.termsWrapper}>
+              <label style={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  name="agreeTerms"
+                  checked={formData.agreeTerms}
+                  onChange={handleChange}
+                  style={styles.checkbox}
+                />
+                
+              
+              </label>
+              {errors.agreeTerms && (
+                <p style={styles.errorText}>{errors.agreeTerms}</p>
+              )}
+            </div>
+
             {/* Success message */}
             {successMessage && (
               <div style={styles.successMessage}>{successMessage}</div>
@@ -388,6 +410,11 @@ const styles = {
   },
   toggleIcon: { width: "1rem", height: "1rem" },
   errorText: { marginTop: "0.25rem", fontSize: "0.75rem", color: "#ef4444" },
+  termsWrapper: { marginTop: "0.25rem" },
+  checkboxLabel: { display: "flex", alignItems: "flex-start", gap: "0.5rem", cursor: "pointer" },
+  checkbox: { width: "1rem", height: "1rem", accentColor: "#0f172a", borderRadius: "0.25rem", marginTop: "0.125rem" },
+  checkboxText: { fontSize: "0.8125rem", fontWeight: 500, color: "#64748b", lineHeight: 1.4 },
+  link: { fontSize: "0.8125rem", fontWeight: 600, color: "#0f172a", textDecoration: "none" },
   successMessage: { 
     padding: "0.75rem", 
     backgroundColor: "#d1fae5", 

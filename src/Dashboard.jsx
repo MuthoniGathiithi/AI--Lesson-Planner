@@ -209,12 +209,12 @@ export default function LessonCreator() {
       const maxWidth = pageWidth - margin * 2
       let y = margin
 
-      const FONT_TITLE = 20
-      const FONT_SECTION = 13
-      const FONT_LABEL = 11
-      const FONT_VALUE = 11
-      const LINE_HEIGHT = 14
-      const SECTION_GAP = 10
+      const FONT_TITLE = 22
+      const FONT_SECTION = 14
+      const FONT_LABEL = 12
+      const FONT_VALUE = 12
+      const LINE_HEIGHT = 16
+      const SECTION_GAP = 14
 
       const ensureSpace = (needed = 18) => {
         if (y + needed > pageHeight - margin) {
@@ -224,53 +224,58 @@ export default function LessonCreator() {
       }
 
       const addTitle = (text) => {
-        const needed = 34
+        const needed = 40
         ensureSpace(needed)
-        doc.setFont("times", "bold")
+        doc.setFont("helvetica", "bold")
         doc.setFontSize(FONT_TITLE)
         doc.text(String(text), pageWidth / 2, y, { align: "center" })
-        y += 28
+        y += 26
+      }
+
+      const addDivider = () => {
+        const needed = 16
+        ensureSpace(needed)
+        doc.setDrawColor(50)
+        doc.setLineWidth(0.8)
+        doc.line(margin, y, pageWidth - margin, y)
+        y += SECTION_GAP
       }
 
       const addSection = (text) => {
-        const needed = 32
+        const needed = 26
         ensureSpace(needed)
-        doc.setFont("times", "bold")
+        doc.setFont("helvetica", "bold")
         doc.setFontSize(FONT_SECTION)
         doc.text(String(text).toUpperCase(), margin, y)
-        y += 16
-        doc.setDrawColor(0)
-        doc.setLineWidth(0.5)
-        doc.line(margin, y, pageWidth - margin, y)
-        y += SECTION_GAP
+        y += 18
       }
 
       const addKeyValue = (label, value) => {
         const labelText = `${label}: `
 
-        doc.setFont("times", "bold")
+        doc.setFont("helvetica", "bold")
         doc.setFontSize(FONT_LABEL)
         const labelWidth = doc.getTextWidth(labelText)
 
-        doc.setFont("times", "normal")
+        doc.setFont("helvetica", "normal")
         doc.setFontSize(FONT_VALUE)
         const valueLines = doc.splitTextToSize(String(value ?? "N/A"), Math.max(10, maxWidth - labelWidth))
         const needed = valueLines.length * LINE_HEIGHT + 8
 
         ensureSpace(needed)
 
-        doc.setFont("times", "bold")
+        doc.setFont("helvetica", "bold")
         doc.setFontSize(FONT_LABEL)
         doc.text(labelText, margin, y)
 
-        doc.setFont("times", "normal")
+        doc.setFont("helvetica", "normal")
         doc.setFontSize(FONT_VALUE)
         doc.text(valueLines, margin + labelWidth, y)
         y += valueLines.length * LINE_HEIGHT + 8
       }
 
       const addParagraph = (text) => {
-        doc.setFont("times", "normal")
+        doc.setFont("helvetica", "normal")
         doc.setFontSize(FONT_VALUE)
         const lines = doc.splitTextToSize(String(text ?? "N/A"), maxWidth)
         const needed = lines.length * LINE_HEIGHT + 8
@@ -280,6 +285,9 @@ export default function LessonCreator() {
       }
 
       addTitle("LESSON PLAN")
+
+      // Divider 1/3 (overall header divider)
+      addDivider()
 
       addSection("Administrative Details")
       addKeyValue("School", admin.school)
@@ -294,9 +302,15 @@ export default function LessonCreator() {
         `Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}`
       )
 
+      // Divider 2/3 (between major blocks)
+      addDivider()
+
       addSection("Teacher Details")
       addKeyValue("Name", teacher.name || admin.teacher)
       addKeyValue("TSC Number", teacher.tscNumber || admin.teacherTSCNumber)
+
+      // Divider 3/3 (between major blocks)
+      addDivider()
 
       addSection("Strand")
       addParagraph(plan.strand || plan.curriculumAlignment?.strand)
@@ -951,6 +965,7 @@ export default function LessonCreator() {
                           <tr style={styles.tableHeader}>
                             <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
+                            <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
                             <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
@@ -965,6 +980,7 @@ export default function LessonCreator() {
                                   {plan.administrativeDetails?.subject || plan.keyInquiryQuestion?.substring(0, 30) || plan.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
                                 </td>
                                 <td style={styles.td}>{plan.administrativeDetails?.grade || "N/A"}</td>
+                                <td style={styles.td}>{plan.administrativeDetails?.class || "N/A"}</td>
                                 <td style={styles.td}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</td>
                                 <td style={styles.td}>{lesson.savedDate}</td>
                                 <td style={styles.td}>
@@ -1328,6 +1344,10 @@ export default function LessonCreator() {
                           <div style={styles.metaRow}>
                             <span style={styles.metaLabel}>Grade:</span>
                             <span style={styles.metaValue}>{plan.administrativeDetails?.grade || "N/A"}</span>
+                          </div>
+                          <div style={styles.metaRow}>
+                            <span style={styles.metaLabel}>Class:</span>
+                            <span style={styles.metaValue}>{plan.administrativeDetails?.class || "N/A"}</span>
                           </div>
                           <div style={styles.metaRow}>
                             <span style={styles.metaLabel}>Teacher:</span>
