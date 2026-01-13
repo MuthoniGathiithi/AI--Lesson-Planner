@@ -209,6 +209,13 @@ export default function LessonCreator() {
       const maxWidth = pageWidth - margin * 2
       let y = margin
 
+      const FONT_TITLE = 20
+      const FONT_SECTION = 13
+      const FONT_LABEL = 11
+      const FONT_VALUE = 11
+      const LINE_HEIGHT = 14
+      const SECTION_GAP = 10
+
       const ensureSpace = (needed = 18) => {
         if (y + needed > pageHeight - margin) {
           doc.addPage()
@@ -217,46 +224,59 @@ export default function LessonCreator() {
       }
 
       const addTitle = (text) => {
+        const needed = 34
+        ensureSpace(needed)
         doc.setFont("times", "bold")
-        doc.setFontSize(18)
-        ensureSpace(28)
-        doc.text(text, pageWidth / 2, y, { align: "center" })
-        y += 26
+        doc.setFontSize(FONT_TITLE)
+        doc.text(String(text), pageWidth / 2, y, { align: "center" })
+        y += 28
       }
 
       const addSection = (text) => {
+        const needed = 32
+        ensureSpace(needed)
         doc.setFont("times", "bold")
-        doc.setFontSize(13)
-        ensureSpace(22)
+        doc.setFontSize(FONT_SECTION)
         doc.text(String(text).toUpperCase(), margin, y)
-        y += 18
+        y += 16
         doc.setDrawColor(0)
         doc.setLineWidth(0.5)
         doc.line(margin, y, pageWidth - margin, y)
-        y += 14
+        y += SECTION_GAP
       }
 
       const addKeyValue = (label, value) => {
-        doc.setFontSize(11)
-        doc.setFont("times", "bold")
         const labelText = `${label}: `
+
+        doc.setFont("times", "bold")
+        doc.setFontSize(FONT_LABEL)
+        const labelWidth = doc.getTextWidth(labelText)
+
+        doc.setFont("times", "normal")
+        doc.setFontSize(FONT_VALUE)
+        const valueLines = doc.splitTextToSize(String(value ?? "N/A"), Math.max(10, maxWidth - labelWidth))
+        const needed = valueLines.length * LINE_HEIGHT + 8
+
+        ensureSpace(needed)
+
+        doc.setFont("times", "bold")
+        doc.setFontSize(FONT_LABEL)
         doc.text(labelText, margin, y)
 
-        const labelWidth = doc.getTextWidth(labelText)
         doc.setFont("times", "normal")
-        const valueLines = doc.splitTextToSize(String(value ?? "N/A"), maxWidth - labelWidth)
-        ensureSpace(valueLines.length * 14 + 6)
+        doc.setFontSize(FONT_VALUE)
         doc.text(valueLines, margin + labelWidth, y)
-        y += valueLines.length * 14 + 6
+        y += valueLines.length * LINE_HEIGHT + 8
       }
 
       const addParagraph = (text) => {
         doc.setFont("times", "normal")
-        doc.setFontSize(11)
+        doc.setFontSize(FONT_VALUE)
         const lines = doc.splitTextToSize(String(text ?? "N/A"), maxWidth)
-        ensureSpace(lines.length * 14 + 6)
+        const needed = lines.length * LINE_HEIGHT + 8
+        ensureSpace(needed)
         doc.text(lines, margin, y)
-        y += lines.length * 14 + 6
+        y += lines.length * LINE_HEIGHT + 8
       }
 
       addTitle("LESSON PLAN")
@@ -264,6 +284,7 @@ export default function LessonCreator() {
       addSection("Administrative Details")
       addKeyValue("School", admin.school)
       addKeyValue("Subject", subject)
+      addKeyValue("Grade", admin.grade)
       addKeyValue("Year", admin.year || new Date().getFullYear())
       addKeyValue("Term", admin.term)
       addKeyValue("Date", admin.date)
