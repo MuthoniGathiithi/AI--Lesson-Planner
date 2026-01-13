@@ -11,7 +11,6 @@ export default function SignIn() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   })
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
@@ -30,10 +29,10 @@ export default function SignIn() {
   }
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: value
     }))
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }))
     setInfoMessage("")
@@ -42,6 +41,8 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setInfoMessage("")
+    setErrors({})
+    
     const newErrors = validateForm()
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -57,9 +58,15 @@ export default function SignIn() {
       })
 
       if (error) {
-        setErrors({ general: "Invalid email or password" })
+        if (error.message.includes("Email not confirmed")) {
+          setErrors({ general: "Please verify your email before signing in." })
+        } else if (error.message.includes("Invalid login credentials")) {
+          setErrors({ general: "Invalid email or password" })
+        } else {
+          setErrors({ general: error.message })
+        }
       } else if (data.user && !data.user.email_confirmed_at) {
-        setInfoMessage("Please verify your email before signing in.")
+        setErrors({ general: "Please verify your email before signing in. Check your inbox." })
       } else {
         navigate("/dashboard")
       }
@@ -98,7 +105,12 @@ export default function SignIn() {
 
             {/* Password */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Password</label>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.375rem" }}>
+                <label style={styles.label}>Password</label>
+                <a href="/forgot-password" style={styles.forgotLink}>
+                  Forgot password?
+                </a>
+              </div>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -119,7 +131,7 @@ export default function SignIn() {
               {errors.password && <p style={styles.errorText}>{errors.password}</p>}
             </div>
 
-            {infoMessage && <p style={{ ...styles.errorText, color: "#1e293b" }}>{infoMessage}</p>}
+            {infoMessage && <p style={styles.infoText}>{infoMessage}</p>}
             {errors.general && <p style={styles.errorText}>{errors.general}</p>}
 
             <button
@@ -175,6 +187,13 @@ const styles = {
   formContainer: { display: "flex", flexDirection: "column", gap: "1.5rem" },
   formGroup: { display: "flex", flexDirection: "column" },
   label: { fontSize: "0.875rem", fontWeight: "500", color: "#475569", marginBottom: "0.375rem", fontFamily: FONT },
+  forgotLink: { 
+    fontSize: "0.875rem", 
+    fontWeight: "500", 
+    color: "#0f172a", 
+    textDecoration: "none",
+    fontFamily: FONT
+  },
   input: {
     width: "100%",
     padding: "0.875rem 1rem",
@@ -192,6 +211,7 @@ const styles = {
   toggleButton: { position: "absolute", top: "50%", right: "0.75rem", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: "0.25rem", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8" },
   toggleIcon: { width: "1.25rem", height: "1.25rem" },
   errorText: { marginTop: "0.375rem", fontSize: "0.875rem", fontWeight: "500", color: "#ef4444", fontFamily: FONT },
+  infoText: { marginTop: "0.375rem", fontSize: "0.875rem", fontWeight: "500", color: "#0369a1", fontFamily: FONT },
   submitButton: { width: "100%", backgroundColor: "#000", color: "#fff", padding: "0.875rem 1rem", borderRadius: "0.625rem", fontWeight: "600", border: "none", cursor: "pointer", fontSize: "1.0625rem", marginTop: "0.5rem", boxShadow: "0 4px 6px rgba(15,23,42,0.1)", fontFamily: FONT },
   submitButtonDisabled: { opacity: 0.7, cursor: "not-allowed" },
   footer: { textAlign: "center", fontSize: "0.95rem", color: "#64748b", marginTop: "2.5rem", fontFamily: FONT },
