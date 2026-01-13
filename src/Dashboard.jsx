@@ -245,6 +245,30 @@ export default function LessonCreator() {
         y += SECTION_GAP
       }
 
+      const addDivider = () => {
+        const needed = 12
+        ensureSpace(needed)
+        doc.setDrawColor(0)
+        doc.setLineWidth(0.5)
+        doc.line(margin, y, pageWidth - margin, y)
+        y += SECTION_GAP
+      }
+
+      const addSubheading = (text, { withDivider = false } = {}) => {
+        const needed = withDivider ? 28 : 18
+        ensureSpace(needed)
+        doc.setFont("times", "bold")
+        doc.setFontSize(FONT_LABEL)
+        doc.text(String(text).toUpperCase(), margin, y)
+        y += 14
+        if (withDivider) {
+          doc.setDrawColor(0)
+          doc.setLineWidth(0.5)
+          doc.line(margin, y, pageWidth - margin, y)
+          y += SECTION_GAP
+        }
+      }
+
       const addKeyValue = (label, value) => {
         const labelText = `${label}: `
 
@@ -279,7 +303,47 @@ export default function LessonCreator() {
         y += lines.length * LINE_HEIGHT + 8
       }
 
+      const pickTeacherName = () => {
+        return (
+          teacher.name ??
+          plan.teacherName ??
+          admin.teacherName ??
+          admin.teacher ??
+          lesson.teacherName ??
+          lesson.teacherDetails?.name ??
+          lesson.administrativeDetails?.teacherName ??
+          lesson.administrativeDetails?.teacher ??
+          ""
+        )
+      }
+
+      const pickTeacherTscNumber = () => {
+        return (
+          teacher.tscNumber ??
+          teacher.tsc ??
+          plan.teacherTscNumber ??
+          admin.teacherTSCNumber ??
+          admin.teacherTscNumber ??
+          lesson.teacherDetails?.tscNumber ??
+          lesson.administrativeDetails?.teacherTSCNumber ??
+          lesson.administrativeDetails?.teacherTscNumber ??
+          ""
+        )
+      }
+
+      const getRollValues = () => {
+        const boys = roll.boys ?? roll.male ?? roll.boysCount ?? 0
+        const girls = roll.girls ?? roll.female ?? roll.girlsCount ?? 0
+        const total =
+          roll.total ??
+          roll.totalCount ??
+          (Number.isFinite(Number(boys)) && Number.isFinite(Number(girls)) ? Number(boys) + Number(girls) : 0)
+        return { boys, girls, total }
+      }
+
       addTitle("LESSON PLAN")
+
+      addDivider()
 
       addSection("Administrative Details")
       addKeyValue("School", admin.school)
@@ -289,20 +353,20 @@ export default function LessonCreator() {
       addKeyValue("Term", admin.term)
       addKeyValue("Date", admin.date)
       addKeyValue("Time", timeString)
+
+      const rollValues = getRollValues()
       addKeyValue(
         "Roll",
-        `Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}`
+        `Boys: ${rollValues.boys ?? 0}, Girls: ${rollValues.girls ?? 0}, Total: ${rollValues.total ?? 0}`
       )
 
+      addDivider()
+
       addSection("Teacher Details")
-      addKeyValue("Name", teacher.name || admin.teacher)
-      addKeyValue("TSC Number", teacher.tscNumber || admin.teacherTSCNumber)
+      addKeyValue("Name", pickTeacherName())
+      addKeyValue("TSC Number", pickTeacherTscNumber())
 
-      addSection("Strand")
-      addParagraph(plan.strand || plan.curriculumAlignment?.strand)
-
-      addSection("Sub-strand")
-      addParagraph(plan.subStrand || plan.curriculumAlignment?.substrand)
+      addDivider()
 
       addSection("Lesson Learning Outcomes")
       addParagraph(outcomesData.statement || "By the end of the lesson, the learner should be able to:")
@@ -314,25 +378,36 @@ export default function LessonCreator() {
         addParagraph("N/A")
       }
 
+      addDivider()
+
       addSection("Key Inquiry Question")
       addParagraph(plan.keyInquiryQuestion || plan.guidingQuestion)
+
+      addDivider()
 
       addSection("Learning Resources")
       addParagraph((plan.learningResources || []).join(", ") || "N/A")
 
+      addDivider()
+
       addSection("Lesson Flow")
-      addKeyValue("Introduction", plan.lessonFlow?.introduction?.description || "N/A")
-      addSection("Development")
+
+      addSubheading("Introduction", { withDivider: true })
+      addParagraph(plan.lessonFlow?.introduction?.description || "N/A")
+
+      addSubheading("Development", { withDivider: true })
       const devSteps = plan.lessonFlow?.development || []
       if (devSteps.length > 0) {
         devSteps.forEach((step) => {
-          addParagraph(`Step ${step.step || ""}: ${step.description || step.title || "N/A"}`)
+          const stepLabel = step.step != null && String(step.step).trim() !== "" ? `Step ${step.step}: ` : ""
+          addParagraph(`${stepLabel}${step.description || step.title || "N/A"}`)
           if (step.activity) addParagraph(`Activity: ${step.activity}`)
         })
       } else {
         addParagraph("N/A")
       }
-      addSection("Conclusion")
+
+      addSubheading("Conclusion")
       addParagraph(plan.lessonFlow?.conclusion?.description || "N/A")
 
       const blob = doc.output("blob")
