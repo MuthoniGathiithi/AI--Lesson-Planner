@@ -304,7 +304,6 @@ export default function SignUp() {
           </form>
 
           {/* Footer */}
-         import { Link } from "react-router-dom";
 
 <div style={styles.footer}>
   Already have an account?{" "}
