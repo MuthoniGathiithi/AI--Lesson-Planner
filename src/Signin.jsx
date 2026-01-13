@@ -106,12 +106,14 @@ export default function SignIn() {
 
             {/* Password */}
             <div style={styles.formGroup}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.375rem" }}>
-                <label style={styles.label}>Password</label>
-                <a href="/forgot-password" style={styles.forgotLink}>
-                  Forgot password?
-                </a>
-              </div>
+              
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.375rem" }}>
+  <label style={styles.label}>Password</label>
+  <Link to="/forgot-password" style={styles.forgotLink}>
+    Forgot password?
+  </Link>
+</div>
+
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
