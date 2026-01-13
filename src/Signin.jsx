@@ -146,11 +146,14 @@ export default function SignIn() {
           </div>
 
           <p style={styles.footer}>
-            Don't have an account?{" "}
-            <Link to="/signup" style={styles.signupLink}></Link>
-              Sign up 
+  Don't have an account?{" "}
+  <Link to="/signup" style={styles.signupLink}>
+    Sign up
+  </Link>
+</p>
+
           
-          </p>
+        
         </div>
       </div>
     </div>
