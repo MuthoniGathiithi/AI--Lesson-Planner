@@ -8,6 +8,11 @@ import SignIn from "./Signin";
 import SignUp from "./Signup";
 import Dashboard from "./Dashboard";
 
+import ForgotPassword from './ForgotPassword'
+
+// In your routes:
+<Route path="/forgot-password" element={<ForgotPassword />} />
+
 function App() {
   const location = useLocation();
 
@@ -20,6 +25,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
       {location.pathname !== '/dashboard' && <Footer />}
     </>

@@ -56,19 +56,6 @@ export default function SignUp() {
 
     setLoading(true)
     try {
-      // Check if user already exists
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('email', formData.email)
-        .single()
-
-      if (existingUser) {
-        setErrors({ email: "This email is already registered. Please sign in." })
-        setLoading(false)
-        return
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -81,11 +68,22 @@ export default function SignUp() {
       })
 
       if (error) {
-        if (error.message.includes("already registered") || error.message.includes("User already registered")) {
-          setErrors({ email: "This email is already registered. Please sign in." })
+        // Handle all Supabase errors
+        if (error.message.includes("already registered") || 
+            error.message.includes("User already registered") ||
+            error.message.includes("duplicate") ||
+            error.status === 422) {
+          setErrors({ email: "This email is already registered. Please sign in instead." })
         } else {
           setErrors({ general: error.message })
         }
+        setLoading(false)
+        return
+      }
+
+      // Check if user needs to verify email (duplicate check)
+      if (data?.user && data.user.identities && data.user.identities.length === 0) {
+        setErrors({ email: "This email is already registered. Please sign in or verify your email." })
         setLoading(false)
         return
       }
