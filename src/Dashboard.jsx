@@ -417,6 +417,28 @@ export default function LessonCreator() {
       const timeString =
         typeof timeObj === "string" ? timeObj : timeObj?.start ? `${timeObj.start} - ${timeObj.end}` : ""
 
+      const getTeacherName = () => {
+        return (
+          lesson.teacherName ||
+          lesson.administrativeDetails?.teacherName ||
+          lesson.administrativeDetails?.teacher ||
+          lesson.lessonPlan?.teacherDetails?.name ||
+          lesson.lessonPlan?.administrativeDetails?.teacher ||
+          ""
+        )
+      }
+
+      const getTeacherTsc = () => {
+        return (
+          lesson.tscNumber ||
+          lesson.administrativeDetails?.tscNumber ||
+          lesson.administrativeDetails?.teacherTSCNumber ||
+          lesson.lessonPlan?.teacherDetails?.tscNumber ||
+          lesson.lessonPlan?.administrativeDetails?.teacherTSCNumber ||
+          ""
+        )
+      }
+
       setLessonPlan({
         lessonPlan: {
           administrativeDetails: {
@@ -424,8 +446,8 @@ export default function LessonCreator() {
             time: timeString,
           },
           teacherDetails: {
-            name: lesson.teacherName || lesson.administrativeDetails?.teacherName || "",
-            tscNumber: lesson.tscNumber || lesson.administrativeDetails?.tscNumber || "",
+            name: getTeacherName(),
+            tscNumber: getTeacherTsc(),
           },
           strand: lesson.strand || lesson.curriculumAlignment?.strand || "",
           subStrand: lesson.subStrand || lesson.curriculumAlignment?.subStrand || "",
