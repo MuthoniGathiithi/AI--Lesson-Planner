@@ -408,7 +408,6 @@ export default function LessonCreator() {
       alert("Failed to delete lesson plan: " + result.error)
     }
   }
-
   const handleViewLesson = (lesson) => {
     if (lesson.lessonPlan) {
       setLessonPlan(lesson)
@@ -420,6 +419,7 @@ export default function LessonCreator() {
       const getTeacherName = () => {
         return (
           lesson.teacherName ||
+          lesson.teacherDetails?.name ||
           lesson.administrativeDetails?.teacherName ||
           lesson.administrativeDetails?.teacher ||
           lesson.lessonPlan?.teacherDetails?.name ||
@@ -431,6 +431,7 @@ export default function LessonCreator() {
       const getTeacherTsc = () => {
         return (
           lesson.tscNumber ||
+          lesson.teacherDetails?.tscNumber ||
           lesson.administrativeDetails?.tscNumber ||
           lesson.administrativeDetails?.teacherTSCNumber ||
           lesson.lessonPlan?.teacherDetails?.tscNumber ||
@@ -1173,7 +1174,12 @@ export default function LessonCreator() {
                           </td>
                           <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>TSC Number:</td>
                           <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.teacherDetails.tscNumber", lessonPlan?.lessonPlan?.teacherDetails?.tscNumber || lessonPlan?.teacherDetails?.tscNumber || lessonPlan?.administrativeDetails?.teacherTSCNumber)}
+                            {renderEditableField(
+                              "lessonPlan.teacherDetails.tscNumber",
+                              lessonPlan?.lessonPlan?.teacherDetails?.tscNumber ||
+                                lessonPlan?.teacherDetails?.tscNumber ||
+                                lessonPlan?.administrativeDetails?.teacherTSCNumber
+                            )}
                           </td>
                         </tr>
                       </tbody>
