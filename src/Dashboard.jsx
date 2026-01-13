@@ -414,39 +414,42 @@ export default function LessonCreator() {
       setLessonPlan(lesson)
     } else {
       const timeObj = lesson.administrativeDetails?.time
-      const timeString = typeof timeObj === 'string' ? timeObj : (timeObj?.start ? `${timeObj.start} - ${timeObj.end}` : '')
-      
+      const timeString =
+        typeof timeObj === "string" ? timeObj : timeObj?.start ? `${timeObj.start} - ${timeObj.end}` : ""
+
       setLessonPlan({
         lessonPlan: {
           administrativeDetails: {
             ...lesson.administrativeDetails,
-            time: timeString
+            time: timeString,
           },
           teacherDetails: {
-            name: lesson.administrativeDetails?.teacher || '',
-            tscNumber: lesson.administrativeDetails?.teacherTSCNumber || ''
+            name: lesson.teacherName || lesson.administrativeDetails?.teacherName || "",
+            tscNumber: lesson.tscNumber || lesson.administrativeDetails?.tscNumber || "",
           },
-          strand: lesson.curriculumAlignment?.strand || '',
-          subStrand: lesson.curriculumAlignment?.substrand || '',
+          strand: lesson.strand || lesson.curriculumAlignment?.strand || "",
+          subStrand: lesson.subStrand || lesson.curriculumAlignment?.subStrand || "",
           lessonLearningOutcomes: {
             statement: "By the end of the lesson, the learner should be able to:",
-            outcomes: lesson.learningOutcomes || []
+            outcomes: lesson.learningOutcomes || [],
           },
-          keyInquiryQuestion: lesson.guidingQuestion || '',
+          keyInquiryQuestion: lesson.guidingQuestion || "",
           learningResources: lesson.learningResources || [],
           lessonFlow: lesson.lessonFlow || {
-            introduction: { description: '' },
+            introduction: { description: "" },
             development: [],
-            conclusion: { description: '' }
-          }
-        }
+            conclusion: { description: "" },
+          },
+        },
       })
     }
-    
+
     setCurrentLessonId(lesson.dbId)
     setActiveTab("create")
     setIsMobileMenuOpen(false)
   }
+    
+   
 
   const handleCreateNew = () => {
     setLessonPlan(null)
