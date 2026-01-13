@@ -797,7 +797,7 @@ export default function LessonCreator() {
               }}
             >
               <LayoutDashboard size={20} />
-              <span>Dashboard</span>
+              <span>Overview</span>
             </button>
 
             <button
@@ -827,6 +827,7 @@ export default function LessonCreator() {
           </div>
 
           <div style={styles.navSectionBottom}>
+            <div style={styles.dividerLine} />
             <button onClick={handleLogout} style={styles.logoutButton}>
               <LogOut size={20} />
               <span>Log out</span>
@@ -859,7 +860,7 @@ export default function LessonCreator() {
               className={isMobile ? 'page-title-mobile' : ''}
               style={styles.pageTitle}
             >
-              {activeTab === "dashboard" && "Dashboard"}
+              {activeTab === "dashboard" && "Overview"}
               {activeTab === "create" && "Lesson Planner"}
               {activeTab === "archive" && "Lesson Archive"}
             </h1>
@@ -934,9 +935,21 @@ export default function LessonCreator() {
               <div style={styles.lessonsSection}>
                 <div style={styles.sectionHeader}>
                   <h2 style={styles.sectionTitle}>Recent Lessons</h2>
-                  <button onClick={() => setActiveTab("archive")} style={styles.viewAllButton}>
-                    View All
-                  </button>
+                  <div style={styles.sectionHeaderActions}>
+                    <button
+                      onClick={() => {
+                        handleCreateNew()
+                        setActiveTab("create")
+                      }}
+                      style={styles.createPlanButton}
+                    >
+                      <Plus size={16} />
+                      <span>Create New Plan</span>
+                    </button>
+                    <button onClick={() => setActiveTab("archive")} style={styles.viewAllButton}>
+                      View All
+                    </button>
+                  </div>
                 </div>
 
                 <div style={styles.tableContainer}>
@@ -1454,7 +1467,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     flex: 1,
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
   navSection: {
     display: "flex",
@@ -1464,7 +1477,26 @@ const styles = {
   navSectionBottom: {
     display: "flex",
     flexDirection: "column",
-    marginTop: "auto",
+    marginTop: "16px",
+  },
+  sectionHeaderActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+  createPlanButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 14px",
+    fontSize: "14px",
+    fontWeight: "600",
+    backgroundColor: "#000000",
+    color: "#ffffff",
+    border: "1px solid #000000",
+    borderRadius: "10px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   dividerLine: {
     height: "1px",
