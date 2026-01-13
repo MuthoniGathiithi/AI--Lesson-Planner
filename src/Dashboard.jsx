@@ -1332,10 +1332,6 @@ export default function LessonCreator() {
                             <span style={styles.metaValue}>{plan.administrativeDetails?.grade || "N/A"}</span>
                           </div>
                           <div style={styles.metaRow}>
-                            <span style={styles.metaLabel}>Class:</span>
-                            <span style={styles.metaValue}>{plan.administrativeDetails?.class || "N/A"}</span>
-                          </div>
-                          <div style={styles.metaRow}>
                             <span style={styles.metaLabel}>Teacher:</span>
                             <span style={styles.metaValue}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</span>
                           </div>
