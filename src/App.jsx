@@ -10,8 +10,7 @@ import Dashboard from "./Dashboard";
 
 import ForgotPassword from './ForgotPassword'
 
-// In your routes:
-<Route path="/forgot-password" element={<ForgotPassword />} />
+
 
 function App() {
   const location = useLocation();

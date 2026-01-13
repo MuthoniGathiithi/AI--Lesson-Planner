@@ -1,4 +1,5 @@
 "use client"
+import { Link } from "react-router-dom";
 
 import { useState } from "react"
 import { supabase } from "./supabaseClient"
@@ -146,9 +147,9 @@ export default function SignIn() {
 
           <p style={styles.footer}>
             Don't have an account?{" "}
-            <a href="/signup" style={styles.signupLink}>
-              Sign up for free
-            </a>
+            <Link to="/signup" style={styles.signupLink}></Link>
+              Sign up 
+          
           </p>
         </div>
       </div>
