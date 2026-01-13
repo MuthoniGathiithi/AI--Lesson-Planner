@@ -1,4 +1,6 @@
 "use client"
+import { Link } from "react-router-dom"
+
 
 import { useState } from "react"
 import { supabase } from "./supabaseClient"
@@ -93,12 +95,13 @@ export default function ForgotPassword() {
             </div>
           )}
 
-          <div style={styles.footer}>
-            <a href="/signin" style={styles.backLink}>
-              <ArrowLeft size={16} />
-              <span>Back to sign in</span>
-            </a>
-          </div>
+         <div style={styles.footer}>
+  <Link to="/signin" style={styles.backLink}>
+    <ArrowLeft size={16} />
+    <span>Back to sign in</span>
+  </Link>
+</div>
+
         </div>
       </div>
     </div>
