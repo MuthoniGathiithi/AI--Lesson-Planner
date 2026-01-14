@@ -77,21 +77,36 @@ export default function LessonCreator() {
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredLessons(savedLessons)
-    } else {
-      const query = searchQuery.toLowerCase()
-      const filtered = savedLessons.filter((lesson) => {
+      const filteredLessons = savedLessons.filter((lesson) => {
+        if (!searchQuery.trim()) return true
+        const query = searchQuery.toLowerCase()
         const plan = lesson.lessonPlan || lesson
+
         const subject = plan.administrativeDetails?.subject?.toLowerCase() || ""
         const grade = plan.administrativeDetails?.grade?.toString().toLowerCase() || ""
-        const className = plan.administrativeDetails?.class?.toLowerCase() || ""
         const teacher = plan.teacherDetails?.name?.toLowerCase() || plan.administrativeDetails?.teacher?.toLowerCase() || ""
         const question = plan.keyInquiryQuestion?.toLowerCase() || plan.guidingQuestion?.toLowerCase() || ""
 
         return (
           subject.includes(query) ||
           grade.includes(query) ||
-          className.includes(query) ||
+          teacher.includes(query) ||
+          question.includes(query)
+        )
+      })
+      setFilteredLessons(filteredLessons)
+    } else {
+      const query = searchQuery.toLowerCase()
+      const filtered = savedLessons.filter((lesson) => {
+        const plan = lesson.lessonPlan || lesson
+        const subject = plan.administrativeDetails?.subject?.toLowerCase() || ""
+        const grade = plan.administrativeDetails?.grade?.toString().toLowerCase() || ""
+        const teacher = plan.teacherDetails?.name?.toLowerCase() || plan.administrativeDetails?.teacher?.toLowerCase() || ""
+        const question = plan.keyInquiryQuestion?.toLowerCase() || plan.guidingQuestion?.toLowerCase() || ""
+
+        return (
+          subject.includes(query) ||
+          grade.includes(query) ||
           teacher.includes(query) ||
           question.includes(query)
         )
@@ -126,7 +141,6 @@ export default function LessonCreator() {
   
   if (!formData.schoolName.trim()) errors.push("School Name")
   if (!formData.subject.trim()) errors.push("Subject")
-  if (!formData.className.trim()) errors.push("Class")
   if (!formData.teacherName.trim()) errors.push("Teacher Name")
   if (!formData.strand.trim()) errors.push("Strand")
   if (!formData.subStrand.trim()) errors.push("Sub-strand")
@@ -138,7 +152,13 @@ export default function LessonCreator() {
 
   setIsGenerating(true)
   try {
-    const generatedPlan = await generateLessonPlan(formData)
+    const normalizedFormData = {
+      ...formData,
+      subject: toSentenceCase(formData.subject),
+      strand: toSentenceCase(formData.strand),
+      subStrand: toSentenceCase(formData.subStrand),
+    }
+    const generatedPlan = await generateLessonPlan(normalizedFormData)
     setLessonPlan(generatedPlan)
     setCurrentLessonId(null)
     console.log("Generated lesson plan:", generatedPlan)
@@ -171,11 +191,33 @@ export default function LessonCreator() {
     return [String(value).trim()].filter(Boolean)
   }
 
+  const toSentenceCase = (value) => {
+    const s = String(value ?? "").trim()
+    if (!s) return ""
+    const lower = s.toLowerCase()
+    return lower.charAt(0).toUpperCase() + lower.slice(1)
+  }
+
   const normalizeLessonPlanForSave = (lp) => {
     const clone = typeof structuredClone === "function" ? structuredClone(lp) : JSON.parse(JSON.stringify(lp))
     const plan = clone?.lessonPlan || clone
     if (plan) {
       plan.learningResources = normalizeToStringArray(plan.learningResources)
+
+      if (plan.administrativeDetails) {
+        if (plan.administrativeDetails.subject != null) {
+          plan.administrativeDetails.subject = toSentenceCase(plan.administrativeDetails.subject)
+        }
+      }
+
+      if (plan.strand != null) plan.strand = toSentenceCase(plan.strand)
+      if (plan.subStrand != null) plan.subStrand = toSentenceCase(plan.subStrand)
+
+      if (plan.curriculumAlignment) {
+        if (plan.curriculumAlignment.strand != null) plan.curriculumAlignment.strand = toSentenceCase(plan.curriculumAlignment.strand)
+        if (plan.curriculumAlignment.substrand != null) plan.curriculumAlignment.substrand = toSentenceCase(plan.curriculumAlignment.substrand)
+        if (plan.curriculumAlignment.subStrand != null) plan.curriculumAlignment.subStrand = toSentenceCase(plan.curriculumAlignment.subStrand)
+      }
 
       const rawLlo = plan.lessonLearningOutcomes || plan.lessonLearningOutcomes || {}
       const rawOutcomes = rawLlo.outcomes || plan.learningOutcomes || []
@@ -201,6 +243,8 @@ export default function LessonCreator() {
           "By the end of the lesson, the learner should be able to:",
         outcomes: normalizedOutcomes,
       }
+
+      plan.lessonLearningOutcomes = plan.lessonLearningOutcomes
 
       delete plan.learningOutcomes
     }
@@ -268,7 +312,7 @@ export default function LessonCreator() {
             .filter((o) => String(o.outcome ?? "").trim() !== "")
         : []
 
-      const subject = admin.subject || "Untitled Lesson"
+      const subject = toSentenceCase(admin.subject || "Untitled Lesson")
       const dateString = admin.date || new Date().toISOString().split("T")[0]
       const safeSubject = String(subject).replace(/[^a-z0-9\- _]/gi, "").trim() || "Lesson Plan"
       const filename = `${safeSubject} - ${dateString}.pdf`
@@ -373,10 +417,10 @@ export default function LessonCreator() {
       addKeyValue("TSC Number", teacher.tscNumber || admin.teacherTSCNumber)
 
       addSection("Strand")
-      addParagraph(plan.strand || plan.curriculumAlignment?.strand)
+      addParagraph(toSentenceCase(plan.strand || plan.curriculumAlignment?.strand))
 
       addSection("Sub-strand")
-      addParagraph(plan.subStrand || plan.curriculumAlignment?.substrand)
+      addParagraph(toSentenceCase(plan.subStrand || plan.curriculumAlignment?.substrand || plan.curriculumAlignment?.subStrand))
 
       addSection("Lesson Learning Outcomes")
       addParagraph(
@@ -956,9 +1000,6 @@ export default function LessonCreator() {
                     <div style={styles.statIcon}>
                       <FileText size={24} />
                     </div>
-                    <div style={styles.statPercentage}>
-                      {savedLessons.length > 0 ? "100%" : "0%"}
-                    </div>
                   </div>
                   <div style={styles.statValue}>{savedLessons.length.toLocaleString()}</div>
                   <div style={styles.statSubtext}>Total Lessons</div>
@@ -968,14 +1009,6 @@ export default function LessonCreator() {
                   <div style={styles.statHeader}>
                     <div style={styles.statIcon}>
                       <Archive size={24} />
-                    </div>
-                    <div style={styles.statPercentage}>
-                      {savedLessons.filter((l) => {
-                        const lessonDate = new Date(l.savedDate)
-                        const weekAgo = new Date()
-                        weekAgo.setDate(weekAgo.getDate() - 7)
-                        return lessonDate >= weekAgo
-                      }).length > 0 ? "+12%" : "0%"}
                     </div>
                   </div>
                   <div style={styles.statValue}>
@@ -1029,7 +1062,6 @@ export default function LessonCreator() {
                           <tr style={styles.tableHeader}>
                             <th style={{ ...styles.th, textAlign: "left" }}>Subject</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Grade</th>
-                            <th style={{ ...styles.th, textAlign: "left" }}>Class</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Teacher</th>
                             <th style={{ ...styles.th, textAlign: "left" }}>Date</th>
                             <th style={{ ...styles.th, textAlign: "center" }}>Actions</th>
@@ -1044,7 +1076,6 @@ export default function LessonCreator() {
                                   {plan.administrativeDetails?.subject || plan.keyInquiryQuestion?.substring(0, 30) || plan.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
                                 </td>
                                 <td style={styles.td}>{plan.administrativeDetails?.grade || "N/A"}</td>
-                                <td style={styles.td}>{plan.administrativeDetails?.class || "N/A"}</td>
                                 <td style={styles.td}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</td>
                                 <td style={styles.td}>{lesson.savedDate}</td>
                                 <td style={styles.td}>
@@ -1095,7 +1126,7 @@ export default function LessonCreator() {
                    {[
   { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
   { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
-  { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text", required: true },
+  { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text", required: false },
   { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: false },
   { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number", required: false },
   { label: "Date", key: "date", placeholder: "", type: "date", required: false },
@@ -1157,11 +1188,11 @@ export default function LessonCreator() {
                         style={styles.pdfButton}
                       >
                         <Download size={16} />
-                        <span>{isDownloading ? "Printing..." : "Print PDF"}</span>
+                        <span>{isDownloading ? "Downloading..." : "Download as PDF"}</span>
                       </button>
                       <button onClick={handleSave} disabled={isSaving} style={styles.saveButton}>
                         <Save size={16} />
-                        <span>{isSaving ? "Saving..." : currentLessonId ? "Update" : "Save"}</span>
+                        <span>{isSaving ? "Saving..." : "Save"}</span>
                       </button>
                     </div>
                   </div>
@@ -1280,11 +1311,12 @@ export default function LessonCreator() {
                       </div>
                       {(() => {
                         const plan = lessonPlan?.lessonPlan || lessonPlan
-                        const outcomes =
+                        const outcomesRaw =
                           plan?.lessonLearningOutcomes?.outcomes ||
                           plan?.lessonLearningOutcomes?.outcomes ||
                           plan?.learningOutcomes ||
                           []
+                        const outcomes = Array.isArray(outcomesRaw) ? outcomesRaw : []
                         return outcomes.map((outcome, index) => (
                           <div key={index} style={styles.outcomeItem}>
                             <div style={styles.outcomeNumber}>{outcome.id})</div>
@@ -1413,10 +1445,6 @@ export default function LessonCreator() {
                           <div style={styles.metaRow}>
                             <span style={styles.metaLabel}>Grade:</span>
                             <span style={styles.metaValue}>{plan.administrativeDetails?.grade || "N/A"}</span>
-                          </div>
-                          <div style={styles.metaRow}>
-                            <span style={styles.metaLabel}>Class:</span>
-                            <span style={styles.metaValue}>{plan.administrativeDetails?.class || "N/A"}</span>
                           </div>
                           <div style={styles.metaRow}>
                             <span style={styles.metaLabel}>Teacher:</span>
