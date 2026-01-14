@@ -151,19 +151,50 @@ export default function LessonCreator() {
 }
 
 
+  const normalizeToStringArray = (value) => {
+    if (Array.isArray(value)) return value.map((v) => String(v ?? "").trim()).filter(Boolean)
+    if (typeof value === "string") {
+      const trimmed = value.trim()
+      if (!trimmed) return []
+      return trimmed
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean)
+    }
+    if (value == null) return []
+    if (typeof value === "object") {
+      return Object.values(value)
+        .flat()
+        .map((v) => String(v ?? "").trim())
+        .filter(Boolean)
+    }
+    return [String(value).trim()].filter(Boolean)
+  }
+
+  const normalizeLessonPlanForSave = (lp) => {
+    const clone = typeof structuredClone === "function" ? structuredClone(lp) : JSON.parse(JSON.stringify(lp))
+    const plan = clone?.lessonPlan || clone
+    if (plan) {
+      plan.learningResources = normalizeToStringArray(plan.learningResources)
+    }
+    return clone
+  }
+
+
   const handleSave = async () => {
     if (!lessonPlan) return
 
     setIsSaving(true)
     try {
       let result
+      const normalized = normalizeLessonPlanForSave(lessonPlan)
       if (currentLessonId) {
-        result = await updateLessonPlan(currentLessonId, lessonPlan)
+        result = await updateLessonPlan(currentLessonId, normalized)
         if (result.success) {
           alert("Lesson plan updated successfully!")
         }
       } else {
-        result = await saveLessonPlan(lessonPlan)
+        result = await saveLessonPlan(normalized)
         if (result.success) {
           alert("Lesson plan saved successfully!")
           setCurrentLessonId(result.data.id)
@@ -194,26 +225,6 @@ export default function LessonCreator() {
       const outcomesData = plan.lessonLearningOutcomes || {}
       const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
 
-      const normalizeToStringArray = (value) => {
-        if (Array.isArray(value)) return value.map((v) => String(v ?? "").trim()).filter(Boolean)
-        if (typeof value === "string") {
-          const trimmed = value.trim()
-          if (!trimmed) return []
-          return trimmed
-            .split(",")
-            .map((v) => v.trim())
-            .filter(Boolean)
-        }
-        if (value == null) return []
-        if (typeof value === "object") {
-          return Object.values(value)
-            .flat()
-            .map((v) => String(v ?? "").trim())
-            .filter(Boolean)
-        }
-        return [String(value).trim()].filter(Boolean)
-      }
-
       const subject = admin.subject || "Untitled Lesson"
       const dateString = admin.date || new Date().toISOString().split("T")[0]
       const safeSubject = String(subject).replace(/[^a-z0-9\- _]/gi, "").trim() || "Lesson Plan"
@@ -229,12 +240,12 @@ export default function LessonCreator() {
       const maxWidth = pageWidth - margin * 2
       let y = margin
 
-      const FONT_TITLE = 22
-      const FONT_SECTION = 14
-      const FONT_LABEL = 12
-      const FONT_VALUE = 12
-      const LINE_HEIGHT = 16
-      const SECTION_GAP = 14
+      const FONT_TITLE = 20
+      const FONT_SECTION = 13
+      const FONT_LABEL = 11
+      const FONT_VALUE = 11
+      const LINE_HEIGHT = 14
+      const SECTION_GAP = 10
 
       const ensureSpace = (needed = 18) => {
         if (y + needed > pageHeight - margin) {
@@ -244,58 +255,53 @@ export default function LessonCreator() {
       }
 
       const addTitle = (text) => {
-        const needed = 40
+        const needed = 34
         ensureSpace(needed)
-        doc.setFont("helvetica", "bold")
+        doc.setFont("times", "bold")
         doc.setFontSize(FONT_TITLE)
         doc.text(String(text), pageWidth / 2, y, { align: "center" })
-        y += 26
-      }
-
-      const addDivider = () => {
-        const needed = 16
-        ensureSpace(needed)
-        doc.setDrawColor(50)
-        doc.setLineWidth(0.8)
-        doc.line(margin, y, pageWidth - margin, y)
-        y += SECTION_GAP
+        y += 28
       }
 
       const addSection = (text) => {
-        const needed = 26
+        const needed = 32
         ensureSpace(needed)
-        doc.setFont("helvetica", "bold")
+        doc.setFont("times", "bold")
         doc.setFontSize(FONT_SECTION)
         doc.text(String(text).toUpperCase(), margin, y)
-        y += 18
+        y += 16
+        doc.setDrawColor(0)
+        doc.setLineWidth(0.5)
+        doc.line(margin, y, pageWidth - margin, y)
+        y += SECTION_GAP
       }
 
       const addKeyValue = (label, value) => {
         const labelText = `${label}: `
 
-        doc.setFont("helvetica", "bold")
+        doc.setFont("times", "bold")
         doc.setFontSize(FONT_LABEL)
         const labelWidth = doc.getTextWidth(labelText)
 
-        doc.setFont("helvetica", "normal")
+        doc.setFont("times", "normal")
         doc.setFontSize(FONT_VALUE)
         const valueLines = doc.splitTextToSize(String(value ?? "N/A"), Math.max(10, maxWidth - labelWidth))
         const needed = valueLines.length * LINE_HEIGHT + 8
 
         ensureSpace(needed)
 
-        doc.setFont("helvetica", "bold")
+        doc.setFont("times", "bold")
         doc.setFontSize(FONT_LABEL)
         doc.text(labelText, margin, y)
 
-        doc.setFont("helvetica", "normal")
+        doc.setFont("times", "normal")
         doc.setFontSize(FONT_VALUE)
         doc.text(valueLines, margin + labelWidth, y)
         y += valueLines.length * LINE_HEIGHT + 8
       }
 
       const addParagraph = (text) => {
-        doc.setFont("helvetica", "normal")
+        doc.setFont("times", "normal")
         doc.setFontSize(FONT_VALUE)
         const lines = doc.splitTextToSize(String(text ?? "N/A"), maxWidth)
         const needed = lines.length * LINE_HEIGHT + 8
@@ -305,9 +311,6 @@ export default function LessonCreator() {
       }
 
       addTitle("LESSON PLAN")
-
-      // Divider 1/3 (overall header divider)
-      addDivider()
 
       addSection("Administrative Details")
       addKeyValue("School", admin.school)
@@ -322,15 +325,9 @@ export default function LessonCreator() {
         `Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}`
       )
 
-      // Divider 2/3 (between major blocks)
-      addDivider()
-
       addSection("Teacher Details")
       addKeyValue("Name", teacher.name || admin.teacher)
       addKeyValue("TSC Number", teacher.tscNumber || admin.teacherTSCNumber)
-
-      // Divider 3/3 (between major blocks)
-      addDivider()
 
       addSection("Strand")
       addParagraph(plan.strand || plan.curriculumAlignment?.strand)
@@ -1264,12 +1261,7 @@ export default function LessonCreator() {
                       {(() => {
                         const plan = lessonPlan?.lessonPlan || lessonPlan
                         const resources = normalizeToStringArray(plan?.learningResources)
-                        return renderEditableField(
-                          "lessonPlan.learningResources",
-                          resources.join(", "),
-                          true,
-                          "Enter resources (comma-separated)"
-                        )
+                        return renderEditableField("lessonPlan.learningResources", resources.join(", "), true, "Enter resources (comma-separated)")
                       })()}
                     </div>
 
