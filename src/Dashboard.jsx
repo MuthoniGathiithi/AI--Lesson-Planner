@@ -590,7 +590,8 @@ export default function LessonCreator() {
       setFilteredLessons([])
       setActiveTab("dashboard")
       alert("Logged out successfully!")
-      window.location.href = "/login"
+      supabase.auth.signOut()
+      window.location.href = "/signin"
     }
   }
 

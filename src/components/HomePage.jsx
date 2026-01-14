@@ -30,6 +30,10 @@ export default function HomePage() {
     navigate("/signup")
   }
 
+  const handleSignInClick = () => {
+    navigate("/signin")
+  }
+
   return (
     <div
       style={{
@@ -268,6 +272,31 @@ export default function HomePage() {
               }}
             >
               Get Started
+            </button>
+
+            <button
+              onClick={handleSignInClick}
+              style={{
+                background: "#FFFFFF",
+                color: "#000",
+                border: "1px solid #E5E7EB",
+                padding: "16px 40px",
+                borderRadius: "8px",
+                fontSize: "1rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onMouseOver={(e) => {
+                e.target.style.borderColor = "#D1D5DB"
+                e.target.style.background = "#F9FAFB"
+              }}
+              onMouseOut={(e) => {
+                e.target.style.borderColor = "#E5E7EB"
+                e.target.style.background = "#FFFFFF"
+              }}
+            >
+              Sign In
             </button>
 
             <button
