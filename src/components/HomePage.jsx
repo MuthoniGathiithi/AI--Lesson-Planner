@@ -1,37 +1,15 @@
 "use client"
-import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import PhoneMockup from './PhoneMockupWithModules.jsx';
 
-function HowItWorks() {
-  return (
-    <div>
-      <PhoneMockup />
-    </div>
-  );
-}
+
+
 
 export default function HomePage() {
   const navigate = useNavigate()
 
-  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" })
-  const contactEmail = "gathiithijoyce74@gmail.com"
-  const whatsappNumber = "+254700000000"
-
-  const handleContactSubmit = (e) => {
-    e.preventDefault()
-    const subject = `FunzoIQ Contact - ${contactForm.name || "Visitor"}`
-    const body = `Name: ${contactForm.name}\nEmail: ${contactForm.email}\n\nMessage:\n${contactForm.message}`
-    const mailto = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.location.href = mailto
-  }
-
   const handleGetStartedClick = () => {
     navigate("/signup")
-  }
-
-  const handleSignInClick = () => {
-    navigate("/signin")
   }
 
   return (
@@ -60,7 +38,6 @@ export default function HomePage() {
           .mockup-grid { grid-template-columns: 1fr; padding: 20px; }
           .about-grid { grid-template-columns: 1fr; padding: 40px 20px; gap: 40px; }
           .how-it-works-grid { grid-template-columns: 1fr; gap: 40px; }
-          .contact-grid { grid-template-columns: 1fr; gap: 28px; }
         }
 
         @media (max-width: 768px) {
@@ -81,10 +58,6 @@ export default function HomePage() {
           .step-title { font-size: 1.15rem; }
           .step-desc { font-size: 0.95rem; }
           .mockup-visual { padding: 32px; }
-          .contact-section { padding: 60px 16px !important; }
-          .contact-grid { grid-template-columns: 1fr; padding: 32px 16px; gap: 24px; }
-          .contact-title { font-size: 2rem !important; }
-          .contact-form-row { grid-template-columns: 1fr !important; }
         }
 
         @media (max-width: 640px) {
@@ -110,10 +83,6 @@ export default function HomePage() {
           .step-desc { font-size: 0.9rem; line-height: 1.6; }
           .mockup-visual { padding: 24px; border-radius: 8px; min-height: 300px; }
           .about-visual { height: auto; min-height: 200px; padding: 24px; }
-          .contact-section { padding: 48px 12px !important; }
-          .contact-grid { padding: 20px 12px; gap: 18px; }
-          .contact-card { padding: 18px !important; }
-          .contact-title { font-size: 1.6rem !important; }
         }
 
         @media (max-width: 480px) {
@@ -275,31 +244,6 @@ export default function HomePage() {
             </button>
 
             <button
-              onClick={handleSignInClick}
-              style={{
-                background: "#FFFFFF",
-                color: "#000",
-                border: "1px solid #E5E7EB",
-                padding: "16px 40px",
-                borderRadius: "8px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
-              onMouseOver={(e) => {
-                e.target.style.borderColor = "#D1D5DB"
-                e.target.style.background = "#F9FAFB"
-              }}
-              onMouseOut={(e) => {
-                e.target.style.borderColor = "#E5E7EB"
-                e.target.style.background = "#FFFFFF"
-              }}
-            >
-              Sign In
-            </button>
-
-            <button
               style={{
                 background: "#FFFFFF",
                 color: "#000",
@@ -324,10 +268,56 @@ export default function HomePage() {
             </button>
           </div>
 
-          
-          <div>
-      <LaptopMockup />
-    </div>
+          {/* Hero Mockup */}
+          <div
+            className="mockup-grid"
+            style={{
+              backgroundColor: "#FFFFFF",
+              border: "1px solid #E5E7EB",
+              borderRadius: "16px",
+              padding: "40px",
+              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.08)",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "20px",
+            }}
+          >
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                style={{
+                  backgroundColor: "#FAFAFA",
+                  border: "1px solid #F3F4F6",
+                  borderRadius: "8px",
+                  padding: "20px",
+                  textAlign: "left",
+                }}
+              >
+                <div
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    backgroundColor: "#E5E7EB",
+                    borderRadius: "6px",
+                    marginBottom: "12px",
+                  }}
+                ></div>
+                <div
+                  style={{
+                    height: "8px",
+                    backgroundColor: "#E5E7EB",
+                    borderRadius: "4px",
+                    marginBottom: "8px",
+                    width: "80%",
+                  }}
+                ></div>
+                <div
+                  style={{ height: "8px", backgroundColor: "#F3F4F6", borderRadius: "4px", marginBottom: "8px" }}
+                ></div>
+                <div style={{ height: "8px", backgroundColor: "#F3F4F6", borderRadius: "4px", width: "60%" }}></div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -508,169 +498,9 @@ export default function HomePage() {
             </div>
 
             {/* Visual mockup */}
-            <div className="mockup-visual" style={{ display: "flex", justifyContent: "center" }}>
-              <PhoneMockup />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section
-        className="contact-section"
-        id="contact"
-        style={{ padding: "100px 40px", backgroundColor: "#F9FAFB", borderTop: "1px solid #E5E7EB" }}
-      >
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <h2
-              className="contact-title"
-              style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111827", margin: "0 0 12px 0", letterSpacing: "-1px" }}
-            >
-              Contact
-            </h2>
-            <p style={{ margin: 0, color: "#6B7280", fontSize: "1.05rem", lineHeight: 1.7 }}>
-              Reach us via WhatsApp, email, or send a message.
-            </p>
-          </div>
-
-          <div
-            className="contact-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "32px",
-              alignItems: "start",
-              backgroundColor: "#FFFFFF",
-              borderRadius: "16px",
-              border: "1px solid #E5E7EB",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
-              padding: "40px",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div
-                className="contact-card"
-                style={{
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "14px",
-                  padding: "22px",
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
-                <div style={{ fontWeight: 800, color: "#111827", marginBottom: "10px" }}>WhatsApp</div>
-                <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#16A34A", marginBottom: "8px" }}>
-                  {whatsappNumber}
-                </div>
-                <div style={{ color: "#6B7280", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: "14px" }}>
-                  Fast support for teachers.
-                </div>
-                <a
-                  href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: "inline-block",
-                    backgroundColor: "#16A34A",
-                    color: "#FFFFFF",
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    textDecoration: "none",
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  Chat on WhatsApp
-                </a>
-              </div>
-
-              <div
-                className="contact-card"
-                style={{
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "14px",
-                  padding: "22px",
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
-                <div style={{ fontWeight: 800, color: "#111827", marginBottom: "10px" }}>Email</div>
-                <div style={{ color: "#6B7280", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: "12px" }}>
-                  For feedback, partnerships, or support:
-                </div>
-                <a
-                  href={`mailto:${contactEmail}`}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid #E5E7EB",
-                    backgroundColor: "#F9FAFB",
-                    color: "#111827",
-                    textDecoration: "none",
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {contactEmail}
-                </a>
-              </div>
-            </div>
-
-            <div
-              className="contact-card"
-              style={{
-                border: "1px solid #E5E7EB",
-                borderRadius: "14px",
-                padding: "22px",
-                backgroundColor: "#FFFFFF",
-              }}
-            >
-              <div style={{ fontWeight: 800, color: "#111827", marginBottom: "12px" }}>Send a message</div>
-              <form onSubmit={handleContactSubmit}>
-                <div className="contact-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <input
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm((p) => ({ ...p, name: e.target.value }))}
-                    placeholder="Your name"
-                    style={{ padding: "12px 12px", borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: "0.95rem" }}
-                  />
-                  <input
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm((p) => ({ ...p, email: e.target.value }))}
-                    placeholder="Your email"
-                    type="email"
-                    style={{ padding: "12px 12px", borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: "0.95rem" }}
-                  />
-                </div>
-                <textarea
-                  value={contactForm.message}
-                  onChange={(e) => setContactForm((p) => ({ ...p, message: e.target.value }))}
-                  placeholder="Message"
-                  rows={5}
-                  style={{ marginTop: "12px", width: "100%", padding: "12px 12px", borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: "0.95rem", resize: "vertical" }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    backgroundColor: "#111827",
-                    color: "#FFFFFF",
-                    border: "none",
-                    padding: "12px 14px",
-                    borderRadius: "10px",
-                    fontWeight: 800,
-                    fontSize: "1rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  Send
-                </button>
-              </form>
-            </div>
+            <div>
+      <PhoneMockup />
+    </div>
           </div>
         </div>
       </section>
