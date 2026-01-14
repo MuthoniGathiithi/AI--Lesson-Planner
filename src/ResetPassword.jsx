@@ -63,7 +63,7 @@ export default function ResetPassword() {
       <div style={styles.contentWrapper}>
         <div style={styles.card}>
           <div style={styles.header}>
-            <h1 style={styles.brandTitle}>FunzoIQ</h1>
+            <h1 style={styles.brandTitle}>Funzo Hub</h1>
             <h2 style={styles.title}>Set New Password</h2>
             <p style={styles.subtitle}>Enter a new password for your account.</p>
           </div>

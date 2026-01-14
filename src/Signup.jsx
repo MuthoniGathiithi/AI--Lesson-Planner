@@ -125,10 +125,10 @@ export default function SignUp() {
                 <User style={styles.logoIcon} />
               </div>
             </div>
-            <h1 style={styles.brandTitle}>FunzoIQ</h1>
+            <h1 style={styles.brandTitle}>Funzo Hub</h1>
             <h2 style={styles.title}>Create Account</h2>
             <p style={styles.subtitle}>
-              Start your journey today at FunzoIQ
+              Start your journey today at Funzo Hub
             </p>
           </div>
 

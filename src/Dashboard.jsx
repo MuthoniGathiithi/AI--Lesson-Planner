@@ -875,7 +875,7 @@ export default function LessonCreator() {
       >
         <div style={styles.sidebarHeader}>
           <div style={styles.logo}>
-            <div style={styles.logoText}>FunzoIQ</div>
+            <div style={styles.logoText}>Funzo Hub</div>
           </div>
         </div>
 

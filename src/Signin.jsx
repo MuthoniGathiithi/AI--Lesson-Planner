@@ -84,7 +84,7 @@ export default function SignIn() {
       <div style={styles.contentWrapper}>
         <div style={styles.card}>
           <div style={styles.header}>
-            <h1 style={styles.brandTitle}>FunzoIQ</h1>
+            <h1 style={styles.brandTitle}>Funzo Hub</h1>
             <h2 style={styles.title}>Welcome back</h2>
             <p style={styles.subtitle}>Enter your credentials to access your account</p>
           </div>

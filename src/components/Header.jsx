@@ -95,7 +95,7 @@ export default function Header() {
           textDecoration: 'none',
           transition: 'color 0.2s',
         }}>
-          FunzoIQ
+          Funzo Hub
         </Link>
 
         {/* Desktop Links */}

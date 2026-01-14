@@ -45,7 +45,7 @@ export default function Footer() {
               fontWeight: 700,
               marginBottom: '16px'
             }}>
-              FunzoIQ
+              Funzo Hub
             </div>
             <p style={{
               fontSize: '0.9rem',
@@ -106,7 +106,7 @@ export default function Footer() {
           color: '#6B7280',
           fontFamily: "'Inter', sans-serif"
         }}>
-          © 2026 FunzoIQ. All rights reserved.
+          © 2026 Funzo Hub. All rights reserved.
         </div>
       </div>
     </footer>
