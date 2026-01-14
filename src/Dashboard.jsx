@@ -121,8 +121,14 @@ export default function LessonCreator() {
     if (result.success) {
       const lessons = result.data.map((lesson) => {
         const content = typeof lesson.content === "string" ? JSON.parse(lesson.content) : lesson.content
+        const normalizedContent = content?.lessonPlan
+          ? content
+          : {
+              lessonPlan: content,
+            }
+
         return {
-          ...content,
+          ...normalizedContent,
           dbId: lesson.id,
           savedDate: new Date(lesson.created_at).toLocaleDateString(),
           status: lesson.status,
@@ -518,29 +524,11 @@ export default function LessonCreator() {
       const timeString =
         typeof timeObj === "string" ? timeObj : timeObj?.start ? `${timeObj.start} - ${timeObj.end}` : ""
 
-      const getTeacherName = () => {
-        return (
-          lesson.teacherName ||
-          lesson.teacherDetails?.name ||
-          lesson.administrativeDetails?.teacherName ||
-          lesson.administrativeDetails?.teacher ||
-          lesson.lessonPlan?.teacherDetails?.name ||
-          lesson.lessonPlan?.administrativeDetails?.teacher ||
-          ""
-        )
-      }
+      const outcomesData =
+        lesson.lessonLearningOutcomes ||
+        lesson.lessonLearningOutcomes ||
+        { statement: "By the end of the lesson, the learner should be able to:", outcomes: [] }
 
-      const getTeacherTsc = () => {
-        return (
-          lesson.tscNumber ||
-          lesson.teacherDetails?.tscNumber ||
-          lesson.administrativeDetails?.tscNumber ||
-          lesson.administrativeDetails?.teacherTSCNumber ||
-          lesson.lessonPlan?.teacherDetails?.tscNumber ||
-          lesson.lessonPlan?.administrativeDetails?.teacherTSCNumber ||
-          ""
-        )
-      }
 
       setLessonPlan({
         lessonPlan: {
@@ -548,24 +536,20 @@ export default function LessonCreator() {
             ...lesson.administrativeDetails,
             time: timeString,
           },
-          teacherDetails: {
-            name: getTeacherName(),
-            tscNumber: getTeacherTsc(),
-          },
+          teacherDetails: lesson.teacherDetails || {},
           strand: lesson.strand || lesson.curriculumAlignment?.strand || "",
           subStrand: lesson.subStrand || lesson.curriculumAlignment?.subStrand || "",
           lessonLearningOutcomes: {
             statement: "By the end of the lesson, the learner should be able to:",
-            outcomes: lesson.learningOutcomes || [],
+            outcomes: outcomesData.outcomes || lesson.learningOutcomes || [],
           },
-          keyInquiryQuestion: lesson.guidingQuestion || "",
+          keyInquiryQuestion: lesson.keyInquiryQuestion || lesson.guidingQuestion || "",
           learningResources: lesson.learningResources || [],
-          lessonFlow: lesson.lessonFlow || {
-            introduction: { description: "" },
-            development: [],
-            conclusion: { description: "" },
-          },
+          lessonFlow: lesson.lessonFlow || {},
         },
+        dbId: lesson.dbId,
+        savedDate: lesson.savedDate,
+        status: lesson.status,
       })
     }
 
