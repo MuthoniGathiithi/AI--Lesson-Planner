@@ -1,6 +1,6 @@
 "use client"
 import { useNavigate } from "react-router-dom"
-import PhoneMockup from './components/PhoneMockupWithModules';
+import PhoneMockup from './PhoneMockupWithModules';
 
 function HowItWorks() {
   return (
