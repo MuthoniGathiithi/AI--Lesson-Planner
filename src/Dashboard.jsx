@@ -582,16 +582,21 @@ export default function LessonCreator() {
     })
   }
 
-  const handleLogout = () => {
-    if (confirm("Are you sure you want to logout?")) {
-      setLessonPlan(null)
-      setCurrentLessonId(null)
-      setSavedLessons([])
-      setFilteredLessons([])
-      setActiveTab("dashboard")
-      alert("Logged out successfully!")
-      supabase.auth.signOut()
-      window.location.href = "/signin"
+  const handleLogout = async () => {
+    if (!confirm("Are you sure you want to logout?")) return
+
+    setLessonPlan(null)
+    setCurrentLessonId(null)
+    setSavedLessons([])
+    setFilteredLessons([])
+    setActiveTab("dashboard")
+
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error("Logout error:", error)
+    } finally {
+      window.location.href = "/"
     }
   }
 
