@@ -194,6 +194,26 @@ export default function LessonCreator() {
       const outcomesData = plan.lessonLearningOutcomes || {}
       const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
 
+      const normalizeToStringArray = (value) => {
+        if (Array.isArray(value)) return value.map((v) => String(v ?? "").trim()).filter(Boolean)
+        if (typeof value === "string") {
+          const trimmed = value.trim()
+          if (!trimmed) return []
+          return trimmed
+            .split(",")
+            .map((v) => v.trim())
+            .filter(Boolean)
+        }
+        if (value == null) return []
+        if (typeof value === "object") {
+          return Object.values(value)
+            .flat()
+            .map((v) => String(v ?? "").trim())
+            .filter(Boolean)
+        }
+        return [String(value).trim()].filter(Boolean)
+      }
+
       const subject = admin.subject || "Untitled Lesson"
       const dateString = admin.date || new Date().toISOString().split("T")[0]
       const safeSubject = String(subject).replace(/[^a-z0-9\- _]/gi, "").trim() || "Lesson Plan"
@@ -332,7 +352,7 @@ export default function LessonCreator() {
       addParagraph(plan.keyInquiryQuestion || plan.guidingQuestion)
 
       addSection("Learning Resources")
-      addParagraph((plan.learningResources || []).join(", ") || "N/A")
+      addParagraph(normalizeToStringArray(plan.learningResources).join(", ") || "N/A")
 
       addSection("Lesson Flow")
       addKeyValue("Introduction", plan.lessonFlow?.introduction?.description || "N/A")
@@ -1243,8 +1263,13 @@ export default function LessonCreator() {
                       <div style={styles.sectionTitle}>LEARNING RESOURCES</div>
                       {(() => {
                         const plan = lessonPlan?.lessonPlan || lessonPlan
-                        const resources = plan?.learningResources || []
-                        return renderEditableField("lessonPlan.learningResources", resources.join(", "), true, "Enter resources (comma-separated)")
+                        const resources = normalizeToStringArray(plan?.learningResources)
+                        return renderEditableField(
+                          "lessonPlan.learningResources",
+                          resources.join(", "),
+                          true,
+                          "Enter resources (comma-separated)"
+                        )
                       })()}
                     </div>
 
