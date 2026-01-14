@@ -176,6 +176,33 @@ export default function LessonCreator() {
     const plan = clone?.lessonPlan || clone
     if (plan) {
       plan.learningResources = normalizeToStringArray(plan.learningResources)
+
+      const rawLlo = plan.lessonLearningOutcomes || plan.lessonLearningOutcomes || {}
+      const rawOutcomes = rawLlo.outcomes || plan.learningOutcomes || []
+      const outcomesArray = Array.isArray(rawOutcomes) ? rawOutcomes : []
+      const normalizedOutcomes = outcomesArray
+        .map((item, index) => {
+          if (item && typeof item === "object") {
+            return {
+              id: item.id ?? String.fromCharCode(97 + (index % 26)),
+              outcome: item.outcome ?? item.text ?? item.description ?? "",
+            }
+          }
+          return {
+            id: String.fromCharCode(97 + (index % 26)),
+            outcome: String(item ?? ""),
+          }
+        })
+        .filter((o) => String(o.outcome ?? "").trim() !== "")
+
+      plan.lessonLearningOutcomes = {
+        statement:
+          rawLlo.statement ||
+          "By the end of the lesson, the learner should be able to:",
+        outcomes: normalizedOutcomes,
+      }
+
+      delete plan.learningOutcomes
     }
     return clone
   }
@@ -222,8 +249,24 @@ export default function LessonCreator() {
       const admin = plan.administrativeDetails || {}
       const teacher = plan.teacherDetails || {}
       const roll = admin.roll || admin.studentEnrollment || {}
-      const outcomesData = plan.lessonLearningOutcomes || {}
-      const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
+      const outcomesData = plan.lessonLearningOutcomes || plan.lessonLearningOutcomes || {}
+      const rawOutcomes = outcomesData.outcomes || plan.learningOutcomes || []
+      const outcomes = Array.isArray(rawOutcomes)
+        ? rawOutcomes
+            .map((item, index) => {
+              if (item && typeof item === "object") {
+                return {
+                  id: item.id ?? String.fromCharCode(97 + (index % 26)),
+                  outcome: item.outcome ?? item.text ?? item.description ?? "",
+                }
+              }
+              return {
+                id: String.fromCharCode(97 + (index % 26)),
+                outcome: String(item ?? ""),
+              }
+            })
+            .filter((o) => String(o.outcome ?? "").trim() !== "")
+        : []
 
       const subject = admin.subject || "Untitled Lesson"
       const dateString = admin.date || new Date().toISOString().split("T")[0]
@@ -336,7 +379,10 @@ export default function LessonCreator() {
       addParagraph(plan.subStrand || plan.curriculumAlignment?.substrand)
 
       addSection("Lesson Learning Outcomes")
-      addParagraph(outcomesData.statement || "By the end of the lesson, the learner should be able to:")
+      addParagraph(
+        outcomesData.statement ||
+          "By the end of the lesson, the learner should be able to:"
+      )
       if (outcomes.length > 0) {
         outcomes.forEach((o) => {
           addParagraph(`${o.id || "-"}) ${o.outcome || ""}`)
@@ -369,16 +415,17 @@ export default function LessonCreator() {
       const blob = doc.output("blob")
       const file = new File([blob], filename, { type: "application/pdf" })
 
-      if (typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: filename })
-      } else {
-        try {
-          saveAs(blob, filename)
-        } catch (e) {
-          const url = URL.createObjectURL(blob)
-          window.open(url, "_blank")
-          setTimeout(() => URL.revokeObjectURL(url), 60_000)
-        }
+      try {
+        saveAs(blob, filename)
+      } catch (e) {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        setTimeout(() => URL.revokeObjectURL(url), 60_000)
       }
 
       return { success: true }
@@ -1010,9 +1057,10 @@ export default function LessonCreator() {
                                       onClick={() => handleDownload(lesson, 'pdf')} 
                                       style={styles.downloadButtonSmall}
                                       disabled={isDownloading}
-                                      title="Download"
+                                      title="Download as PDF"
                                     >
                                       <Download size={16} />
+                                      <span>Download as PDF</span>
                                     </button>
                                     <button 
                                       onClick={() => handleDelete(lesson)} 
@@ -1232,7 +1280,11 @@ export default function LessonCreator() {
                       </div>
                       {(() => {
                         const plan = lessonPlan?.lessonPlan || lessonPlan
-                        const outcomes = plan?.lessonLearningOutcomes?.outcomes || plan?.learningOutcomes || []
+                        const outcomes =
+                          plan?.lessonLearningOutcomes?.outcomes ||
+                          plan?.lessonLearningOutcomes?.outcomes ||
+                          plan?.learningOutcomes ||
+                          []
                         return outcomes.map((outcome, index) => (
                           <div key={index} style={styles.outcomeItem}>
                             <div style={styles.outcomeNumber}>{outcome.id})</div>

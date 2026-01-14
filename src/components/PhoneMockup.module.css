@@ -1,0 +1,200 @@
+/* PhoneMockup.module.css */
+/* Save this file as: PhoneMockup.module.css */
+
+.phoneMockupWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+.phoneFrame {
+  position: relative;
+  width: 360px;
+  height: 740px;
+  background: #1a1a1a;
+  border-radius: 50px;
+  padding: 12px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-15px) rotate(-1deg); 
+  }
+}
+
+.phoneNotch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 28px;
+  background: #1a1a1a;
+  border-radius: 0 0 20px 20px;
+  z-index: 10;
+}
+
+.phoneSpeaker {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 6px;
+  background: #0a0a0a;
+  border-radius: 3px;
+}
+
+.phoneCamera {
+  position: absolute;
+  top: 8px;
+  right: 35px;
+  width: 12px;
+  height: 12px;
+  background: #1a3a5a;
+  border-radius: 50%;
+  border: 2px solid #0a0a0a;
+}
+
+.phoneScreen {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 42px;
+  overflow: hidden;
+  position: relative;
+}
+
+.screenContent {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 45px 16px 20px;
+  background: white;
+}
+
+.screenContent::-webkit-scrollbar {
+  width: 4px;
+}
+
+.screenContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.screenContent::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.formHeader {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.formHeader h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.formInput,
+.formSelect {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.formInput::placeholder {
+  color: #94a3b8;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.tipBox {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 3px solid #2563eb;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  font-size: 11px;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.tipIcon {
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 13px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.submitButton:hover {
+  background: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+}
+
+@media (max-width: 480px) {
+  .phoneFrame {
+    width: 320px;
+    height: 660px;
+    border-radius: 45px;
+  }
+
+  .formHeader h1 {
+    font-size: 18px;
+  }
+}

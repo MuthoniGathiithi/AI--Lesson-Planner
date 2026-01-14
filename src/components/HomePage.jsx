@@ -1,5 +1,14 @@
 "use client"
 import { useNavigate } from "react-router-dom"
+import PhoneMockup from './components/PhoneMockupWithModules';
+
+function HowItWorks() {
+  return (
+    <div>
+      <PhoneMockup />
+    </div>
+  );
+}
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -494,18 +503,9 @@ export default function HomePage() {
             </div>
 
             {/* Visual mockup */}
-            <div
-              className="mockup-visual"
-              style={{
-                backgroundColor: "#FAFAFA",
-                border: "1px solid #E5E7EB",
-                borderRadius: "12px",
-                padding: "48px",
-                position: "relative",
-              }}
-            >
-              {/* Grid overlay and mockup elements */}
-            </div>
+            <div>
+      <PhoneMockup />
+    </div>
           </div>
         </div>
       </section>
