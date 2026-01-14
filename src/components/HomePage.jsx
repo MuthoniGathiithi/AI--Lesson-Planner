@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import PhoneMockup from "./PhoneMockupWithModules.jsx"
 import LaptopMockup from "./Laptopmockup.jsx"
 
 
@@ -333,41 +334,9 @@ export default function HomePage() {
               gap: "20px",
             }}
           >
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                style={{
-                  backgroundColor: "#FAFAFA",
-                  border: "1px solid #F3F4F6",
-                  borderRadius: "8px",
-                  padding: "20px",
-                  textAlign: "left",
-                }}
-              >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    backgroundColor: "#E5E7EB",
-                    borderRadius: "6px",
-                    marginBottom: "12px",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    height: "8px",
-                    backgroundColor: "#E5E7EB",
-                    borderRadius: "4px",
-                    marginBottom: "8px",
-                    width: "80%",
-                  }}
-                ></div>
-                <div
-                  style={{ height: "8px", backgroundColor: "#F3F4F6", borderRadius: "4px", marginBottom: "8px" }}
-                ></div>
-                <div style={{ height: "8px", backgroundColor: "#F3F4F6", borderRadius: "4px", width: "60%" }}></div>
-              </div>
-            ))}
+            <div style={{ gridColumn: "1 / -1" }}>
+              <LaptopMockup />
+            </div>
           </div>
         </div>
       </section>
@@ -550,7 +519,7 @@ export default function HomePage() {
 
             {/* Visual mockup */}
             <div className="mockup-visual" style={{ display: "flex", justifyContent: "center" }}>
-              <LaptopMockup />
+              <PhoneMockup />
             </div>
           </div>
         </div>
