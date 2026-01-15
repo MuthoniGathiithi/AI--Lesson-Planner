@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import PhoneMockup from "./Staticphonemockup.jsx"
-import  Dashboardmockup from "./Dashboardmockup.jsx"
+import DashboardMockup from "./Dashboardmockup.jsx"
 
 
 
@@ -67,7 +67,13 @@ export default function HomePage() {
           .mockup-grid { padding: 16px; gap: 16px; }
           .mockup-grid > div { padding: 16px; }
           .about-section { padding: 60px 16px !important; }
-          .about-grid { padding: 32px 16px; gap: 32px; }
+          .about-grid { 
+            display: block !important;
+            grid-template-columns: 1fr !important;
+            padding: 44px 24px !important;
+            gap: 32px !important;
+            border-radius: 0 !important;
+          }
           .about-grid h2 { font-size: 2rem; }
           .about-grid button { width: 100%; }
           .how-it-works-section { padding: 60px 16px !important; }
@@ -335,7 +341,7 @@ export default function HomePage() {
             }}
           >
             <div style={{ gridColumn: "1 / -1" }}>
-              <Dashboardmockup />
+              <DashboardMockup />
             </div>
           </div>
         </div>
@@ -418,21 +424,6 @@ export default function HomePage() {
               >
                 Watch  Demo
               </button>
-            </div>
-
-            <div
-              className="about-visual"
-              style={{
-                position: "relative",
-                height: "500px",
-                backgroundColor: "#F9FAFB",
-                borderRadius: "12px",
-                padding: "40px",
-                overflow: "hidden",
-              }}
-            >
-              {/* Cards inside same as your current code */}
-              {/* ... */}
             </div>
           </div>
         </div>
