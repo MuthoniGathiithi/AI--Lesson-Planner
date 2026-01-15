@@ -1,5 +1,30 @@
 const API_URL = process.env.REACT_APP_API_URL || 'https://ai-lesson-planner-backend-7rq9.onrender.com';
 
+const formatBackendError = (errorData) => {
+  if (!errorData) return 'Failed to generate lesson plan'
+  const detail = errorData.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((d) => {
+        if (typeof d === 'string') return d
+        if (d && typeof d === 'object') {
+          const loc = Array.isArray(d.loc) ? d.loc.join('.') : ''
+          const msg = d.msg || d.message || ''
+          const type = d.type || ''
+          const combined = [loc, msg, type].filter(Boolean).join(' - ')
+          return combined || JSON.stringify(d)
+        }
+        return String(d)
+      })
+      .filter(Boolean)
+    if (parts.length) return parts.join('\n')
+  }
+  if (detail && typeof detail === 'object') return JSON.stringify(detail)
+  if (typeof errorData.message === 'string') return errorData.message
+  return JSON.stringify(errorData)
+}
+
 // Generate lesson plan
 export const generateLessonPlan = async (formData) => {
   try {
@@ -29,7 +54,7 @@ export const generateLessonPlan = async (formData) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Backend error:', errorData);
-      throw new Error(errorData.detail || 'Failed to generate lesson plan');
+      throw new Error(formatBackendError(errorData));
     }
 
     const data = await response.json();

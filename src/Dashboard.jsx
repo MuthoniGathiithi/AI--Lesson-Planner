@@ -311,7 +311,8 @@ export default function LessonCreator() {
     console.log("Generated lesson plan:", generatedPlan)
   } catch (error) {
     console.error("Error generating lesson plan:", error)
-    alert("Failed to generate lesson plan. Please check:\n- Backend is running\n- All required fields are filled\n- Strand and sub-strand are provided")
+    const message = error?.message ? String(error.message) : String(error)
+    alert(`Failed to generate lesson plan:\n${message}`)
   } finally {
     setIsGenerating(false)
   }
@@ -1262,12 +1263,11 @@ export default function LessonCreator() {
                 <div style={styles.formCard}>
                   <h2 style={styles.formTitle}>Create New Lesson Plan</h2>
                   <div 
-                    className={isMobile ? 'form-grid-mobile' : ''}
                     style={styles.formGrid}
                   >
                    {[
   { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
-  { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics, Kiswahili", type: "text", required: true },
+  { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
   { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text", required: false },
   { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: false },
   { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number", required: false },
