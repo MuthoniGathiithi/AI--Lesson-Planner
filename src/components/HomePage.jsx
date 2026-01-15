@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import PhoneMockup from "./Staticphonemockup.jsx"
-import LaptopMockup from "./Tabletmockup.jsx"
+import  Dashboardmockup from "./Dashboardmockup.jsx"
 
 
 
@@ -335,7 +335,7 @@ export default function HomePage() {
             }}
           >
             <div style={{ gridColumn: "1 / -1" }}>
-              <LaptopMockup />
+              <Dashboardmockup />
             </div>
           </div>
         </div>
