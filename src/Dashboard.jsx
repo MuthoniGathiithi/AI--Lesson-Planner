@@ -1215,7 +1215,16 @@ export default function LessonCreator() {
                         <tr>
                           <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Year:</td>
                           <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.administrativeDetails.year", lessonPlan?.lessonPlan?.administrativeDetails?.year || lessonPlan?.administrativeDetails?.year)}
+                            {(() => {
+                              const plan = lessonPlan?.lessonPlan || lessonPlan
+                              const admin = plan?.administrativeDetails || {}
+                              const yearFromDate = typeof admin.date === "string" ? admin.date.split("-")[0] : ""
+                              const rawYear = admin.year ?? (plan?.lessonPlan?.administrativeDetails?.year)
+                              const yearString = String(rawYear ?? "").trim()
+                              const parsed = parseInt(yearString, 10)
+                              const safeYear = parsed >= 1000 ? String(parsed) : (yearFromDate || "2026")
+                              return renderEditableField("lessonPlan.administrativeDetails.year", safeYear)
+                            })()}
                           </td>
                           <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Term:</td>
                           <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
@@ -1246,8 +1255,26 @@ export default function LessonCreator() {
                           <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
                             {(() => {
                               const plan = lessonPlan?.lessonPlan || lessonPlan
-                              const roll = plan?.administrativeDetails?.roll || plan?.administrativeDetails?.studentEnrollment || {}
-                              return `Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}`
+                              const admin = plan?.administrativeDetails || {}
+                              const roll = admin.roll || admin.studentEnrollment || {}
+                              const boys = roll.boys ?? 0
+                              const girls = roll.girls ?? 0
+                              const total = (parseInt(boys, 10) || 0) + (parseInt(girls, 10) || 0)
+                              return (
+                                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                      <span>Boys:</span>
+                                      {renderEditableField("lessonPlan.administrativeDetails.roll.boys", String(boys))}
+                                    </div>
+                                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                      <span>Girls:</span>
+                                      {renderEditableField("lessonPlan.administrativeDetails.roll.girls", String(girls))}
+                                    </div>
+                                  </div>
+                                  <div>Total: {total}</div>
+                                </div>
+                              )
                             })()}
                           </td>
                         </tr>
@@ -1578,9 +1605,9 @@ const styles = {
     padding: "8px 14px",
     fontSize: "14px",
     fontWeight: "600",
-    backgroundColor: "#000000",
+    backgroundColor: "#4F46E5",
     color: "#ffffff",
-    border: "1px solid #000000",
+    border: "1px solid #4F46E5",
     borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s ease",
