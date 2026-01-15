@@ -37,6 +37,20 @@ const getBilingualFields = (lessonPlan) => {
     const admin = plan?.["MAELEZO YA KIUTAWALA"] || {}
     const teacher = plan?.["MAELEZO YA MWALIMU"] || {}
     const roll = admin?.["Orodha ya Wanafunzi"] || {}
+
+    const learningOutcomes =
+      plan?.["MATOKEO YA KUJIFUNZA"] ||
+      plan?.["MATOKEO YA KUJIFUNZIA"] ||
+      plan?.["MATOKEO YA KUJIFUNZIA "] ||
+      {}
+
+    const resources =
+      plan?.["VIFAA VYA KUJIFUNZIA"] ||
+      plan?.["VIFAA VYA KUJIFUNZA"] ||
+      plan?.["VIFAA VYA KUJIFUNZIA "] ||
+      []
+
+    const lessonFlow = plan?.["MTIRIRIKO WA SOMO"] || plan?.["MTIRIRIKO WA SOMO "] || {}
     
     return {
       isKiswahili: true,
@@ -83,10 +97,10 @@ const getBilingualFields = (lessonPlan) => {
         tscNumber: teacher?.["Namba ya TSC"] || "",
         strand: plan?.MSTARI || "",
         subStrand: plan?.["MSTARI MDOGO"] || "",
-        learningOutcomes: plan?.["MATOKEO YA KUJIFUNZA"] || {},
+        learningOutcomes,
         keyQuestion: plan?.["SWALI KUU LA UCHUNGUZI"] || "",
-        resources: plan?.["VIFAA VYA KUJIFUNZIA"] || [],
-        lessonFlow: plan?.["MTIRIRIKO WA SOMO"] || {}
+        resources,
+        lessonFlow,
       }
     }
   } else {
@@ -425,6 +439,34 @@ export default function LessonCreator() {
       const fields = getBilingualFields(lesson)
       const { isKiswahili, labels, data } = fields
 
+      const findKeyInsensitive = (obj, wantedKey) => {
+        if (!obj || typeof obj !== "object") return undefined
+        const wanted = String(wantedKey ?? "").toLowerCase()
+        if (!wanted) return undefined
+        const match = Object.keys(obj).find((k) => String(k).toLowerCase() === wanted)
+        return match ? obj[match] : undefined
+      }
+
+      const getFlowPart = (flow, labelKey, englishKey) => {
+        if (!flow || typeof flow !== "object") return undefined
+        return (
+          flow?.[englishKey] ??
+          flow?.[labelKey] ??
+          flow?.[String(labelKey ?? "").toLowerCase()] ??
+          findKeyInsensitive(flow, labelKey) ??
+          findKeyInsensitive(flow, englishKey)
+        )
+      }
+
+      const normalizeDescription = (value) => {
+        if (typeof value === "string") return value
+        if (!value || typeof value !== "object") return ""
+        const direct = value.description ?? value.maelezo ?? value.text ?? value.content
+        if (typeof direct === "string") return direct
+        const firstString = Object.values(value).find((v) => typeof v === "string")
+        return typeof firstString === "string" ? firstString : ""
+      }
+
       const subject = toSentenceCase(data.subject || "Untitled Lesson")
       const dateString = data.date || new Date().toISOString().split("T")[0]
       const safeSubject = String(subject).replace(/[^a-z0-9\- _]/gi, "").trim() || "Lesson Plan"
@@ -534,11 +576,29 @@ export default function LessonCreator() {
 
       addSection(labels.learningOutcomes)
       const outcomesData = data.learningOutcomes || {}
-      const outcomes = outcomesData.outcomes || []
-      addParagraph(outcomesData.statement || labels.outcomeStatement)
+      const outcomesRaw =
+        outcomesData.outcomes ||
+        outcomesData.majibu ||
+        outcomesData.matokeo ||
+        outcomesData.learningOutcomes ||
+        []
+      const outcomes = Array.isArray(outcomesRaw)
+        ? outcomesRaw
+        : typeof outcomesRaw === "object" && outcomesRaw
+          ? Object.values(outcomesRaw)
+          : []
+
+      addParagraph(outcomesData.statement || outcomesData.taarifa || labels.outcomeStatement)
       if (outcomes.length > 0) {
-        outcomes.forEach((o) => {
-          addParagraph(`${o.id || "-"}) ${o.outcome || ""}`)
+        outcomes.forEach((o, index) => {
+          if (o && typeof o === "object") {
+            const id = o.id ?? String.fromCharCode(97 + (index % 26))
+            const outcome = o.outcome ?? o.text ?? o.description ?? ""
+            addParagraph(`${id}) ${outcome || ""}`)
+            return
+          }
+          const id = String.fromCharCode(97 + (index % 26))
+          addParagraph(`${id}) ${String(o ?? "")}`)
         })
       } else {
         addParagraph("N/A")
@@ -552,22 +612,36 @@ export default function LessonCreator() {
 
       addSection(labels.lessonFlow)
       const lessonFlow = data.lessonFlow || {}
-      
-      addKeyValue(labels.introduction, lessonFlow.introduction?.description || lessonFlow[labels.introduction?.toLowerCase()]?.description || "N/A")
-      
+
+      const introRaw = getFlowPart(lessonFlow, labels.introduction, "introduction")
+      addKeyValue(labels.introduction, normalizeDescription(introRaw) || "N/A")
+
       addSection(labels.development)
-      const devSteps = lessonFlow.development || lessonFlow[labels.development?.toLowerCase()] || []
+      const devRaw = getFlowPart(lessonFlow, labels.development, "development")
+      const devSteps = Array.isArray(devRaw)
+        ? devRaw
+        : typeof devRaw === "object" && devRaw
+          ? Object.values(devRaw)
+          : []
+
       if (devSteps.length > 0) {
-        devSteps.forEach((step) => {
-          addParagraph(`${labels.step} ${step.step || step[labels.step?.toLowerCase()] || ""}: ${step.description || step.title || "N/A"}`)
-          if (step.activity) addParagraph(`${isKiswahili ? "Shughuli" : "Activity"}: ${step.activity}`)
+        devSteps.forEach((step, index) => {
+          if (step && typeof step === "object") {
+            const stepNo = step.step ?? step.no ?? step.number ?? step[labels.step] ?? index + 1
+            const desc = step.description ?? step.title ?? step.maelezo ?? step.text ?? ""
+            addParagraph(`${labels.step} ${stepNo}: ${desc || "N/A"}`)
+            if (step.activity) addParagraph(`${isKiswahili ? "Shughuli" : "Activity"}: ${step.activity}`)
+            return
+          }
+          addParagraph(`${labels.step} ${index + 1}: ${String(step ?? "N/A")}`)
         })
       } else {
         addParagraph("N/A")
       }
       
       addSection(labels.conclusion)
-      addParagraph(lessonFlow.conclusion?.description || lessonFlow[labels.conclusion?.toLowerCase()]?.description || "N/A")
+      const conclusionRaw = getFlowPart(lessonFlow, labels.conclusion, "conclusion")
+      addParagraph(normalizeDescription(conclusionRaw) || "N/A")
 
       const blob = doc.output("blob")
       const file = new File([blob], filename, { type: "application/pdf" })
@@ -1541,7 +1615,6 @@ export default function LessonCreator() {
   )
 }
 
-// NOTE: Add your styles object here (const styles = {...})
 
 const styles = {
   // Add your styles object here
