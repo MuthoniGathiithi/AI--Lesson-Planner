@@ -1,8 +1,8 @@
 "use client"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import PhoneMockup from "./PhoneMockupWithModules.jsx"
-import LaptopMockup from "./Laptopmockup.jsx"
+import PhoneMockup from "./Staticphonemockup.jsx"
+import LaptopMockup from "./Tabletmockup.jsx"
 
 
 

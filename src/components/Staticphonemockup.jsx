@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './StaticPhoneMockup.module.css';
+import styles from './Staticphonemockup.module.css';
 
 const StaticPhoneMockup = () => {
   return (

@@ -141,3 +141,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 480px) {
+  .tabletFrame {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .tabletScreen {
+    border-radius: 12px;
+  }
+
+  .screenContent {
+    padding: 20px 16px;
+  }
+}

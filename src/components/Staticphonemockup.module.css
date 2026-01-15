@@ -155,3 +155,21 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   cursor: default;
 }
+
+@media (max-width: 480px) {
+  .phoneFrame {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    min-height: 520px;
+  }
+
+  .phoneNotch {
+    width: 90px;
+    height: 22px;
+  }
+
+  .screenContent {
+    padding: 34px 12px 14px;
+  }
+}
