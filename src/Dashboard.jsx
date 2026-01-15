@@ -25,6 +25,24 @@ import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } 
 // ============== BILINGUAL HELPER FUNCTION ==============
 const getBilingualFields = (lessonPlan) => {
   const plan = lessonPlan?.lessonPlan || lessonPlan
+
+  const findKeyInsensitive = (obj, wantedKey) => {
+    if (!obj || typeof obj !== "object") return undefined
+    const wanted = String(wantedKey ?? "")
+      .toLowerCase()
+      .replace(/\s+/g, "")
+    if (!wanted) return undefined
+
+    const key = Object.keys(obj).find(
+      (k) => String(k ?? "").toLowerCase().replace(/\s+/g, "") === wanted
+    )
+    return key ? obj[key] : undefined
+  }
+
+  const getKey = (obj, key) => {
+    if (!obj || typeof obj !== "object") return undefined
+    return obj?.[key] ?? findKeyInsensitive(obj, key)
+  }
   
   // Detect if Kiswahili by checking both possible field structures
   const isKiswahili = 
@@ -39,18 +57,54 @@ const getBilingualFields = (lessonPlan) => {
     const roll = admin?.["Orodha ya Wanafunzi"] || {}
 
     const learningOutcomes =
-      plan?.["MATOKEO YA KUJIFUNZA"] ||
-      plan?.["MATOKEO YA KUJIFUNZIA"] ||
-      plan?.["MATOKEO YA KUJIFUNZIA "] ||
+      getKey(plan, "MATOKEO YA KUJIFUNZA") ||
+      getKey(plan, "MATOKEO YA KUJIFUNZIA") ||
       {}
 
     const resources =
-      plan?.["VIFAA VYA KUJIFUNZIA"] ||
-      plan?.["VIFAA VYA KUJIFUNZA"] ||
-      plan?.["VIFAA VYA KUJIFUNZIA "] ||
+      getKey(plan, "VIFAA VYA KUJIFUNZIA") ||
+      getKey(plan, "VIFAA VYA KUJIFUNZA") ||
       []
 
-    const lessonFlow = plan?.["MTIRIRIKO WA SOMO"] || plan?.["MTIRIRIKO WA SOMO "] || {}
+    const lessonFlowRaw =
+      getKey(plan, "MTIRIRIKO WA SOMO") ||
+      {}
+
+    const normalizeFlowPart = (value) => {
+      if (value == null) return undefined
+      if (typeof value === "string") return { description: value }
+      if (Array.isArray(value)) return value
+      if (typeof value === "object") return value
+      return { description: String(value) }
+    }
+
+    const rawIntro =
+      getKey(lessonFlowRaw, "Utangulizi") ??
+      getKey(lessonFlowRaw, "Introduction")
+    const rawDev =
+      getKey(lessonFlowRaw, "Maendeleo") ??
+      getKey(lessonFlowRaw, "Development")
+    const rawConclusion =
+      getKey(lessonFlowRaw, "Hitimisho") ??
+      getKey(lessonFlowRaw, "Conclusion")
+
+    const normalizedDevelopment = Array.isArray(rawDev)
+      ? rawDev.map((step, index) => {
+          if (step && typeof step === "object") return step
+          return { step: index + 1, description: String(step ?? "") }
+        })
+      : typeof rawDev === "object" && rawDev
+        ? Object.values(rawDev).map((step, index) => {
+            if (step && typeof step === "object") return step
+            return { step: index + 1, description: String(step ?? "") }
+          })
+        : []
+
+    const lessonFlow = {
+      introduction: normalizeFlowPart(rawIntro),
+      development: normalizedDevelopment,
+      conclusion: normalizeFlowPart(rawConclusion),
+    }
     
     return {
       isKiswahili: true,
@@ -95,10 +149,10 @@ const getBilingualFields = (lessonPlan) => {
         total: roll?.Jumla || 0,
         teacherName: teacher?.Jina || "",
         tscNumber: teacher?.["Namba ya TSC"] || "",
-        strand: plan?.MSTARI || "",
-        subStrand: plan?.["MSTARI MDOGO"] || "",
+        strand: getKey(plan, "MSTARI") || "",
+        subStrand: getKey(plan, "MSTARI MDOGO") || "",
         learningOutcomes,
-        keyQuestion: plan?.["SWALI KUU LA UCHUNGUZI"] || "",
+        keyQuestion: getKey(plan, "SWALI KUU LA UCHUNGUZI") || "",
         resources,
         lessonFlow,
       }
