@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -22,6 +21,133 @@ import {
 } from "lucide-react"
 import { generateLessonPlan } from "./services/api"
 import { saveLessonPlan, fetchLessonPlans, updateLessonPlan, deleteLessonPlan } from "./services/lessonPlanService"
+
+// ============== BILINGUAL HELPER FUNCTION ==============
+const getBilingualFields = (lessonPlan) => {
+  const plan = lessonPlan?.lessonPlan || lessonPlan
+  
+  // Detect if Kiswahili by checking both possible field structures
+  const isKiswahili = 
+    plan?.administrativeDetails?.subject?.toLowerCase()?.includes("kiswahili") ||
+    plan?.["MAELEZO YA KIUTAWALA"]?.Somo?.toLowerCase()?.includes("kiswahili") ||
+    false
+  
+  if (isKiswahili) {
+    // Kiswahili structure
+    const admin = plan?.["MAELEZO YA KIUTAWALA"] || {}
+    const teacher = plan?.["MAELEZO YA MWALIMU"] || {}
+    const roll = admin?.["Orodha ya Wanafunzi"] || {}
+    
+    return {
+      isKiswahili: true,
+      labels: {
+        adminDetails: "MAELEZO YA KIUTAWALA",
+        school: "Shule",
+        subject: "Somo",
+        year: "Mwaka",
+        term: "Muhula",
+        date: "Tarehe",
+        time: "Muda",
+        grade: "Darasa",
+        roll: "Orodha ya Wanafunzi",
+        boys: "Wavulana",
+        girls: "Wasichana",
+        total: "Jumla",
+        teacherDetails: "MAELEZO YA MWALIMU",
+        name: "Jina",
+        tscNumber: "Namba ya TSC",
+        strand: "MSTARI",
+        subStrand: "MSTARI MDOGO",
+        learningOutcomes: "MATOKEO YA KUJIFUNZA",
+        outcomeStatement: "Mwishoni mwa somo, mwanafunzi aweze:",
+        keyQuestion: "SWALI KUU LA UCHUNGUZI",
+        resources: "VIFAA VYA KUJIFUNZIA",
+        lessonFlow: "MTIRIRIKO WA SOMO",
+        introduction: "Utangulizi",
+        development: "Maendeleo",
+        conclusion: "Hitimisho",
+        step: "Hatua"
+      },
+      data: {
+        school: admin?.Shule || "",
+        subject: admin?.Somo || "Kiswahili",
+        year: admin?.Mwaka || "",
+        term: admin?.Muhula || "",
+        date: admin?.Tarehe || "",
+        time: admin?.Muda || "",
+        grade: admin?.Darasa || "",
+        boys: roll?.Wavulana || 0,
+        girls: roll?.Wasichana || 0,
+        total: roll?.Jumla || 0,
+        teacherName: teacher?.Jina || "",
+        tscNumber: teacher?.["Namba ya TSC"] || "",
+        strand: plan?.MSTARI || "",
+        subStrand: plan?.["MSTARI MDOGO"] || "",
+        learningOutcomes: plan?.["MATOKEO YA KUJIFUNZA"] || {},
+        keyQuestion: plan?.["SWALI KUU LA UCHUNGUZI"] || "",
+        resources: plan?.["VIFAA VYA KUJIFUNZIA"] || [],
+        lessonFlow: plan?.["MTIRIRIKO WA SOMO"] || {}
+      }
+    }
+  } else {
+    // English structure (default)
+    const admin = plan?.administrativeDetails || {}
+    const teacher = plan?.teacherDetails || {}
+    const roll = admin?.roll || admin?.studentEnrollment || {}
+    
+    return {
+      isKiswahili: false,
+      labels: {
+        adminDetails: "ADMINISTRATIVE DETAILS",
+        school: "School",
+        subject: "Subject",
+        year: "Year",
+        term: "Term",
+        date: "Date",
+        time: "Time",
+        grade: "Grade",
+        roll: "Roll",
+        boys: "Boys",
+        girls: "Girls",
+        total: "Total",
+        teacherDetails: "TEACHER DETAILS",
+        name: "Name",
+        tscNumber: "TSC Number",
+        strand: "STRAND",
+        subStrand: "SUB-STRAND",
+        learningOutcomes: "LESSON LEARNING OUTCOMES",
+        outcomeStatement: "By the end of the lesson, the learner should be able to:",
+        keyQuestion: "KEY INQUIRY QUESTION",
+        resources: "LEARNING RESOURCES",
+        lessonFlow: "LESSON FLOW",
+        introduction: "Introduction",
+        development: "Development",
+        conclusion: "Conclusion",
+        step: "Step"
+      },
+      data: {
+        school: admin?.school || "",
+        subject: admin?.subject || "",
+        year: admin?.year || "",
+        term: admin?.term || "",
+        date: admin?.date || "",
+        time: typeof admin?.time === "string" ? admin.time : (admin?.time?.start ? `${admin.time.start} - ${admin.time.end}` : ""),
+        grade: admin?.grade || "",
+        boys: roll?.boys || 0,
+        girls: roll?.girls || 0,
+        total: roll?.total || 0,
+        teacherName: teacher?.name || admin?.teacher || "",
+        tscNumber: teacher?.tscNumber || admin?.teacherTSCNumber || "",
+        strand: plan?.strand || plan?.curriculumAlignment?.strand || "",
+        subStrand: plan?.subStrand || plan?.curriculumAlignment?.substrand || plan?.curriculumAlignment?.subStrand || "",
+        learningOutcomes: plan?.lessonLearningOutcomes || plan?.lessonLearningOutcomes || {},
+        keyQuestion: plan?.keyInquiryQuestion || plan?.guidingQuestion || "",
+        resources: plan?.learningResources || [],
+        lessonFlow: plan?.lessonFlow || {}
+      }
+    }
+  }
+}
 
 export default function LessonCreator() {
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -80,12 +206,12 @@ export default function LessonCreator() {
       const filteredLessons = savedLessons.filter((lesson) => {
         if (!searchQuery.trim()) return true
         const query = searchQuery.toLowerCase()
-        const plan = lesson.lessonPlan || lesson
+        const fields = getBilingualFields(lesson)
 
-        const subject = plan.administrativeDetails?.subject?.toLowerCase() || ""
-        const grade = plan.administrativeDetails?.grade?.toString().toLowerCase() || ""
-        const teacher = plan.teacherDetails?.name?.toLowerCase() || plan.administrativeDetails?.teacher?.toLowerCase() || ""
-        const question = plan.keyInquiryQuestion?.toLowerCase() || plan.guidingQuestion?.toLowerCase() || ""
+        const subject = fields.data.subject?.toLowerCase() || ""
+        const grade = fields.data.grade?.toString().toLowerCase() || ""
+        const teacher = fields.data.teacherName?.toLowerCase() || ""
+        const question = fields.data.keyQuestion?.toLowerCase() || ""
 
         return (
           subject.includes(query) ||
@@ -98,11 +224,11 @@ export default function LessonCreator() {
     } else {
       const query = searchQuery.toLowerCase()
       const filtered = savedLessons.filter((lesson) => {
-        const plan = lesson.lessonPlan || lesson
-        const subject = plan.administrativeDetails?.subject?.toLowerCase() || ""
-        const grade = plan.administrativeDetails?.grade?.toString().toLowerCase() || ""
-        const teacher = plan.teacherDetails?.name?.toLowerCase() || plan.administrativeDetails?.teacher?.toLowerCase() || ""
-        const question = plan.keyInquiryQuestion?.toLowerCase() || plan.guidingQuestion?.toLowerCase() || ""
+        const fields = getBilingualFields(lesson)
+        const subject = fields.data.subject?.toLowerCase() || ""
+        const grade = fields.data.grade?.toString().toLowerCase() || ""
+        const teacher = fields.data.teacherName?.toLowerCase() || ""
+        const question = fields.data.keyQuestion?.toLowerCase() || ""
 
         return (
           subject.includes(query) ||
@@ -141,6 +267,7 @@ export default function LessonCreator() {
     }
     setIsLoadingLessons(false)
   }
+  
   const handleGenerate = async () => {
   // Validate required fields
   const errors = []
@@ -295,36 +422,13 @@ export default function LessonCreator() {
 
   const downloadAsPdf = async (lesson) => {
     try {
-      const plan = lesson.lessonPlan || lesson
-      const admin = plan.administrativeDetails || {}
-      const teacher = plan.teacherDetails || {}
-      const roll = admin.roll || admin.studentEnrollment || {}
-      const outcomesData = plan.lessonLearningOutcomes || plan.lessonLearningOutcomes || {}
-      const rawOutcomes = outcomesData.outcomes || plan.learningOutcomes || []
-      const outcomes = Array.isArray(rawOutcomes)
-        ? rawOutcomes
-            .map((item, index) => {
-              if (item && typeof item === "object") {
-                return {
-                  id: item.id ?? String.fromCharCode(97 + (index % 26)),
-                  outcome: item.outcome ?? item.text ?? item.description ?? "",
-                }
-              }
-              return {
-                id: String.fromCharCode(97 + (index % 26)),
-                outcome: String(item ?? ""),
-              }
-            })
-            .filter((o) => String(o.outcome ?? "").trim() !== "")
-        : []
+      const fields = getBilingualFields(lesson)
+      const { isKiswahili, labels, data } = fields
 
-      const subject = toSentenceCase(admin.subject || "Untitled Lesson")
-      const dateString = admin.date || new Date().toISOString().split("T")[0]
+      const subject = toSentenceCase(data.subject || "Untitled Lesson")
+      const dateString = data.date || new Date().toISOString().split("T")[0]
       const safeSubject = String(subject).replace(/[^a-z0-9\- _]/gi, "").trim() || "Lesson Plan"
       const filename = `${safeSubject} - ${dateString}.pdf`
-
-      const timeString =
-        typeof admin.time === "string" ? admin.time : admin.time?.start ? `${admin.time.start} - ${admin.time.end}` : "N/A"
 
       const doc = new jsPDF({ unit: "pt", format: "a4" })
       const pageWidth = doc.internal.pageSize.getWidth()
@@ -403,36 +507,35 @@ export default function LessonCreator() {
         y += lines.length * LINE_HEIGHT + 8
       }
 
-      addTitle("LESSON PLAN")
+      addTitle(isKiswahili ? "MPANGO WA SOMO" : "LESSON PLAN")
 
-      addSection("Administrative Details")
-      addKeyValue("School", admin.school)
-      addKeyValue("Subject", subject)
-      addKeyValue("Grade", admin.grade)
-      addKeyValue("Year", admin.year || new Date().getFullYear())
-      addKeyValue("Term", admin.term)
-      addKeyValue("Date", admin.date)
-      addKeyValue("Time", timeString)
+      addSection(labels.adminDetails)
+      addKeyValue(labels.school, data.school)
+      addKeyValue(labels.subject, subject)
+      addKeyValue(labels.grade, data.grade)
+      addKeyValue(labels.year, data.year || new Date().getFullYear())
+      addKeyValue(labels.term, data.term)
+      addKeyValue(labels.date, data.date)
+      addKeyValue(labels.time, data.time)
       addKeyValue(
-        "Roll",
-        `Boys: ${roll.boys || 0}, Girls: ${roll.girls || 0}, Total: ${roll.total || 0}`
+        labels.roll,
+        `${labels.boys}: ${data.boys || 0}, ${labels.girls}: ${data.girls || 0}, ${labels.total}: ${data.total || 0}`
       )
 
-      addSection("Teacher Details")
-      addKeyValue("Name", teacher.name || admin.teacher)
-      addKeyValue("TSC Number", teacher.tscNumber || admin.teacherTSCNumber)
+      addSection(labels.teacherDetails)
+      addKeyValue(labels.name, data.teacherName)
+      addKeyValue(labels.tscNumber, data.tscNumber)
 
-      addSection("Strand")
-      addParagraph(toSentenceCase(plan.strand || plan.curriculumAlignment?.strand))
+      addSection(labels.strand)
+      addParagraph(toSentenceCase(data.strand))
 
-      addSection("Sub-strand")
-      addParagraph(toSentenceCase(plan.subStrand || plan.curriculumAlignment?.substrand || plan.curriculumAlignment?.subStrand))
+      addSection(labels.subStrand)
+      addParagraph(toSentenceCase(data.subStrand))
 
-      addSection("Lesson Learning Outcomes")
-      addParagraph(
-        outcomesData.statement ||
-          "By the end of the lesson, the learner should be able to:"
-      )
+      addSection(labels.learningOutcomes)
+      const outcomesData = data.learningOutcomes || {}
+      const outcomes = outcomesData.outcomes || []
+      addParagraph(outcomesData.statement || labels.outcomeStatement)
       if (outcomes.length > 0) {
         outcomes.forEach((o) => {
           addParagraph(`${o.id || "-"}) ${o.outcome || ""}`)
@@ -441,26 +544,30 @@ export default function LessonCreator() {
         addParagraph("N/A")
       }
 
-      addSection("Key Inquiry Question")
-      addParagraph(plan.keyInquiryQuestion || plan.guidingQuestion)
+      addSection(labels.keyQuestion)
+      addParagraph(data.keyQuestion)
 
-      addSection("Learning Resources")
-      addParagraph(normalizeToStringArray(plan.learningResources).join(", ") || "N/A")
+      addSection(labels.resources)
+      addParagraph(normalizeToStringArray(data.resources).join(", ") || "N/A")
 
-      addSection("Lesson Flow")
-      addKeyValue("Introduction", plan.lessonFlow?.introduction?.description || "N/A")
-      addSection("Development")
-      const devSteps = plan.lessonFlow?.development || []
+      addSection(labels.lessonFlow)
+      const lessonFlow = data.lessonFlow || {}
+      
+      addKeyValue(labels.introduction, lessonFlow.introduction?.description || lessonFlow[labels.introduction?.toLowerCase()]?.description || "N/A")
+      
+      addSection(labels.development)
+      const devSteps = lessonFlow.development || lessonFlow[labels.development?.toLowerCase()] || []
       if (devSteps.length > 0) {
         devSteps.forEach((step) => {
-          addParagraph(`Step ${step.step || ""}: ${step.description || step.title || "N/A"}`)
-          if (step.activity) addParagraph(`Activity: ${step.activity}`)
+          addParagraph(`${labels.step} ${step.step || step[labels.step?.toLowerCase()] || ""}: ${step.description || step.title || "N/A"}`)
+          if (step.activity) addParagraph(`${isKiswahili ? "Shughuli" : "Activity"}: ${step.activity}`)
         })
       } else {
         addParagraph("N/A")
       }
-      addSection("Conclusion")
-      addParagraph(plan.lessonFlow?.conclusion?.description || "N/A")
+      
+      addSection(labels.conclusion)
+      addParagraph(lessonFlow.conclusion?.description || lessonFlow[labels.conclusion?.toLowerCase()]?.description || "N/A")
 
       const blob = doc.output("blob")
       const file = new File([blob], filename, { type: "application/pdf" })
@@ -516,37 +623,16 @@ export default function LessonCreator() {
       alert("Failed to delete lesson plan: " + result.error)
     }
   }
+  
   const handleViewLesson = (lesson) => {
     if (lesson.lessonPlan) {
       setLessonPlan(lesson)
     } else {
-      const timeObj = lesson.administrativeDetails?.time
-      const timeString =
-        typeof timeObj === "string" ? timeObj : timeObj?.start ? `${timeObj.start} - ${timeObj.end}` : ""
-
-      const outcomesData =
-        lesson.lessonLearningOutcomes ||
-        lesson.lessonLearningOutcomes ||
-        { statement: "By the end of the lesson, the learner should be able to:", outcomes: [] }
-
+      const fields = getBilingualFields(lesson)
+      const timeString = fields.data.time
 
       setLessonPlan({
-        lessonPlan: {
-          administrativeDetails: {
-            ...lesson.administrativeDetails,
-            time: timeString,
-          },
-          teacherDetails: lesson.teacherDetails || {},
-          strand: lesson.strand || lesson.curriculumAlignment?.strand || "",
-          subStrand: lesson.subStrand || lesson.curriculumAlignment?.subStrand || "",
-          lessonLearningOutcomes: {
-            statement: "By the end of the lesson, the learner should be able to:",
-            outcomes: outcomesData.outcomes || lesson.learningOutcomes || [],
-          },
-          keyInquiryQuestion: lesson.keyInquiryQuestion || lesson.guidingQuestion || "",
-          learningResources: lesson.learningResources || [],
-          lessonFlow: lesson.lessonFlow || {},
-        },
+        lessonPlan: lesson,
         dbId: lesson.dbId,
         savedDate: lesson.savedDate,
         status: lesson.status,
@@ -652,9 +738,9 @@ export default function LessonCreator() {
   const addLearningOutcome = () => {
     if (!lessonPlan) return
     
-    const plan = lessonPlan.lessonPlan || lessonPlan
-    const outcomesData = plan.lessonLearningOutcomes || { statement: "By the end of the lesson, the learner should be able to:", outcomes: [] }
-    const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
+    const fields = getBilingualFields(lessonPlan)
+    const outcomesData = fields.data.learningOutcomes || { statement: fields.labels.outcomeStatement, outcomes: [] }
+    const outcomes = outcomesData.outcomes || []
     
     const newOutcomes = [...outcomes]
     const nextLetter = String.fromCharCode(97 + newOutcomes.length)
@@ -663,28 +749,25 @@ export default function LessonCreator() {
       outcome: "New learning outcome - click to edit"
     })
     
-    if (lessonPlan.lessonPlan) {
-      setLessonPlan({
-        ...lessonPlan,
-        lessonPlan: {
-          ...lessonPlan.lessonPlan,
-          lessonLearningOutcomes: {
-            ...outcomesData,
-            outcomes: newOutcomes
-          }
-        }
-      })
+    // Update in original structure
+    const plan = lessonPlan.lessonPlan || lessonPlan
+    if (fields.isKiswahili) {
+      if (!plan["MATOKEO YA KUJIFUNZIA"]) plan["MATOKEO YA KUJIFUNZIA"] = {}
+      plan["MATOKEO YA KUJIFUNZIA"].outcomes = newOutcomes
     } else {
-      setLessonPlan({ ...lessonPlan, learningOutcomes: newOutcomes })
+      if (!plan.lessonLearningOutcomes) plan.lessonLearningOutcomes = {}
+      plan.lessonLearningOutcomes.outcomes = newOutcomes
     }
+    
+    setLessonPlan({...lessonPlan})
   }
 
   const deleteLearningOutcome = (index) => {
     if (!lessonPlan) return
     
-    const plan = lessonPlan.lessonPlan || lessonPlan
-    const outcomesData = plan.lessonLearningOutcomes || {}
-    const outcomes = outcomesData.outcomes || plan.learningOutcomes || []
+    const fields = getBilingualFields(lessonPlan)
+    const outcomesData = fields.data.learningOutcomes || {}
+    const outcomes = outcomesData.outcomes || []
     
     const newOutcomes = outcomes.filter((_, i) => i !== index)
     const renumbered = newOutcomes.map((outcome, i) => ({
@@ -692,73 +775,68 @@ export default function LessonCreator() {
       id: String.fromCharCode(97 + i)
     }))
     
-    if (lessonPlan.lessonPlan) {
-      setLessonPlan({
-        ...lessonPlan,
-        lessonPlan: {
-          ...lessonPlan.lessonPlan,
-          lessonLearningOutcomes: {
-            ...outcomesData,
-            outcomes: renumbered
-          }
-        }
-      })
+    // Update in original structure
+    const plan = lessonPlan.lessonPlan || lessonPlan
+    if (fields.isKiswahili) {
+      if (plan["MATOKEO YA KUJIFUNZIA"]) {
+        plan["MATOKEO YA KUJIFUNZIA"].outcomes = renumbered
+      }
     } else {
-      setLessonPlan({ ...lessonPlan, learningOutcomes: renumbered })
+      if (plan.lessonLearningOutcomes) {
+        plan.lessonLearningOutcomes.outcomes = renumbered
+      }
     }
+    
+    setLessonPlan({...lessonPlan})
   }
 
   const addDevelopmentStep = () => {
     if (!lessonPlan) return
-    const plan = lessonPlan.lessonPlan || lessonPlan
-    const lessonFlow = plan.lessonFlow || {}
-    const development = [...(lessonFlow.development || [])]
+    const fields = getBilingualFields(lessonPlan)
+    const lessonFlow = fields.data.lessonFlow || {}
+    const development = [...(lessonFlow.development || lessonFlow[fields.labels.development?.toLowerCase()] || [])]
     
     development.push({
       step: development.length + 1,
       description: "Step description - click to edit"
     })
     
-    if (lessonPlan.lessonPlan) {
-      setLessonPlan({
-        ...lessonPlan,
-        lessonPlan: {
-          ...lessonPlan.lessonPlan,
-          lessonFlow: { ...lessonFlow, development }
-        }
-      })
+    // Update in original structure
+    const plan = lessonPlan.lessonPlan || lessonPlan
+    if (fields.isKiswahili) {
+      if (!plan["MTIRIRIKO WA SOMO"]) plan["MTIRIRIKO WA SOMO"] = {}
+      plan["MTIRIRIKO WA SOMO"][fields.labels.development] = development
     } else {
-      setLessonPlan({
-        ...lessonPlan,
-        lessonFlow: { ...lessonFlow, development }
-      })
+      if (!plan.lessonFlow) plan.lessonFlow = {}
+      plan.lessonFlow.development = development
     }
+    
+    setLessonPlan({...lessonPlan})
   }
 
   const deleteDevelopmentStep = (index) => {
     if (!lessonPlan) return
-    const plan = lessonPlan.lessonPlan || lessonPlan
-    const lessonFlow = plan.lessonFlow || {}
-    const development = lessonFlow.development.filter((_, i) => i !== index)
+    const fields = getBilingualFields(lessonPlan)
+    const lessonFlow = fields.data.lessonFlow || {}
+    const development = (lessonFlow.development || lessonFlow[fields.labels.development?.toLowerCase()] || []).filter((_, i) => i !== index)
     const renumbered = development.map((step, i) => ({
       ...step,
       step: i + 1
     }))
     
-    if (lessonPlan.lessonPlan) {
-      setLessonPlan({
-        ...lessonPlan,
-        lessonPlan: {
-          ...lessonPlan.lessonPlan,
-          lessonFlow: { ...lessonFlow, development: renumbered }
-        }
-      })
+    // Update in original structure
+    const plan = lessonPlan.lessonPlan || lessonPlan
+    if (fields.isKiswahili) {
+      if (plan["MTIRIRIKO WA SOMO"]) {
+        plan["MTIRIRIKO WA SOMO"][fields.labels.development] = renumbered
+      }
     } else {
-      setLessonPlan({
-        ...lessonPlan,
-        lessonFlow: { ...lessonFlow, development: renumbered }
-      })
+      if (plan.lessonFlow) {
+        plan.lessonFlow.development = renumbered
+      }
     }
+    
+    setLessonPlan({...lessonPlan})
   }
 
   const renderEditableField = (path, value, multiline = false, placeholder = "Click to edit") => {
@@ -1059,14 +1137,14 @@ export default function LessonCreator() {
                         </thead>
                         <tbody>
                           {filteredLessons.slice(0, 5).map((lesson) => {
-                            const plan = lesson.lessonPlan || lesson
+                            const fields = getBilingualFields(lesson)
                             return (
                               <tr key={lesson.dbId} style={styles.tableRow}>
                                 <td style={styles.td}>
-                                  {plan.administrativeDetails?.subject || plan.keyInquiryQuestion?.substring(0, 30) || plan.guidingQuestion?.substring(0, 30) || "Lesson Plan"}
+                                  {fields.data.subject || fields.data.keyQuestion?.substring(0, 30) || "Lesson Plan"}
                                 </td>
-                                <td style={styles.td}>{plan.administrativeDetails?.grade || "N/A"}</td>
-                                <td style={styles.td}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</td>
+                                <td style={styles.td}>{fields.data.grade || "N/A"}</td>
+                                <td style={styles.td}>{fields.data.teacherName || "N/A"}</td>
                                 <td style={styles.td}>{lesson.savedDate}</td>
                                 <td style={styles.td}>
                                   <div style={styles.actionButtonGroup}>
@@ -1115,7 +1193,7 @@ export default function LessonCreator() {
                   >
                    {[
   { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
-  { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
+  { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics, Kiswahili", type: "text", required: true },
   { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text", required: false },
   { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: false },
   { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number", required: false },
@@ -1151,7 +1229,7 @@ export default function LessonCreator() {
                   </div>
                   
                   <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#f0f9ff", borderRadius: "8px", fontSize: "14px", color: "#0369a1" }}>
-                    💡 <strong>Tip:</strong> The system can handle typos! If you type "Geogrphy" instead of "Geography", it will automatically match to the correct subject.
+                    💡 <strong>Tip:</strong> For Kiswahili lessons, type "Kiswahili" as the subject to get full Kiswahili output!
                   </div>
                   
                   <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
@@ -1191,231 +1269,194 @@ export default function LessonCreator() {
                     className={isMobile ? 'document-page-mobile' : ''}
                     style={styles.documentPage}
                   >
-                    <div style={styles.docHeader}>
-                      <div style={styles.docTitle}>LESSON PLAN</div>
-                      <div style={styles.docDivider}></div>
-                    </div>
+                    {(() => {
+                      const fields = getBilingualFields(lessonPlan)
+                      const { isKiswahili, labels, data } = fields
 
-                    <h3 style={styles.sectionTitle}>ADMINISTRATIVE DETAILS</h3>
-                    <table 
-                      className={isMobile ? 'doc-table-mobile' : ''}
-                      style={styles.docTable}
-                    >
-                      <tbody>
-                        <tr>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>School:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.administrativeDetails.school", lessonPlan?.lessonPlan?.administrativeDetails?.school || lessonPlan?.administrativeDetails?.school)}
-                          </td>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Subject:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.administrativeDetails.subject", lessonPlan?.lessonPlan?.administrativeDetails?.subject || lessonPlan?.administrativeDetails?.subject)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Year:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {(() => {
-                              const plan = lessonPlan?.lessonPlan || lessonPlan
-                              const admin = plan?.administrativeDetails || {}
-                              const yearFromDate = typeof admin.date === "string" ? admin.date.split("-")[0] : ""
-                              const rawYear = admin.year ?? (plan?.lessonPlan?.administrativeDetails?.year)
-                              const yearString = String(rawYear ?? "").trim()
-                              const parsed = parseInt(yearString, 10)
-                              const safeYear = parsed >= 1000 ? String(parsed) : (yearFromDate || "2026")
-                              return renderEditableField("lessonPlan.administrativeDetails.year", safeYear)
-                            })()}
-                          </td>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Term:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.administrativeDetails.term", lessonPlan?.lessonPlan?.administrativeDetails?.term?.toString() || lessonPlan?.administrativeDetails?.term?.toString())}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Date:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.administrativeDetails.date", lessonPlan?.lessonPlan?.administrativeDetails?.date || lessonPlan?.administrativeDetails?.date)}
-                          </td>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Time:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {(() => {
-                              const plan = lessonPlan?.lessonPlan || lessonPlan
-                              const timeValue = plan?.administrativeDetails?.time
-                              const timeString = typeof timeValue === 'string' ? timeValue : (timeValue?.start ? `${timeValue.start} - ${timeValue.end}` : "N/A")
-                              return renderEditableField("lessonPlan.administrativeDetails.time", timeString)
-                            })()}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Grade:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.administrativeDetails.grade", lessonPlan?.lessonPlan?.administrativeDetails?.grade?.toString() || lessonPlan?.administrativeDetails?.grade?.toString())}
-                          </td>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Roll:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {(() => {
-                              const plan = lessonPlan?.lessonPlan || lessonPlan
-                              const admin = plan?.administrativeDetails || {}
-                              const roll = admin.roll || admin.studentEnrollment || {}
-                              const boys = roll.boys ?? 0
-                              const girls = roll.girls ?? 0
-                              const total = (parseInt(boys, 10) || 0) + (parseInt(girls, 10) || 0)
-                              return (
-                                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
-                                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                                      <span>Boys:</span>
-                                      {renderEditableField("lessonPlan.administrativeDetails.roll.boys", String(boys))}
-                                    </div>
-                                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                                      <span>Girls:</span>
-                                      {renderEditableField("lessonPlan.administrativeDetails.roll.girls", String(girls))}
-                                    </div>
-                                  </div>
-                                  <div>Total: {total}</div>
-                                </div>
-                              )
-                            })()}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    <h3 style={styles.sectionTitle}>TEACHER DETAILS</h3>
-                    <table 
-                      className={isMobile ? 'doc-table-mobile' : ''}
-                      style={styles.docTable}
-                    >
-                      <tbody>
-                        <tr>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>Name:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField("lessonPlan.teacherDetails.name", lessonPlan?.lessonPlan?.teacherDetails?.name || lessonPlan?.teacherDetails?.name || lessonPlan?.administrativeDetails?.teacher)}
-                          </td>
-                          <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>TSC Number:</td>
-                          <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
-                            {renderEditableField(
-                              "lessonPlan.teacherDetails.tscNumber",
-                              lessonPlan?.lessonPlan?.teacherDetails?.tscNumber ||
-                                lessonPlan?.teacherDetails?.tscNumber ||
-                                lessonPlan?.administrativeDetails?.teacherTSCNumber
-                            )}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    <div style={styles.section}>
-                      <div style={styles.sectionTitle}>STRAND</div>
-                      {renderEditableField("lessonPlan.strand", lessonPlan?.lessonPlan?.strand || lessonPlan?.strand || lessonPlan?.curriculumAlignment?.strand, false, "Enter strand")}
-                    </div>
-
-                    <div style={styles.section}>
-                      <div style={styles.sectionTitle}>SUB-STRAND</div>
-                      {renderEditableField("lessonPlan.subStrand", lessonPlan?.lessonPlan?.subStrand || lessonPlan?.subStrand || lessonPlan?.curriculumAlignment?.substrand, false, "Enter sub-strand")}
-                    </div>
-
-                    <div style={styles.section}>
-                      <div style={styles.sectionHeaderWithButton}>
-                        <div style={styles.sectionTitle}>LESSON LEARNING OUTCOMES</div>
-                        <button onClick={addLearningOutcome} style={styles.addButton} title="Add outcome">
-                          <Plus size={16} />
-                          <span>Add</span>
-                        </button>
-                      </div>
-                      <div style={{ fontStyle: 'italic', marginBottom: '12px', fontSize: '12px' }}>
-                        {lessonPlan?.lessonPlan?.lessonLearningOutcomes?.statement || lessonPlan?.lessonLearningOutcomes?.statement || "By the end of the lesson, the learner should be able to:"}
-                      </div>
-                      {(() => {
-                        const plan = lessonPlan?.lessonPlan || lessonPlan
-                        const outcomesRaw =
-                          plan?.lessonLearningOutcomes?.outcomes ||
-                          plan?.lessonLearningOutcomes?.outcomes ||
-                          plan?.learningOutcomes ||
-                          []
-                        const outcomes = Array.isArray(outcomesRaw) ? outcomesRaw : []
-                        return outcomes.map((outcome, index) => (
-                          <div key={index} style={styles.outcomeItem}>
-                            <div style={styles.outcomeNumber}>{outcome.id})</div>
-                            <div style={styles.outcomeContent}>
-                              {renderEditableField(`lessonPlan.lessonLearningOutcomes.outcomes.${index}.outcome`, outcome.outcome, true, "Enter outcome")}
-                            </div>
-                            <button 
-                              onClick={() => deleteLearningOutcome(index)} 
-                              style={styles.deleteButton}
-                              title="Delete outcome"
-                            >
-                              <Trash2 size={14} />
-                            </button>
+                      return (
+                        <>
+                          <div style={styles.docHeader}>
+                            <div style={styles.docTitle}>{isKiswahili ? "MPANGO WA SOMO" : "LESSON PLAN"}</div>
+                            <div style={styles.docDivider}></div>
                           </div>
-                        ))
-                      })()}
-                    </div>
 
-                    <div style={styles.section}>
-                      <div style={styles.sectionTitle}>KEY INQUIRY QUESTION</div>
-                      {renderEditableField("lessonPlan.keyInquiryQuestion", lessonPlan?.lessonPlan?.keyInquiryQuestion || lessonPlan?.keyInquiryQuestion || lessonPlan?.guidingQuestion, true, "Enter key inquiry question")}
-                    </div>
+                          <h3 style={styles.sectionTitle}>{labels.adminDetails}</h3>
+                          <table 
+                            className={isMobile ? 'doc-table-mobile' : ''}
+                            style={styles.docTable}
+                          >
+                            <tbody>
+                              <tr>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.school}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.administrativeDetails.school", data.school)}
+                                </td>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.subject}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.administrativeDetails.subject", data.subject)}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.year}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.administrativeDetails.year", data.year || new Date().getFullYear().toString())}
+                                </td>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.term}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.administrativeDetails.term", data.term?.toString())}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.date}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.administrativeDetails.date", data.date)}
+                                </td>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.time}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.administrativeDetails.time", data.time)}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.grade}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.administrativeDetails.grade", data.grade?.toString())}
+                                </td>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.roll}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                        <span>{labels.boys}:</span>
+                                        {renderEditableField("lessonPlan.administrativeDetails.roll.boys", String(data.boys))}
+                                      </div>
+                                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                        <span>{labels.girls}:</span>
+                                        {renderEditableField("lessonPlan.administrativeDetails.roll.girls", String(data.girls))}
+                                      </div>
+                                    </div>
+                                    <div>{labels.total}: {data.total}</div>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
 
-                    <div style={styles.section}>
-                      <div style={styles.sectionTitle}>LEARNING RESOURCES</div>
-                      {(() => {
-                        const plan = lessonPlan?.lessonPlan || lessonPlan
-                        const resources = normalizeToStringArray(plan?.learningResources)
-                        return renderEditableField("lessonPlan.learningResources", resources.join(", "), true, "Enter resources (comma-separated)")
-                      })()}
-                    </div>
+                          <h3 style={styles.sectionTitle}>{labels.teacherDetails}</h3>
+                          <table 
+                            className={isMobile ? 'doc-table-mobile' : ''}
+                            style={styles.docTable}
+                          >
+                            <tbody>
+                              <tr>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.name}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.teacherDetails.name", data.teacherName)}
+                                </td>
+                                <td className={isMobile ? 'table-label-cell-mobile' : ''} style={styles.tableLabelCell}>{labels.tscNumber}:</td>
+                                <td className={isMobile ? 'table-value-cell-mobile' : ''} style={styles.tableValueCell}>
+                                  {renderEditableField("lessonPlan.teacherDetails.tscNumber", data.tscNumber)}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
 
-                    <div style={styles.section}>
-                      <div style={styles.sectionTitle}>LESSON FLOW</div>
+                          <div style={styles.section}>
+                            <div style={styles.sectionTitle}>{labels.strand}</div>
+                            {renderEditableField("lessonPlan.strand", data.strand, false, "Enter strand")}
+                          </div>
 
-                      <div style={styles.subsection}>
-                        <div style={styles.subsectionTitle}>Introduction</div>
-                        {renderEditableField("lessonPlan.lessonFlow.introduction.description", lessonPlan?.lessonPlan?.lessonFlow?.introduction?.description || lessonPlan?.lessonFlow?.introduction?.description, true, "Enter introduction")}
-                      </div>
+                          <div style={styles.section}>
+                            <div style={styles.sectionTitle}>{labels.subStrand}</div>
+                            {renderEditableField("lessonPlan.subStrand", data.subStrand, false, "Enter sub-strand")}
+                          </div>
 
-                      <div style={styles.subsection}>
-                        <div style={styles.sectionHeaderWithButton}>
-                          <div style={styles.subsectionTitle}>Development</div>
-                          <button onClick={addDevelopmentStep} style={styles.addButton} title="Add step">
-                            <Plus size={16} />
-                            <span>Add Step</span>
-                          </button>
-                        </div>
-                        {(() => {
-                          const plan = lessonPlan?.lessonPlan || lessonPlan
-                          const development = plan?.lessonFlow?.development || []
-                          return development.map((step, index) => (
-                            <div key={index} style={styles.stepBlock}>
-                              <div style={styles.stepHeader}>
-                                <div style={styles.stepTitleText}>Step {step.step}</div>
+                          <div style={styles.section}>
+                            <div style={styles.sectionHeaderWithButton}>
+                              <div style={styles.sectionTitle}>{labels.learningOutcomes}</div>
+                              <button onClick={addLearningOutcome} style={styles.addButton} title="Add outcome">
+                                <Plus size={16} />
+                                <span>Add</span>
+                              </button>
+                            </div>
+                            <div style={{ fontStyle: 'italic', marginBottom: '12px', fontSize: '12px' }}>
+                              {data.learningOutcomes?.statement || labels.outcomeStatement}
+                            </div>
+                            {(data.learningOutcomes?.outcomes || []).map((outcome, index) => (
+                              <div key={index} style={styles.outcomeItem}>
+                                <div style={styles.outcomeNumber}>{outcome.id})</div>
+                                <div style={styles.outcomeContent}>
+                                  {renderEditableField(`lessonPlan.lessonLearningOutcomes.outcomes.${index}.outcome`, outcome.outcome, true, "Enter outcome")}
+                                </div>
                                 <button 
-                                  onClick={() => deleteDevelopmentStep(index)} 
+                                  onClick={() => deleteLearningOutcome(index)} 
                                   style={styles.deleteButton}
-                                  title="Delete step"
+                                  title="Delete outcome"
                                 >
                                   <Trash2 size={14} />
                                 </button>
                               </div>
-                              <div style={styles.stepField}>
-                                {renderEditableField(`lessonPlan.lessonFlow.development.${index}.description`, step.description || step.title, true, "Enter step description")}
-                              </div>
-                              {step.activity && (
-                                <div style={styles.stepField}>
-                                  <strong>Activity:</strong>
-                                  {renderEditableField(`lessonPlan.lessonFlow.development.${index}.activity`, step.activity, true, "Enter activity")}
-                                </div>
-                              )}
-                            </div>
-                          ))
-                        })()}
-                      </div>
+                            ))}
+                          </div>
 
-                      <div style={styles.subsection}>
-                        <div style={styles.subsectionTitle}>Conclusion</div>
-                        {renderEditableField("lessonPlan.lessonFlow.conclusion.description", lessonPlan?.lessonPlan?.lessonFlow?.conclusion?.description || lessonPlan?.lessonFlow?.conclusion?.description, true, "Enter conclusion")}
-                      </div>
-                    </div>
+                          <div style={styles.section}>
+                            <div style={styles.sectionTitle}>{labels.keyQuestion}</div>
+                            {renderEditableField("lessonPlan.keyInquiryQuestion", data.keyQuestion, true, "Enter key inquiry question")}
+                          </div>
+
+                          <div style={styles.section}>
+                            <div style={styles.sectionTitle}>{labels.resources}</div>
+                            {renderEditableField("lessonPlan.learningResources", normalizeToStringArray(data.resources).join(", "), true, "Enter resources (comma-separated)")}
+                          </div>
+
+                          <div style={styles.section}>
+                            <div style={styles.sectionTitle}>{labels.lessonFlow}</div>
+
+                            <div style={styles.subsection}>
+                              <div style={styles.subsectionTitle}>{labels.introduction}</div>
+                              {renderEditableField("lessonPlan.lessonFlow.introduction.description", data.lessonFlow?.introduction?.description || data.lessonFlow?.[labels.introduction?.toLowerCase()]?.description, true, "Enter introduction")}
+                            </div>
+
+                            <div style={styles.subsection}>
+                              <div style={styles.sectionHeaderWithButton}>
+                                <div style={styles.subsectionTitle}>{labels.development}</div>
+                                <button onClick={addDevelopmentStep} style={styles.addButton} title="Add step">
+                                  <Plus size={16} />
+                                  <span>Add Step</span>
+                                </button>
+                              </div>
+                              {(data.lessonFlow?.development || data.lessonFlow?.[labels.development?.toLowerCase()] || []).map((step, index) => (
+                                <div key={index} style={styles.stepBlock}>
+                                  <div style={styles.stepHeader}>
+                                    <div style={styles.stepTitleText}>{labels.step} {step.step || step[labels.step?.toLowerCase()]}</div>
+                                    <button 
+                                      onClick={() => deleteDevelopmentStep(index)} 
+                                      style={styles.deleteButton}
+                                      title="Delete step"
+                                    >
+                                      <Trash2 size={14} />
+                                    </button>
+                                  </div>
+                                  <div style={styles.stepField}>
+                                    {renderEditableField(`lessonPlan.lessonFlow.development.${index}.description`, step.description || step.title, true, "Enter step description")}
+                                  </div>
+                                  {step.activity && (
+                                    <div style={styles.stepField}>
+                                      <strong>{isKiswahili ? "Shughuli" : "Activity"}:</strong>
+                                      {renderEditableField(`lessonPlan.lessonFlow.development.${index}.activity`, step.activity, true, "Enter activity")}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+
+                            <div style={styles.subsection}>
+                              <div style={styles.subsectionTitle}>{labels.conclusion}</div>
+                              {renderEditableField("lessonPlan.lessonFlow.conclusion.description", data.lessonFlow?.conclusion?.description || data.lessonFlow?.[labels.conclusion?.toLowerCase()]?.description, true, "Enter conclusion")}
+                            </div>
+                          </div>
+                        </>
+                      )
+                    })()}
                   </div>
                 </div>
               )}
@@ -1446,29 +1487,26 @@ export default function LessonCreator() {
                   style={styles.lessonGrid}
                 >
                   {filteredLessons.map((lesson) => {
-                    const plan = lesson.lessonPlan || lesson
+                    const fields = getBilingualFields(lesson)
                     return (
                       <div key={lesson.dbId} style={styles.lessonCard}>
                         <div style={styles.lessonCardHeader}>
                           <FileText size={24} style={styles.lessonCardIcon} />
                         </div>
                         <div style={styles.lessonCardTitle}>
-                          {plan.administrativeDetails?.subject ||
-                            plan.keyInquiryQuestion?.substring(0, 50) ||
-                            plan.guidingQuestion?.substring(0, 50) ||
-                            "Untitled"}
+                          {fields.data.subject || fields.data.keyQuestion?.substring(0, 50) || "Untitled"}
                         </div>
                         <div style={styles.lessonCardMeta}>
                           <div style={styles.metaRow}>
-                            <span style={styles.metaLabel}>Grade:</span>
-                            <span style={styles.metaValue}>{plan.administrativeDetails?.grade || "N/A"}</span>
+                            <span style={styles.metaLabel}>{fields.labels.grade}:</span>
+                            <span style={styles.metaValue}>{fields.data.grade || "N/A"}</span>
                           </div>
                           <div style={styles.metaRow}>
-                            <span style={styles.metaLabel}>Teacher:</span>
-                            <span style={styles.metaValue}>{plan.teacherDetails?.name || plan.administrativeDetails?.teacher || "N/A"}</span>
+                            <span style={styles.metaLabel}>{fields.labels.name}:</span>
+                            <span style={styles.metaValue}>{fields.data.teacherName || "N/A"}</span>
                           </div>
                           <div style={styles.metaRow}>
-                            <span style={styles.metaLabel}>Date:</span>
+                            <span style={styles.metaLabel}>{fields.labels.date}:</span>
                             <span style={styles.metaValue}>{lesson.savedDate}</span>
                           </div>
                         </div>
@@ -1502,6 +1540,8 @@ export default function LessonCreator() {
     </div>
   )
 }
+
+// NOTE: Add your styles object here (const styles = {...})
 
 const styles = {
   // Add your styles object here
