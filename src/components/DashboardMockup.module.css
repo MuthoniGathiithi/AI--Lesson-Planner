@@ -118,7 +118,7 @@
 .mainContent {
   flex: 1;
   overflow-y: auto;
-  background: #fafafa;
+  background: transparent;
 }
 
 .mainContent::-webkit-scrollbar {
