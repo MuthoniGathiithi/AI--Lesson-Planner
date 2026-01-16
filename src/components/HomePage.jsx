@@ -12,7 +12,7 @@ export default function HomePage() {
 
   const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" })
   const contactEmail = "gathiithijoyce74@gmail.com"
-  const whatsappNumber = "+254700000000"
+  const whatsappNumber = "+254742278735"
 
   const handleContactSubmit = (e) => {
     e.preventDefault()
@@ -340,9 +340,6 @@ export default function HomePage() {
               gap: "20px",
             }}
           >
-            <div style={{ gridColumn: "1 / -1" }}>
-              <DashboardMockup />
-            </div>
           </div>
         </div>
       </section>
@@ -509,9 +506,7 @@ export default function HomePage() {
             </div>
 
             {/* Visual mockup */}
-            <div className="mockup-visual" style={{ display: "flex", justifyContent: "center" }}>
-              <PhoneMockup />
-            </div>
+            
           </div>
         </div>
       </section>

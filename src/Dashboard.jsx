@@ -44,12 +44,9 @@ export default function LessonCreator() {
     schoolName: "",
     subject: "",
     grade: "",
-    term: "1",
     date: new Date().toISOString().split("T")[0],
     startTime: "08:00",
     endTime: "08:40",
-    teacherName: "",
-    tscNumber: "",
     boys: "",
     girls: "",
     strand: "",
@@ -132,12 +129,8 @@ export default function LessonCreator() {
     if (!formData.schoolName.trim()) errors.push("School")
     if (!formData.subject.trim()) errors.push("Learning Area")
     if (!formData.grade.trim()) errors.push("Grade")
-    if (!String(formData.term ?? "").trim()) errors.push("Term")
     if (!formData.date.trim()) errors.push("Date")
-    if (!formData.startTime.trim()) errors.push("Start Time")
-    if (!formData.endTime.trim()) errors.push("End Time")
-    if (!String(formData.teacherName ?? "").trim()) errors.push("Teacher Name")
-    if (!String(formData.tscNumber ?? "").trim()) errors.push("TSC Number")
+    if (!formData.startTime.trim()) errors.push("Time")
     if (!formData.boys.trim()) errors.push("Roll - Boys")
     if (!formData.girls.trim()) errors.push("Roll - Girls")
     if (!formData.strand.trim()) errors.push("Strand")
@@ -319,12 +312,9 @@ export default function LessonCreator() {
       schoolName: "",
       subject: "",
       grade: "",
-      term: "1",
       date: new Date().toISOString().split("T")[0],
       startTime: "08:00",
       endTime: "08:40",
-      teacherName: "",
-      tscNumber: "",
       boys: "",
       girls: "",
       strand: "",
@@ -893,12 +883,8 @@ export default function LessonCreator() {
                       { label: "School", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
                       { label: "Learning Area", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
                       { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: true },
-                      { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number", required: true },
                       { label: "Date", key: "date", placeholder: "", type: "date", required: true },
-                      { label: "Start Time", key: "startTime", placeholder: "", type: "time", required: true },
-                      { label: "End Time", key: "endTime", placeholder: "", type: "time", required: true },
-                      { label: "Teacher Name", key: "teacherName", placeholder: "Enter teacher name", type: "text", required: true },
-                      { label: "TSC Number", key: "tscNumber", placeholder: "Enter TSC number", type: "text", required: true },
+                      { label: "Time", key: "startTime", placeholder: "e.g. 08:00", type: "time", required: true },
                       { label: "Roll - Boys", key: "boys", placeholder: "0", type: "number", required: true },
                       { label: "Roll - Girls", key: "girls", placeholder: "0", type: "number", required: true },
                       { label: "Strand", key: "strand", placeholder: "e.g. Biodiversity", type: "text", required: true },
