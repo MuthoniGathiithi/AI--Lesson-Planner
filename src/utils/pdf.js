@@ -34,35 +34,7 @@ export const downloadAsPdf = async (lesson) => {
     const fields = getBilingualFields(lesson)
     const { isKiswahili, labels, data } = fields
 
-    const findKeyInsensitive = (obj, wantedKey) => {
-      if (!obj || typeof obj !== "object") return undefined
-      const wanted = String(wantedKey ?? "").toLowerCase()
-      if (!wanted) return undefined
-      const match = Object.keys(obj).find((k) => String(k).toLowerCase() === wanted)
-      return match ? obj[match] : undefined
-    }
-
-    const getFlowPart = (flow, labelKey, englishKey) => {
-      if (!flow || typeof flow !== "object") return undefined
-      return (
-        flow?.[englishKey] ??
-        flow?.[labelKey] ??
-        flow?.[String(labelKey ?? "").toLowerCase()] ??
-        findKeyInsensitive(flow, labelKey) ??
-        findKeyInsensitive(flow, englishKey)
-      )
-    }
-
-    const normalizeDescription = (value) => {
-      if (typeof value === "string") return value
-      if (!value || typeof value !== "object") return ""
-      const direct = value.description ?? value.maelezo ?? value.text ?? value.content
-      if (typeof direct === "string") return direct
-      const firstString = Object.values(value).find((v) => typeof v === "string")
-      return typeof firstString === "string" ? firstString : ""
-    }
-
-    const subject = toSentenceCase(data.subject || "Untitled Lesson")
+    const subject = toSentenceCase(data.learningArea || "Untitled Lesson")
     const dateString = data.date || new Date().toISOString().split("T")[0]
     const safeSubject = String(subject).replace(/[^a-z0-9\- _]/gi, "").trim() || "Lesson Plan"
     const filename = `${safeSubject} - ${dateString}.pdf`
@@ -105,8 +77,6 @@ export const downloadAsPdf = async (lesson) => {
       doc.text(String(text).toUpperCase(), margin, y)
       y += 16
       doc.setDrawColor(0)
-      doc.setLineWidth(0.5)
-      doc.line(margin, y, pageWidth - margin, y)
       y += SECTION_GAP
     }
 
@@ -144,100 +114,124 @@ export const downloadAsPdf = async (lesson) => {
       y += lines.length * LINE_HEIGHT + 8
     }
 
+    const addList = (items, numbered = false) => {
+      if (!Array.isArray(items) || items.length === 0) {
+        addParagraph("N/A")
+        return
+      }
+      
+      items.forEach((item, index) => {
+        const prefix = numbered ? `${index + 1}) ` : "• "
+        const text = typeof item === "string" ? item : item?.text || item?.outcome || String(item)
+        doc.setFont("times", "normal")
+        doc.setFontSize(FONT_VALUE)
+        const lines = doc.splitTextToSize(`${prefix}${text}`, maxWidth - 20)
+        const needed = lines.length * LINE_HEIGHT + 4
+        ensureSpace(needed)
+        doc.text(lines, margin + (numbered ? 0 : 10), y)
+        y += lines.length * LINE_HEIGHT + 4
+      })
+    }
+
+    // Title
     addTitle(isKiswahili ? "MPANGO WA SOMO" : "LESSON PLAN")
 
-    addSection(labels.adminDetails)
+    // Basic Information
+    addSection(isKiswahili ? "TAARIFA ZA MSINGI" : "BASIC INFORMATION")
     addKeyValue(labels.school, data.school)
-    addKeyValue(labels.subject, subject)
+    addKeyValue(labels.learningArea, data.learningArea)
     addKeyValue(labels.grade, data.grade)
-    addKeyValue(labels.year, data.year || new Date().getFullYear())
-    addKeyValue(labels.term, data.term)
     addKeyValue(labels.date, data.date)
     addKeyValue(labels.time, data.time)
+    
+    const rollData = data.roll || {}
     addKeyValue(
       labels.roll,
-      `${labels.boys}: ${data.boys || 0}, ${labels.girls}: ${data.girls || 0}, ${labels.total}: ${data.total || 0}`
+      `${labels.boys}: ${rollData.boys || 0}, ${labels.girls}: ${rollData.girls || 0}, ${labels.total}: ${rollData.total || 0}`
     )
 
-    addSection(labels.teacherDetails)
-    addKeyValue(labels.name, data.teacherName)
-    addKeyValue(labels.tscNumber, data.tscNumber)
-
+    // Strand and Sub-strand
     addSection(labels.strand)
-    addParagraph(toSentenceCase(data.strand))
+    addParagraph(data.strand)
 
     addSection(labels.subStrand)
-    addParagraph(toSentenceCase(data.subStrand))
+    addParagraph(data.subStrand)
 
-    addSection(labels.learningOutcomes)
-    const outcomesData = data.learningOutcomes || {}
-    const outcomesRaw =
-      outcomesData.outcomes ||
-      outcomesData.majibu ||
-      outcomesData.matokeo ||
-      outcomesData.learningOutcomes ||
-      []
-    const outcomes = Array.isArray(outcomesRaw)
-      ? outcomesRaw
-      : typeof outcomesRaw === "object" && outcomesRaw
-        ? Object.values(outcomesRaw)
-        : []
+    // Lesson Title
+    addSection(labels.lessonTitle)
+    addParagraph(data.lessonTitle)
 
-    addParagraph(outcomesData.statement || outcomesData.taarifa || labels.outcomeStatement)
+    // Specific Learning Outcomes
+    addSection(labels.specificLearningOutcomes)
+    const outcomesData = data.specificLearningOutcomes || {}
+    addParagraph(outcomesData.statement || labels.outcomeStatement)
+    
+    const outcomes = outcomesData.outcomes || []
     if (outcomes.length > 0) {
-      outcomes.forEach((o, index) => {
-        if (o && typeof o === "object") {
-          const id = o.id ?? String.fromCharCode(97 + (index % 26))
-          const outcome = o.outcome ?? o.text ?? o.description ?? ""
-          addParagraph(`${id}) ${outcome || ""}`)
-          return
-        }
-        const id = String.fromCharCode(97 + (index % 26))
-        addParagraph(`${id}) ${String(o ?? "")}`)
+      outcomes.forEach((outcome, index) => {
+        const id = outcome.id || String.fromCharCode(97 + index)
+        const text = outcome.outcome || outcome.text || String(outcome)
+        addParagraph(`${id}) ${text}`)
       })
     } else {
       addParagraph("N/A")
     }
 
-    addSection(labels.keyQuestion)
-    addParagraph(data.keyQuestion)
+    // Key Inquiry Questions
+    addSection(labels.keyInquiryQuestions)
+    addList(data.keyInquiryQuestions, true)
 
-    addSection(labels.resources)
-    addParagraph(normalizeToStringArray(data.resources).join(", ") || "N/A")
+    // Core Competencies
+    addSection(labels.coreCompetencies)
+    addList(data.coreCompetencies, false)
 
-    addSection(labels.lessonFlow)
-    const lessonFlow = data.lessonFlow || {}
+    // Link to Values
+    addSection(labels.linkToValues)
+    addList(data.linkToValues, false)
 
-    const introRaw = getFlowPart(lessonFlow, labels.introduction, "introduction")
-    addKeyValue(labels.introduction, normalizeDescription(introRaw) || "N/A")
+    // Links to PCI
+    addSection(labels.linksToPCI)
+    addList(data.linksToPCI, false)
 
-    addSection(labels.development)
-    const devRaw = getFlowPart(lessonFlow, labels.development, "development")
-    const devSteps = Array.isArray(devRaw)
-      ? devRaw
-      : typeof devRaw === "object" && devRaw
-        ? Object.values(devRaw)
-        : []
+    // Learning Resources
+    addSection(labels.learningResources)
+    addList(data.learningResources, false)
 
-    if (devSteps.length > 0) {
-      devSteps.forEach((step, index) => {
-        if (step && typeof step === "object") {
-          const stepNo = step.step ?? step.no ?? step.number ?? step[labels.step] ?? index + 1
-          const desc = step.description ?? step.title ?? step.maelezo ?? step.text ?? ""
-          addParagraph(`${labels.step} ${stepNo}: ${desc || "N/A"}`)
-          if (step.activity) addParagraph(`${isKiswahili ? "Shughuli" : "Activity"}: ${step.activity}`)
-          return
-        }
-        addParagraph(`${labels.step} ${index + 1}: ${String(step ?? "N/A")}`)
+    // Suggested Learning Experiences
+    addSection(labels.suggestedLearningExperiences)
+    
+    const experiences = data.suggestedLearningExperiences || {}
+
+    // i) Introduction
+    addKeyValue(`i) ${labels.introduction}`, experiences.introduction || "N/A")
+
+    // ii) Exploration/Development
+    addSection(`ii) ${labels.exploration}`)
+    const explorationSteps = experiences.exploration || []
+    if (Array.isArray(explorationSteps) && explorationSteps.length > 0) {
+      explorationSteps.forEach((step, index) => {
+        const stepText = typeof step === "string" ? step : step?.description || step?.text || String(step)
+        addParagraph(`${labels.step} ${index + 1}: ${stepText}`)
       })
     } else {
       addParagraph("N/A")
     }
 
-    addSection(labels.conclusion)
-    const conclusionRaw = getFlowPart(lessonFlow, labels.conclusion, "conclusion")
-    addParagraph(normalizeDescription(conclusionRaw) || "N/A")
+    // iii) Reflection
+    addKeyValue(`iii) ${labels.reflection}`, experiences.reflection || "N/A")
 
+    // iv) Extension
+    addKeyValue(`iv) ${labels.extension}`, experiences.extension || "N/A")
+
+    // Parental Involvement
+    addSection(labels.parentalInvolvement)
+    addParagraph(data.parentalInvolvement)
+
+    // Self Evaluation
+    addSection(labels.selfEvaluation)
+    addParagraph(data.selfEvaluation)
+
+    // Generate and save PDF
     const blob = doc.output("blob")
     const file = new File([blob], filename, { type: "application/pdf" })
 
