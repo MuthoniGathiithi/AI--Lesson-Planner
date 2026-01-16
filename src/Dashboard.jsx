@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { jsPDF } from "jspdf"
 import { saveAs } from "file-saver"
+import "./Dashboard.css"
 import {
   LayoutDashboard,
   Plus,
@@ -160,8 +161,21 @@ const getBilingualFields = (lessonPlan) => {
         total: getKey(roll, "Jumla") || roll?.total || 0,
         teacherName: getKey(teacher, "Jina") || teacher?.name || "",
         tscNumber: getKey(teacher, "Namba ya TSC") || teacher?.tscNumber || "",
-        strand: getKey(plan, "MSTARI") || getKey(plan, "mstari") || "",
-        subStrand: getKey(plan, "MSTARI MDOGO") || getKey(plan, "mstari mdogo") || "",
+        strand:
+          getKey(plan, "MSTARI") ||
+          getKey(plan, "mstari") ||
+          getKey(plan, "strand") ||
+          plan?.curriculumAlignment?.strand ||
+          "",
+        subStrand:
+          getKey(plan, "MSTARI MDOGO") ||
+          getKey(plan, "mstari mdogo") ||
+          getKey(plan, "mstari_mdogo") ||
+          getKey(plan, "sub_strand") ||
+          getKey(plan, "subStrand") ||
+          plan?.curriculumAlignment?.substrand ||
+          plan?.curriculumAlignment?.subStrand ||
+          "",
         learningOutcomes,
         keyQuestion: getKey(plan, "SWALI KUU LA UCHUNGUZI") || plan?.keyInquiryQuestion || "",
         resources,
@@ -217,8 +231,20 @@ const getBilingualFields = (lessonPlan) => {
         total: roll?.total || 0,
         teacherName: teacher?.name || admin?.teacher || "",
         tscNumber: teacher?.tscNumber || admin?.teacherTSCNumber || "",
-        strand: plan?.strand || plan?.curriculumAlignment?.strand || "",
-        subStrand: plan?.subStrand || plan?.curriculumAlignment?.substrand || plan?.curriculumAlignment?.subStrand || "",
+        strand:
+          plan?.strand ||
+          plan?.curriculumAlignment?.strand ||
+          getKey(plan, "STRAND") ||
+          getKey(plan, "mstari") ||
+          "",
+        subStrand:
+          plan?.subStrand ||
+          plan?.curriculumAlignment?.substrand ||
+          plan?.curriculumAlignment?.subStrand ||
+          getKey(plan, "SUB-STRAND") ||
+          getKey(plan, "SUB_STRAND") ||
+          getKey(plan, "mstari mdogo") ||
+          "",
         learningOutcomes: plan?.lessonLearningOutcomes || plan?.lessonLearningOutcomes || {},
         keyQuestion: plan?.keyInquiryQuestion || plan?.guidingQuestion || "",
         resources: plan?.learningResources || [],
@@ -980,6 +1006,7 @@ export default function LessonCreator() {
   const renderEditableField = (path, value, multiline = false, placeholder = "Click to edit") => {
     const fieldKey = path
     const isEditing = editingField === fieldKey
+    const displayValue = typeof value === "string" ? value.trim() : value
     
     return (
       <div style={styles.editableContainer}>
@@ -1030,11 +1057,11 @@ export default function LessonCreator() {
         ) : (
           <div 
             style={styles.editableValue} 
-            onClick={() => startEditing(fieldKey, value)}
+            onClick={() => startEditing(fieldKey, displayValue)}
             title="Click to edit"
           >
             <span style={styles.editableText}>
-              {value || placeholder}
+              {displayValue || placeholder}
             </span>
             <Edit2 size={14} style={styles.editIcon} />
           </div>
@@ -1047,28 +1074,6 @@ export default function LessonCreator() {
 
   return (
     <div style={styles.container}>
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .mobile-menu-button { display: block !important; }
-          .sidebar-mobile-hidden { transform: translateX(-100%) !important; }
-          .sidebar-mobile-visible { transform: translateX(0) !important; }
-          .main-mobile { margin-left: 0 !important; }
-          .top-bar-mobile { padding: 60px 16px 16px 16px !important; }
-          .page-title-mobile { font-size: 20px !important; }
-          .search-box-mobile { max-width: 100% !important; }
-          .content-mobile { padding: 16px !important; }
-          .form-grid-mobile { grid-template-columns: 1fr !important; }
-          .stats-row-mobile { grid-template-columns: 1fr !important; }
-          .lesson-grid-mobile { grid-template-columns: 1fr !important; }
-          .document-page-mobile { padding: 20px 16px !important; }
-          .action-bar-mobile { flex-direction: column !important; gap: 8px !important; }
-          .action-bar-right-mobile { width: 100% !important; flex-direction: column !important; gap: 8px !important; }
-          .doc-table-mobile { font-size: 10px !important; }
-          .table-label-cell-mobile { padding: 4px !important; }
-          .table-value-cell-mobile { padding: 4px !important; }
-        }
-      `}</style>
-
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         className="mobile-menu-button"
