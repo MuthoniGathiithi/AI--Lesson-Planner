@@ -28,11 +28,15 @@ const formatBackendError = (errorData) => {
 // Generate lesson plan
 export const generateLessonPlan = async (formData) => {
   try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 90_000)
+
     const response = await fetch(`${API_URL}/generate-lesson-plan`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
       body: JSON.stringify({
         school: formData.schoolName,
         subject: formData.subject,  // ✅ FIXED: Use actual subject from form
@@ -51,6 +55,8 @@ export const generateLessonPlan = async (formData) => {
       })
     });
 
+    clearTimeout(timeoutId)
+
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Backend error:', errorData);
@@ -64,6 +70,9 @@ export const generateLessonPlan = async (formData) => {
       throw new Error('Failed to generate lesson plan');
     }
   } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Request timed out. The server is taking too long to respond. Please try again.')
+    }
     console.error('Error generating lesson plan:', error);
     throw error;
   }
