@@ -43,15 +43,12 @@ export default function LessonCreator() {
   const [formData, setFormData] = useState({
     schoolName: "",
     subject: "",
-    grade: "10",
-    term: "1",
+    grade: "",
     date: new Date().toISOString().split("T")[0],
     startTime: "08:00",
     endTime: "08:40",
-    teacherName: "",
-    tscNumber: "",
-    boys: "0",
-    girls: "0",
+    boys: "",
+    girls: "",
     strand: "",
     subStrand: "",
   })
@@ -129,8 +126,13 @@ export default function LessonCreator() {
     // Validate required fields
     const errors = []
     
-    if (!formData.schoolName.trim()) errors.push("School Name")
-    if (!formData.subject.trim()) errors.push("Subject")
+    if (!formData.schoolName.trim()) errors.push("School")
+    if (!formData.subject.trim()) errors.push("Learning Area")
+    if (!formData.grade.trim()) errors.push("Grade")
+    if (!formData.date.trim()) errors.push("Date")
+    if (!formData.startTime.trim()) errors.push("Time")
+    if (!formData.boys.trim()) errors.push("Roll - Boys")
+    if (!formData.girls.trim()) errors.push("Roll - Girls")
     if (!formData.strand.trim()) errors.push("Strand")
     if (!formData.subStrand.trim()) errors.push("Sub-strand")
     
@@ -309,15 +311,12 @@ export default function LessonCreator() {
     setFormData({
       schoolName: "",
       subject: "",
-      grade: "10",
-      term: "1",
+      grade: "",
       date: new Date().toISOString().split("T")[0],
       startTime: "08:00",
       endTime: "08:40",
-      teacherName: "",
-      tscNumber: "",
-      boys: "0",
-      girls: "0",
+      boys: "",
+      girls: "",
       strand: "",
       subStrand: "",
     })
@@ -881,15 +880,13 @@ export default function LessonCreator() {
                   <h2 style={styles.formTitle}>Create New Lesson Plan</h2>
                   <div style={styles.formGrid}>
                     {[
-                      { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
-                      { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
-                      { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: false },
-                      { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number", required: false },
-                      { label: "Date", key: "date", placeholder: "", type: "date", required: false },
-                      { label: "Start Time", key: "startTime", placeholder: "", type: "time", required: false },
-                      { label: "End Time", key: "endTime", placeholder: "", type: "time", required: false },
-                      { label: "Number of Boys", key: "boys", placeholder: "0", type: "number", required: false },
-                      { label: "Number of Girls", key: "girls", placeholder: "0", type: "number", required: false },
+                      { label: "School", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
+                      { label: "Learning Area", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
+                      { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: true },
+                      { label: "Date", key: "date", placeholder: "", type: "date", required: true },
+                      { label: "Time", key: "startTime", placeholder: "e.g. 08:00", type: "time", required: true },
+                      { label: "Roll - Boys", key: "boys", placeholder: "0", type: "number", required: true },
+                      { label: "Roll - Girls", key: "girls", placeholder: "0", type: "number", required: true },
                       { label: "Strand", key: "strand", placeholder: "e.g. Biodiversity", type: "text", required: true },
                       { label: "Sub-strand", key: "subStrand", placeholder: "e.g. Classification", type: "text", required: true },
                     ].map((field) => (
@@ -915,11 +912,11 @@ export default function LessonCreator() {
                   </div>
                   
                   <div style={{ marginTop: "16px", padding: "12px", backgroundColor: "#f0f9ff", borderRadius: "8px", fontSize: "14px", color: "#0369a1" }}>
-                    💡 <strong>Tip:</strong> For Kiswahili lessons, type "Kiswahili" as the subject to get full Kiswahili output!
+                    💡 <strong>Tip:</strong> For Kiswahili lessons, enter "Kiswahili" in the Learning Area field to get full Kiswahili output with subject-specific terminology!
                   </div>
                   
                   <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
-                    {isGenerating ? "Generating..." : "Generate Lesson Plan"}
+                    {isGenerating ? "Generating Lesson Plan..." : "Generate Lesson Plan"}
                   </button>
                 </div>
               ) : (
