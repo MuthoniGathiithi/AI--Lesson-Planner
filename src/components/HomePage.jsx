@@ -520,7 +520,7 @@ export default function HomePage() {
       <section
         className="contact-section"
         id="contact"
-        style={{ padding: "100px 40px", backgroundColor: "#F9FAFB", borderTop: "1px solid #E5E7EB" }}
+        style={{ padding: "100px 40px", backgroundColor: "#4F46E5" }}
       >
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: "56px" }}>
