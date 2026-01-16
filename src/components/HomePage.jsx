@@ -361,7 +361,7 @@ export default function HomePage() {
               gridTemplateColumns: "1fr 1fr",
               gap: "60px",
               alignItems: "center",
-              backgroundColor: "#FFFFFF",
+              backgroundColor: "#4F46E5",
               borderRadius: "16px",
               padding: "60px",
               boxShadow: "0 10px 40px rgba(0, 0, 0, 0.06)",
