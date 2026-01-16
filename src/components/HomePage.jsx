@@ -351,7 +351,7 @@ export default function HomePage() {
       <section
         className="about-section"
         id="about"
-        style={{ padding: "100px 40px", backgroundColor: "#F3F4F6", borderTop: "1px solid #E5E7EB" }}
+        style={{ padding: "100px 40px", backgroundColor: "#4F46E5" }}
       >
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div
@@ -361,7 +361,7 @@ export default function HomePage() {
               gridTemplateColumns: "1fr 1fr",
               gap: "60px",
               alignItems: "center",
-              backgroundColor: "#4F46E5",
+              backgroundColor: "#FFFFFF",
               borderRadius: "16px",
               padding: "60px",
               boxShadow: "0 10px 40px rgba(0, 0, 0, 0.06)",

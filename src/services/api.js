@@ -36,7 +36,6 @@ export const generateLessonPlan = async (formData) => {
       body: JSON.stringify({
         school: formData.schoolName,
         subject: formData.subject,  // ✅ FIXED: Use actual subject from form
-        class_name: formData.className,
         grade: parseInt(formData.grade),
         term: parseInt(formData.term),
         date: formData.date,

@@ -45,29 +45,40 @@ const getBilingualFields = (lessonPlan) => {
   }
   
   // Detect if Kiswahili by checking both possible field structures
-  const isKiswahili = 
-    plan?.administrativeDetails?.subject?.toLowerCase()?.includes("kiswahili") ||
-    plan?.["MAELEZO YA KIUTAWALA"]?.Somo?.toLowerCase()?.includes("kiswahili") ||
-    false
+  const subjectCandidate =
+    plan?.administrativeDetails?.subject ||
+    plan?.["MAELEZO YA KIUTAWALA"]?.Somo ||
+    plan?.subject
+
+  const isKiswahili =
+    String(subjectCandidate ?? "").toLowerCase().includes("kiswahili") ||
+    String(plan?.title ?? "").toLowerCase().includes("mpango") ||
+    getKey(plan, "mstari") != null ||
+    getKey(plan, "mstari mdogo") != null ||
+    getKey(plan, "MSTARI") != null ||
+    getKey(plan, "MSTARI MDOGO") != null
   
   if (isKiswahili) {
-    // Kiswahili structure
-    const admin = plan?.["MAELEZO YA KIUTAWALA"] || {}
-    const teacher = plan?.["MAELEZO YA MWALIMU"] || {}
-    const roll = admin?.["Orodha ya Wanafunzi"] || {}
+    // Kiswahili structure (and Kiswahili content returned in English-shaped JSON)
+    const admin = plan?.["MAELEZO YA KIUTAWALA"] || plan?.administrativeDetails || {}
+    const teacher = plan?.["MAELEZO YA MWALIMU"] || plan?.teacherDetails || {}
+    const roll = admin?.["Orodha ya Wanafunzi"] || admin?.roll || admin?.studentEnrollment || {}
 
     const learningOutcomes =
       getKey(plan, "MATOKEO YA KUJIFUNZA") ||
       getKey(plan, "MATOKEO YA KUJIFUNZIA") ||
+      plan?.lessonLearningOutcomes ||
       {}
 
     const resources =
       getKey(plan, "VIFAA VYA KUJIFUNZIA") ||
       getKey(plan, "VIFAA VYA KUJIFUNZA") ||
+      plan?.learningResources ||
       []
 
     const lessonFlowRaw =
       getKey(plan, "MTIRIRIKO WA SOMO") ||
+      plan?.lessonFlow ||
       {}
 
     const normalizeFlowPart = (value) => {
@@ -137,22 +148,22 @@ const getBilingualFields = (lessonPlan) => {
         step: "Hatua"
       },
       data: {
-        school: admin?.Shule || "",
-        subject: admin?.Somo || "Kiswahili",
-        year: admin?.Mwaka || "",
-        term: admin?.Muhula || "",
-        date: admin?.Tarehe || "",
-        time: admin?.Muda || "",
-        grade: admin?.Darasa || "",
-        boys: roll?.Wavulana || 0,
-        girls: roll?.Wasichana || 0,
-        total: roll?.Jumla || 0,
-        teacherName: teacher?.Jina || "",
-        tscNumber: teacher?.["Namba ya TSC"] || "",
-        strand: getKey(plan, "MSTARI") || "",
-        subStrand: getKey(plan, "MSTARI MDOGO") || "",
+        school: getKey(admin, "Shule") || admin?.school || "",
+        subject: getKey(admin, "Somo") || admin?.subject || "Kiswahili",
+        year: getKey(admin, "Mwaka") || admin?.year || "",
+        term: getKey(admin, "Muhula") || admin?.term || "",
+        date: getKey(admin, "Tarehe") || admin?.date || "",
+        time: getKey(admin, "Muda") || admin?.time || "",
+        grade: getKey(admin, "Darasa") || admin?.grade || "",
+        boys: getKey(roll, "Wavulana") || roll?.boys || 0,
+        girls: getKey(roll, "Wasichana") || roll?.girls || 0,
+        total: getKey(roll, "Jumla") || roll?.total || 0,
+        teacherName: getKey(teacher, "Jina") || teacher?.name || "",
+        tscNumber: getKey(teacher, "Namba ya TSC") || teacher?.tscNumber || "",
+        strand: getKey(plan, "MSTARI") || getKey(plan, "mstari") || "",
+        subStrand: getKey(plan, "MSTARI MDOGO") || getKey(plan, "mstari mdogo") || "",
         learningOutcomes,
-        keyQuestion: getKey(plan, "SWALI KUU LA UCHUNGUZI") || "",
+        keyQuestion: getKey(plan, "SWALI KUU LA UCHUNGUZI") || plan?.keyInquiryQuestion || "",
         resources,
         lessonFlow,
       }
@@ -236,7 +247,6 @@ export default function LessonCreator() {
   const [formData, setFormData] = useState({
     schoolName: "",
     subject: "",
-    className: "",
     grade: "10",
     term: "1",
     date: new Date().toISOString().split("T")[0],
@@ -782,7 +792,6 @@ export default function LessonCreator() {
     setFormData({
       schoolName: "",
       subject: "",
-      className: "",
       grade: "10",
       term: "1",
       date: new Date().toISOString().split("T")[0],
@@ -1322,7 +1331,6 @@ export default function LessonCreator() {
                    {[
   { label: "School Name", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
   { label: "Subject", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
-  { label: "Class", key: "className", placeholder: "e.g. 10A", type: "text", required: false },
   { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: false },
   { label: "Term", key: "term", placeholder: "1, 2, or 3", type: "number", required: false },
   { label: "Date", key: "date", placeholder: "", type: "date", required: false },
