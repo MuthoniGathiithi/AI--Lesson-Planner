@@ -529,25 +529,31 @@ export async function downloadAsPdf(lessonPlan) {
     }
     
     // Reflection
-    if (data.suggestedLearningExperiences?.reflection) {
-      addSectionHeader('Reflection (5 minutes)', 11)
-      addText(data.suggestedLearningExperiences.reflection, 11, false)
-      y += 2
-    }
+    addSectionHeader('Reflection (5 minutes)', 11)
+    addText(
+      String(data.suggestedLearningExperiences?.reflection ?? '').trim() || '- N/A',
+      11,
+      false
+    )
+    y += 2
     
     // Extension
-    if (data.suggestedLearningExperiences?.extension) {
-      addSectionHeader('Extension Activities', 11)
-      addText(data.suggestedLearningExperiences.extension, 11, false)
-      y += 2
-    }
+    addSectionHeader('Extension Activities', 11)
+    addText(
+      String(data.suggestedLearningExperiences?.extension ?? '').trim() || '- N/A',
+      11,
+      false
+    )
+    y += 2
 
     // Conclusion
-    if (data.suggestedLearningExperiences?.conclusion) {
-      addSectionHeader('Conclusion (5 minutes)', 11)
-      addText(data.suggestedLearningExperiences.conclusion, 11, false)
-      y += 2
-    }
+    addSectionHeader('Conclusion (5 minutes)', 11)
+    addText(
+      String(data.suggestedLearningExperiences?.conclusion ?? '').trim() || '- N/A',
+      11,
+      false
+    )
+    y += 2
     
     // ============ PARENTAL INVOLVEMENT ============
     if (data.parentalInvolvement) {

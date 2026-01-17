@@ -100,7 +100,17 @@ export default function LessonCreator() {
         subStrand: toSentenceCase(formData.subStrand),
       }
       const generatedPlan = await generateLessonPlan(normalizedFormData)
-      setLessonPlan(generatedPlan)
+
+      const normalizedPlan = JSON.parse(JSON.stringify(generatedPlan))
+      const plan = normalizedPlan?.lessonPlan || normalizedPlan
+      if (!plan.suggestedLearningExperiences) plan.suggestedLearningExperiences = {}
+      if (!plan.suggestedLearningExperiences.introduction) plan.suggestedLearningExperiences.introduction = "N/A"
+      if (!plan.suggestedLearningExperiences.reflection) plan.suggestedLearningExperiences.reflection = "N/A"
+      if (!plan.suggestedLearningExperiences.extension) plan.suggestedLearningExperiences.extension = "N/A"
+      if (!plan.suggestedLearningExperiences.conclusion) plan.suggestedLearningExperiences.conclusion = "N/A"
+      if (!plan.weekLesson) plan.weekLesson = "WEEK 1: LESSON 1"
+
+      setLessonPlan(normalizedPlan)
       console.log("Generated lesson plan:", generatedPlan)
     } catch (error) {
       console.error("Error generating lesson plan:", error)
@@ -925,7 +935,12 @@ export default function LessonCreator() {
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField("lessonPlan.suggestedLearningExperiences.reflection", data.suggestedLearningExperiences?.reflection, true, "Enter reflection")}
+                              {renderEditableField(
+                                "lessonPlan.suggestedLearningExperiences.reflection",
+                                String(data.suggestedLearningExperiences?.reflection ?? "").trim() || "N/A",
+                                true,
+                                "Enter reflection"
+                              )}
                             </div>
 
                             {/* iv) Extension */}
@@ -941,7 +956,12 @@ export default function LessonCreator() {
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField("lessonPlan.suggestedLearningExperiences.extension", data.suggestedLearningExperiences?.extension, true, "Enter extension")}
+                              {renderEditableField(
+                                "lessonPlan.suggestedLearningExperiences.extension",
+                                String(data.suggestedLearningExperiences?.extension ?? "").trim() || "N/A",
+                                true,
+                                "Enter extension"
+                              )}
                             </div>
 
                             {/* v) Conclusion */}
@@ -959,7 +979,7 @@ export default function LessonCreator() {
                               </div>
                               {renderEditableField(
                                 "lessonPlan.suggestedLearningExperiences.conclusion",
-                                data.suggestedLearningExperiences?.conclusion,
+                                String(data.suggestedLearningExperiences?.conclusion ?? "").trim() || "N/A",
                                 true,
                                 "Enter conclusion"
                               )}
