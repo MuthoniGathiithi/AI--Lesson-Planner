@@ -75,7 +75,6 @@ export default function LessonCreator() {
       }
       const generatedPlan = await generateLessonPlan(normalizedFormData)
       setLessonPlan(generatedPlan)
-      setCurrentLessonId(null)
       console.log("Generated lesson plan:", generatedPlan)
     } catch (error) {
       console.error("Error generating lesson plan:", error)
