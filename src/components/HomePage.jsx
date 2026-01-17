@@ -23,7 +23,7 @@ export default function HomePage() {
   }
 
   const handleGetStartedClick = () => {
-    navigate("/signup")
+    navigate("/dashboard")
   }
 
   const handleSignInClick = () => {
@@ -273,7 +273,7 @@ export default function HomePage() {
                 e.target.style.transform = "translateY(0)"
               }}
             >
-              Get Started
+              Create lesson plan now
             </button>
 
             <button
