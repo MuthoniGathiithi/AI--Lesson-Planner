@@ -1,6 +1,59 @@
 export const getBilingualFields = (lessonPlan) => {
   const plan = lessonPlan?.lessonPlan || lessonPlan
 
+  const normalizeOutcomeObjects = (outcomes) => {
+    if (!Array.isArray(outcomes)) return []
+    return outcomes
+      .map((o, index) => {
+        if (o == null) return null
+        if (typeof o === "string") {
+          return {
+            id: String.fromCharCode(97 + index),
+            outcome: o,
+          }
+        }
+        if (typeof o === "object") {
+          const text = o.outcome ?? o.text ?? o.description ?? o.statement
+          return {
+            ...o,
+            id: o.id ?? String.fromCharCode(97 + index),
+            outcome: text ?? "",
+          }
+        }
+        return {
+          id: String.fromCharCode(97 + index),
+          outcome: String(o),
+        }
+      })
+      .filter(Boolean)
+  }
+
+  const normalizeSpecificLearningOutcomes = (value, fallbackStatement) => {
+    if (!value) {
+      return {
+        statement: fallbackStatement,
+        outcomes: [],
+      }
+    }
+    if (Array.isArray(value)) {
+      return {
+        statement: fallbackStatement,
+        outcomes: normalizeOutcomeObjects(value),
+      }
+    }
+    if (typeof value === "object") {
+      return {
+        ...value,
+        statement: value.statement ?? fallbackStatement,
+        outcomes: normalizeOutcomeObjects(value.outcomes),
+      }
+    }
+    return {
+      statement: fallbackStatement,
+      outcomes: normalizeOutcomeObjects([value]),
+    }
+  }
+
   const findKeyInsensitive = (obj, wantedKey) => {
     if (!obj || typeof obj !== "object") return undefined
     const wanted = String(wantedKey ?? "")
@@ -75,7 +128,10 @@ export const getBilingualFields = (lessonPlan) => {
         strand: getKey(plan, "mstari") || plan?.strand || "",
         subStrand: getKey(plan, "mstari mdogo") || getKey(plan, "mstariMdogo") || plan?.subStrand || "",
         lessonTitle: getKey(plan, "kichwa cha somo") || getKey(plan, "lessonTitle") || plan?.lessonTitle || "",
-        specificLearningOutcomes: getKey(plan, "matokeo mahususi ya kujifunza") || plan?.specificLearningOutcomes || { statement: "Mwishoni mwa somo hili, mwanafunzi aweze:", outcomes: [] },
+        specificLearningOutcomes: normalizeSpecificLearningOutcomes(
+          getKey(plan, "matokeo mahususi ya kujifunza") || plan?.specificLearningOutcomes,
+          "Mwishoni mwa somo hili, mwanafunzi aweze:"
+        ),
         keyInquiryQuestions: getKey(plan, "maswali muhimu ya uchunguzi") || plan?.keyInquiryQuestions || [],
         coreCompetencies: getKey(plan, "uwezo wa msingi utakaoboreshwa") || plan?.coreCompetenciesToBeDeveloped || [],
         linkToValues: getKey(plan, "uhusiano na maadili") || plan?.linkToValues || [],
@@ -135,7 +191,10 @@ export const getBilingualFields = (lessonPlan) => {
       strand: plan?.strand || "",
       subStrand: plan?.subStrand || "",
       lessonTitle: plan?.lessonTitle || "",
-      specificLearningOutcomes: plan?.specificLearningOutcomes || { statement: "By the end of this lesson, the learner should be able to:", outcomes: [] },
+      specificLearningOutcomes: normalizeSpecificLearningOutcomes(
+        plan?.specificLearningOutcomes,
+        "By the end of this lesson, the learner should be able to:"
+      ),
       keyInquiryQuestions: plan?.keyInquiryQuestions || [],
       coreCompetencies: plan?.coreCompetenciesToBeDeveloped || [],
       linkToValues: plan?.linkToValues || [],
