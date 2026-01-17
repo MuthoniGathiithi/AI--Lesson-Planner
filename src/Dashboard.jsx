@@ -902,7 +902,7 @@ export default function LessonCreator() {
                           type={field.type}
                           placeholder={field.placeholder}
                           value={formData[field.key]}
-                          onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))}
                           style={{
                             ...styles.input,
                             ...(field.required && (
