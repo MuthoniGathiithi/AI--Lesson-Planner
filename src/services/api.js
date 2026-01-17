@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL || 'https://ai-lesson-planner-backend-7rq9.onrender.com';
+/*const API_URL = process.env.REACT_APP_API_URL || 'https://ai-lesson-planner-backend-7rq9.onrender.com';
 
 const formatBackendError = (errorData) => {
   if (!errorData) return 'Failed to generate lesson plan'
@@ -92,4 +92,95 @@ export const getSubStrands = async (subject, strandName) => {  // ✅ FIXED: Acc
   );
   const data = await response.json();
   return data.sub_strands;
-};
+};*/
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+const formatBackendError = (errorData) => {
+  if (!errorData) return 'Failed to generate lesson plan'
+  
+  const detail = errorData.detail
+  
+  if (typeof detail === 'string') return detail
+  
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((d) => {
+        if (typeof d === 'string') return d
+        if (d && typeof d === 'object') {
+          const loc = Array.isArray(d.loc) ? d.loc.join('.') : ''
+          const msg = d.msg || d.message || ''
+          const type = d.type || ''
+          const combined = [loc, msg, type].filter(Boolean).join(' - ')
+          return combined || JSON.stringify(d)
+        }
+        return String(d)
+      })
+      .filter(Boolean)
+    if (parts.length) return parts.join('\n')
+  }
+  
+  if (detail && typeof detail === 'object') return JSON.stringify(detail)
+  if (typeof errorData.message === 'string') return errorData.message
+  
+  return JSON.stringify(errorData)
+}
+
+export const generateLessonPlan = async (formData) => {
+  try {
+    console.log('Sending form data to backend:', formData);
+    
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 90_000)
+    
+    // Map frontend form fields to backend expected fields
+    const requestBody = {
+      school: formData.schoolName,
+      subject: formData.subject,
+      class_name: `Grade ${formData.grade}`,
+      grade: parseInt(formData.grade) || 0,
+      date: formData.date,
+      start_time: formData.startTime,
+      end_time: formData.endTime,
+      boys: parseInt(formData.boys) || 0,
+      girls: parseInt(formData.girls) || 0,
+      strand: formData.strand,
+      sub_strand: formData.subStrand
+    };
+    
+    console.log('Request body:', requestBody);
+
+    const response = await fetch(`${API_URL}/generate-lesson-plan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      signal: controller.signal,
+      body: JSON.stringify(requestBody),
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.error('Backend error:', errorData);
+      throw new Error(formatBackendError(errorData))
+    }
+
+    const data = await response.json()
+    console.log('Backend response:', data)
+
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to generate lesson plan')
+    }
+
+    // Return the complete response including the lessonPlan wrapper
+    return data.lesson_plan
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error('Request timed out. The server is taking too long to respond. Please try again.')
+    }
+    console.error('API Error:', error)
+    throw error
+  }
+}
