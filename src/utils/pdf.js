@@ -491,12 +491,42 @@ export async function downloadAsPdf(lessonPlan) {
     
     // Exploration steps
     const exploration = data.suggestedLearningExperiences?.exploration || []
-    exploration.forEach((step, i) => {
-      const stepText = typeof step === 'string' ? step : (step?.description || step?.text || 'N/A')
-      addSectionHeader(`Step ${i + 1}: ${step.title || `Activity ${i + 1}`} (${step.duration || '10 minutes'})`, 11)
-      addText(stepText, 11, false)
-      y += 1
-    })
+    const getExplorationText = (step) => {
+      if (step == null) return ""
+      if (typeof step === 'string') return step
+      if (typeof step !== 'object') return String(step)
+      return (
+        step.description ||
+        step.text ||
+        step.activity ||
+        step.content ||
+        step.task ||
+        step.teacherActivity ||
+        step.learnerActivity ||
+        ""
+      )
+    }
+
+    const normalizedExploration = Array.isArray(exploration) ? exploration : [exploration]
+    const usableSteps = normalizedExploration
+      .map((step, i) => ({
+        step,
+        index: i,
+        text: String(getExplorationText(step) ?? "").trim(),
+      }))
+      .filter((s) => s.text.length > 0)
+
+    if (usableSteps.length === 0) {
+      addText('- N/A', 11, false)
+    } else {
+      usableSteps.forEach(({ step, index, text }, i) => {
+        const title = typeof step === 'object' && step ? step.title : null
+        const duration = typeof step === 'object' && step ? step.duration : null
+        addSectionHeader(`Step ${i + 1}: ${title || `Activity ${i + 1}`} (${duration || '10 minutes'})`, 11)
+        addText(text, 11, false)
+        y += 1
+      })
+    }
     
     // Reflection
     if (data.suggestedLearningExperiences?.reflection) {

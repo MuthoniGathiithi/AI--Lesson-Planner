@@ -221,6 +221,35 @@ export default function LessonCreator() {
     setEditingValue("")
   }
 
+  const setPathValue = (path, value) => {
+    if (!lessonPlan) return
+
+    const newPlan = JSON.parse(JSON.stringify(lessonPlan))
+    const keys = path.split('.')
+
+    let current = newPlan
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i]
+      const nextKey = keys[i + 1]
+
+      if (!isNaN(nextKey)) {
+        if (!current[key]) current[key] = []
+      } else {
+        if (!current[key]) current[key] = {}
+      }
+      current = current[key]
+    }
+
+    const finalKey = keys[keys.length - 1]
+    current[finalKey] = value
+    setLessonPlan(newPlan)
+  }
+
+  const clearSection = (path, emptyValue) => {
+    if (!confirm("Remove this section?")) return
+    setPathValue(path, emptyValue)
+  }
+
   const saveEdit = (path) => {
     if (!lessonPlan) return
     
@@ -596,6 +625,14 @@ export default function LessonCreator() {
                         <>
                           <div style={styles.docHeader}>
                             <div style={styles.docTitle}>{isKiswahili ? "MPANGO WA SOMO" : "LESSON PLAN"}</div>
+                            <div style={styles.docSubtitle}>
+                              {renderEditableField(
+                                "lessonPlan.weekLesson",
+                                (data.weekLesson || (lessonPlan?.lessonPlan || lessonPlan)?.weekLesson) ?? "WEEK 1: LESSON 1",
+                                false,
+                                "WEEK 1: LESSON 1"
+                              )}
+                            </div>
                             <div style={styles.docDivider}></div>
                           </div>
 
@@ -795,27 +832,65 @@ export default function LessonCreator() {
 
                           {/* LEARNING RESOURCES */}
                           <div style={styles.section}>
-                            <div style={styles.sectionTitle}>{labels.learningResources}</div>
+                            <div style={styles.sectionHeaderWithButton}>
+                              <div style={styles.sectionTitle}>{labels.learningResources}</div>
+                              <button
+                                onClick={() => clearSection("lessonPlan.learningResources", [])}
+                                style={styles.clearSectionButton}
+                                title="Remove section"
+                              >
+                                <Trash2 size={14} />
+                                <span>Remove</span>
+                              </button>
+                            </div>
                             {renderEditableField("lessonPlan.learningResources", normalizeToStringArray(data.learningResources).join(", "), true, "Enter resources (comma-separated)")}
                           </div>
 
                           {/* SUGGESTED LEARNING EXPERIENCES */}
                           <div style={styles.section}>
-                            <div style={styles.sectionTitle}>{labels.suggestedLearningExperiences}</div>
+                            <div style={styles.sectionHeaderWithButton}>
+                              <div style={styles.sectionTitle}>{labels.suggestedLearningExperiences}</div>
+                              <button
+                                onClick={() => clearSection("lessonPlan.suggestedLearningExperiences", {})}
+                                style={styles.clearSectionButton}
+                                title="Remove section"
+                              >
+                                <Trash2 size={14} />
+                                <span>Remove</span>
+                              </button>
+                            </div>
 
                             {/* i) Introduction */}
                             <div style={styles.subsection}>
-                              <div style={styles.subsectionTitle}>i) {labels.introduction}</div>
+                              <div style={styles.sectionHeaderWithButton}>
+                                <div style={styles.subsectionTitle}>i) {labels.introduction} (5 mins)</div>
+                                <button
+                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.introduction", "")}
+                                  style={styles.clearSectionButton}
+                                  title="Remove section"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>Remove</span>
+                                </button>
+                              </div>
                               {renderEditableField("lessonPlan.suggestedLearningExperiences.introduction", data.suggestedLearningExperiences?.introduction, true, "Enter introduction")}
                             </div>
 
                             {/* ii) Exploration/Development */}
                             <div style={styles.subsection}>
                               <div style={styles.sectionHeaderWithButton}>
-                                <div style={styles.subsectionTitle}>ii) {labels.exploration}</div>
+                                <div style={styles.subsectionTitle}>ii) {labels.exploration} (35 mins)</div>
                                 <button onClick={addExplorationStep} style={styles.addButton} title="Add step">
                                   <Plus size={16} />
                                   <span>Add Step</span>
+                                </button>
+                                <button
+                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.exploration", [])}
+                                  style={styles.clearSectionButton}
+                                  title="Remove section"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>Remove</span>
                                 </button>
                               </div>
                               {(data.suggestedLearningExperiences?.exploration || []).map((step, index) => (
@@ -839,26 +914,87 @@ export default function LessonCreator() {
 
                             {/* iii) Reflection */}
                             <div style={styles.subsection}>
-                              <div style={styles.subsectionTitle}>iii) {labels.reflection}</div>
+                              <div style={styles.sectionHeaderWithButton}>
+                                <div style={styles.subsectionTitle}>iii) {labels.reflection}</div>
+                                <button
+                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.reflection", "")}
+                                  style={styles.clearSectionButton}
+                                  title="Remove section"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>Remove</span>
+                                </button>
+                              </div>
                               {renderEditableField("lessonPlan.suggestedLearningExperiences.reflection", data.suggestedLearningExperiences?.reflection, true, "Enter reflection")}
                             </div>
 
                             {/* iv) Extension */}
                             <div style={styles.subsection}>
-                              <div style={styles.subsectionTitle}>iv) {labels.extension}</div>
+                              <div style={styles.sectionHeaderWithButton}>
+                                <div style={styles.subsectionTitle}>iv) {labels.extension}</div>
+                                <button
+                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.extension", "")}
+                                  style={styles.clearSectionButton}
+                                  title="Remove section"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>Remove</span>
+                                </button>
+                              </div>
                               {renderEditableField("lessonPlan.suggestedLearningExperiences.extension", data.suggestedLearningExperiences?.extension, true, "Enter extension")}
+                            </div>
+
+                            {/* v) Conclusion */}
+                            <div style={styles.subsection}>
+                              <div style={styles.sectionHeaderWithButton}>
+                                <div style={styles.subsectionTitle}>v) Conclusion (5 mins)</div>
+                                <button
+                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.conclusion", "")}
+                                  style={styles.clearSectionButton}
+                                  title="Remove section"
+                                >
+                                  <Trash2 size={14} />
+                                  <span>Remove</span>
+                                </button>
+                              </div>
+                              {renderEditableField(
+                                "lessonPlan.suggestedLearningExperiences.conclusion",
+                                data.suggestedLearningExperiences?.conclusion,
+                                true,
+                                "Enter conclusion"
+                              )}
                             </div>
                           </div>
 
                           {/* PARENTAL INVOLVEMENT */}
                           <div style={styles.section}>
-                            <div style={styles.sectionTitle}>{labels.parentalInvolvement}</div>
+                            <div style={styles.sectionHeaderWithButton}>
+                              <div style={styles.sectionTitle}>{labels.parentalInvolvement}</div>
+                              <button
+                                onClick={() => clearSection("lessonPlan.suggestedParentalInvolvement", "")}
+                                style={styles.clearSectionButton}
+                                title="Remove section"
+                              >
+                                <Trash2 size={14} />
+                                <span>Remove</span>
+                              </button>
+                            </div>
                             {renderEditableField("lessonPlan.suggestedParentalInvolvement", data.parentalInvolvement, true, "Enter parental involvement/community service learning")}
                           </div>
 
                           {/* SELF EVALUATION */}
                           <div style={styles.section}>
-                            <div style={styles.sectionTitle}>{labels.selfEvaluation}</div>
+                            <div style={styles.sectionHeaderWithButton}>
+                              <div style={styles.sectionTitle}>{labels.selfEvaluation}</div>
+                              <button
+                                onClick={() => clearSection("lessonPlan.selfEvaluationMarks", "")}
+                                style={styles.clearSectionButton}
+                                title="Remove section"
+                              >
+                                <Trash2 size={14} />
+                                <span>Remove</span>
+                              </button>
+                            </div>
                             {renderEditableField("lessonPlan.selfEvaluationMarks", data.selfEvaluation, true, "Enter self-evaluation criteria")}
                           </div>
                         </>
