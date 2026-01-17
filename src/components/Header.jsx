@@ -49,15 +49,14 @@ export default function Header() {
     setMobileMenuOpen(false); // close mobile menu after click
   };
 
-  const handleSignInClick = () => navigate('/signin');
-  const handleGetStartedClick = () => navigate('/signup');
+  const handleGetStartedClick = () => navigate('/dashboard');
 
   const activeColor = '#4F46E5';
   const inactiveColor = scrolled ? '#fff' : '#111827';
   const navBackground = scrolled ? '#000' : 'rgba(255,255,255,0.95)';
   const logoColor = location.pathname === '/' && activeSection === 'home' ? activeColor : scrolled ? '#fff' : '#111827';
-  const primaryButtonBg = isActive('/signup') ? activeColor : scrolled ? '#fff' : '#111827';
-  const primaryButtonText = isActive('/signup') ? '#fff' : scrolled ? '#111827' : '#fff';
+  const primaryButtonBg = isActive('/dashboard') ? activeColor : scrolled ? '#fff' : '#111827';
+  const primaryButtonText = isActive('/dashboard') ? '#fff' : scrolled ? '#111827' : '#fff';
 
   const linkStyle = {
     background: 'transparent',
@@ -108,8 +107,6 @@ export default function Header() {
           <button onClick={() => scrollToSection('about')} style={{ ...linkStyle, color: activeSection === 'about' ? activeColor : inactiveColor }}>About Us</button>
           <button onClick={() => scrollToSection('how-it-works')} style={{ ...linkStyle, color: activeSection === 'how-it-works' ? activeColor : inactiveColor }}>How It Works</button>
           <button onClick={() => scrollToSection('contact')} style={{ ...linkStyle, color: activeSection === 'contact' ? activeColor : inactiveColor }}>Contact</button>
-
-          <button onClick={handleSignInClick} style={{ ...linkStyle, fontWeight: 500, color: isActive('/signin') ? activeColor : inactiveColor }}>Sign In</button>
           <button onClick={handleGetStartedClick} style={{
             background: primaryButtonBg,
             border: 'none',
@@ -119,7 +116,7 @@ export default function Header() {
             padding: '8px 20px',
             borderRadius: '8px',
             cursor: 'pointer',
-          }}>Get Started</button>
+          }}>Create lesson plan now</button>
         </div>
 
         {/* Mobile Hamburger */}
@@ -148,7 +145,6 @@ export default function Header() {
           <button onClick={() => scrollToSection('about')} style={{ ...linkStyle, color: activeSection === 'about' ? activeColor : inactiveColor }}>About Us</button>
           <button onClick={() => scrollToSection('how-it-works')} style={{ ...linkStyle, color: activeSection === 'how-it-works' ? activeColor : inactiveColor }}>How It Works</button>
           <button onClick={() => scrollToSection('contact')} style={{ ...linkStyle, color: activeSection === 'contact' ? activeColor : inactiveColor }}>Contact</button>
-          <button onClick={handleSignInClick} style={{ ...linkStyle, fontWeight: 500, color: isActive('/signin') ? activeColor : inactiveColor }}>Sign In</button>
           <button onClick={handleGetStartedClick} style={{
             background: primaryButtonBg,
             border: 'none',
@@ -158,7 +154,7 @@ export default function Header() {
             padding: '8px 20px',
             borderRadius: '8px',
             cursor: 'pointer',
-          }}>Get Started</button>
+          }}>Create lesson plan now</button>
         </div>
       )}
 
