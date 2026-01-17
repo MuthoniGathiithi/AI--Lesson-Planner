@@ -94,7 +94,7 @@ export const getSubStrands = async (subject, strandName) => {  // ✅ FIXED: Acc
   return data.sub_strands;
 };*/
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = (import.meta.env.VITE_API_URL || 'https://ai-lesson-planner-backend-7rq9.onrender.com').replace(/\/+$/, '')
 
 const formatBackendError = (errorData) => {
   if (!errorData) return 'Failed to generate lesson plan'
@@ -162,8 +162,14 @@ export const generateLessonPlan = async (formData) => {
     clearTimeout(timeoutId)
 
     if (!response.ok) {
-      const errorData = await response.json()
-      console.error('Backend error:', errorData);
+      const raw = await response.text()
+      let errorData = null
+      try {
+        errorData = raw ? JSON.parse(raw) : null
+      } catch {
+        errorData = { detail: raw || `HTTP ${response.status} ${response.statusText}` }
+      }
+      console.error('Backend error:', errorData)
       throw new Error(formatBackendError(errorData))
     }
 
@@ -174,8 +180,8 @@ export const generateLessonPlan = async (formData) => {
       throw new Error(data.message || 'Failed to generate lesson plan')
     }
 
-    // Return the complete response including the lessonPlan wrapper
-    return data.lesson_plan
+    // Dashboard expects the lesson plan payload (prefer inner lessonPlan if present)
+    return data?.lesson_plan?.lessonPlan ?? data?.lesson_plan
   } catch (error) {
     if (error?.name === 'AbortError') {
       throw new Error('Request timed out. The server is taking too long to respond. Please try again.')
