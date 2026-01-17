@@ -541,6 +541,13 @@ export async function downloadAsPdf(lessonPlan) {
       addText(data.suggestedLearningExperiences.extension, 11, false)
       y += 2
     }
+
+    // Conclusion
+    if (data.suggestedLearningExperiences?.conclusion) {
+      addSectionHeader('Conclusion (5 minutes)', 11)
+      addText(data.suggestedLearningExperiences.conclusion, 11, false)
+      y += 2
+    }
     
     // ============ PARENTAL INVOLVEMENT ============
     if (data.parentalInvolvement) {
