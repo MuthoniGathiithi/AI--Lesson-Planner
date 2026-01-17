@@ -129,11 +129,9 @@ export default function LessonCreator() {
     
     if (!formData.schoolName?.trim()) errors.push("School")
     if (!formData.subject?.trim()) errors.push("Learning Area")
-    if (formData.grade === "" || formData.grade === null || formData.grade === undefined) errors.push("Grade")
+    if (String(formData.grade ?? "").trim() === "") errors.push("Grade")
     if (!formData.date?.trim()) errors.push("Date")
     if (!formData.startTime?.trim()) errors.push("Time")
-    if (formData.boys === "" || formData.boys === null || formData.boys === undefined) errors.push("Roll - Boys")
-    if (formData.girls === "" || formData.girls === null || formData.girls === undefined) errors.push("Roll - Girls")
     if (!formData.strand?.trim()) errors.push("Strand")
     if (!formData.subStrand?.trim()) errors.push("Sub-strand")
     
@@ -901,14 +899,12 @@ export default function LessonCreator() {
                         <input
                           type={field.type}
                           placeholder={field.placeholder}
-                          value={formData[field.key]}
+                          value={formData[field.key] ?? ""}
                           onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
                               [field.key]:
-                                field.type === "number"
-                                  ? (e.target.value === "" ? "" : Number(e.target.value))
-                                  : e.target.value,
+                                field.type === "number" ? e.target.value : e.target.value,
                             }))
                           }
                           style={{
