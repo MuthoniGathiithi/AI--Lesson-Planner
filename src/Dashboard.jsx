@@ -37,6 +37,32 @@ export default function LessonCreator() {
     subStrand: "",
   })
 
+  const sanitizeTextInput = (value, maxLen = 120) => {
+    const s = String(value ?? "")
+      .replace(/[\u0000-\u001F\u007F]/g, " ")
+      .replace(/[<>]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+    return s.length > maxLen ? s.slice(0, maxLen) : s
+  }
+
+  const sanitizeNumberInput = (value, maxLen = 4) => {
+    const s = String(value ?? "")
+      .replace(/[^0-9]/g, "")
+      .slice(0, maxLen)
+    return s
+  }
+
+  const sanitizeTimeInput = (value) => {
+    const s = String(value ?? "").trim()
+    return /^\d{2}:\d{2}$/.test(s) ? s : ""
+  }
+
+  const sanitizeDateInput = (value) => {
+    const s = String(value ?? "").trim()
+    return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : ""
+  }
+
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
@@ -495,8 +521,21 @@ export default function LessonCreator() {
                           onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
-                              [field.key]:
-                                field.type === "number" ? e.target.value : e.target.value,
+                              [field.key]: (() => {
+                                const raw = e.target.value
+                                if (field.type === "number") {
+                                  if (field.key === "grade") return sanitizeNumberInput(raw, 2)
+                                  if (field.key === "boys" || field.key === "girls") return sanitizeNumberInput(raw, 3)
+                                  return sanitizeNumberInput(raw, 6)
+                                }
+                                if (field.type === "time") return sanitizeTimeInput(raw)
+                                if (field.type === "date") return sanitizeDateInput(raw)
+                                if (field.key === "schoolName") return sanitizeTextInput(raw, 120)
+                                if (field.key === "subject") return sanitizeTextInput(raw, 80)
+                                if (field.key === "strand") return sanitizeTextInput(raw, 120)
+                                if (field.key === "subStrand") return sanitizeTextInput(raw, 120)
+                                return sanitizeTextInput(raw, 200)
+                              })(),
                             }))
                           }
                           style={{

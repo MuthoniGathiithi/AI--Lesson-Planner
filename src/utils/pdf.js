@@ -255,172 +255,161 @@ export const downloadAsPdf = async (lesson) => {
   }
 } */
 
-  import { jsPDF } from "jspdf"
-import { getBilingualFields } from "./bilingual"
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import { getBilingualFields } from "./bilingual";
 
-/**
- * Download lesson plan as PDF with proper formatting
- */
-export async function downloadAsPdf(lessonPlan) {
+export async function downloadAsPdf(lessonPlan, isPreview = false) {
   try {
-    const fields = getBilingualFields(lessonPlan)
-    const { isKiswahili, labels, data } = fields
-    
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    })
-    
-    let y = 20
-    const margin = 20
-    const pageWidth = doc.internal.pageSize.getWidth()
-    const contentWidth = pageWidth - (2 * margin)
-    
-    // Helper to add text with auto-wrap
-    const addText = (text, fontSize = 11, isBold = false) => {
-      doc.setFontSize(fontSize)
-      doc.setFont(undefined, isBold ? 'bold' : 'normal')
-      const lines = doc.splitTextToSize(text, contentWidth)
-      
-      lines.forEach(line => {
-        if (y > 270) {
-          doc.addPage()
-          y = 20
+    const fields = getBilingualFields(lessonPlan);
+    const { isKiswahili, labels, data } = fields;
+
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let y = 20;
+
+    const addText = (text, fontSize = 11, isBold = false, indent = 0) => {
+      doc.setFont("helvetica", isBold ? "bold" : "normal");
+      doc.setFontSize(fontSize);
+
+      const contentWidth = pageWidth - 2 * margin - indent;
+      const lines = doc.splitTextToSize(text, contentWidth);
+
+      lines.forEach((line) => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
         }
-        doc.text(line, margin, y)
-        y += fontSize * 0.5
-      })
-      y += 3
-    }
-    
+        doc.text(line, margin + indent, y);
+        y += fontSize * 0.8;
+      });
+      y += 3;
+    };
+
     const addSection = (title) => {
-      y += 5
-      doc.setFillColor(240, 240, 240)
-      doc.rect(margin, y - 5, contentWidth, 8, 'F')
-      addText(title, 12, true)
-      y += 2
+      y += 5;
+      addText(title, 13, true);
+      y += 2;
+    };
+
+    // Optional preview watermark
+    if (isPreview) {
+      doc.setTextColor(200, 200, 200);
+      doc.setFontSize(50);
+      doc.text("PREVIEW", pageWidth / 2, 150, { align: "center", angle: 45 });
+      doc.setTextColor(0, 0, 0);
     }
-    
+
     // Title
-    doc.setFillColor(59, 130, 246)
-    doc.rect(0, 0, pageWidth, 30, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(18)
-    doc.setFont(undefined, 'bold')
-    doc.text(isKiswahili ? 'MPANGO WA SOMO' : 'LESSON PLAN', pageWidth / 2, 18, { align: 'center' })
-    doc.setTextColor(0, 0, 0)
-    
-    y = 40
-    
-    // Basic Information
-    addSection(isKiswahili ? 'TAARIFA ZA MSINGI' : 'BASIC INFORMATION')
-    addText(`${labels.school}: ${data.school || 'N/A'}`)
-    addText(`${labels.learningArea}: ${data.learningArea || 'N/A'}`)
-    addText(`${labels.grade}: ${data.grade || 'N/A'}`)
-    addText(`${labels.date}: ${data.date || 'N/A'}`)
-    addText(`${labels.time}: ${data.time || 'N/A'}`)
-    addText(`${labels.roll}: ${labels.boys}: ${data.roll?.boys || 0}, ${labels.girls}: ${data.roll?.girls || 0}, ${labels.total}: ${data.roll?.total || 0}`)
-    
-    // Strand
-    addSection(labels.strand)
-    addText(data.strand || 'N/A')
-    
-    // Sub-strand
-    addSection(labels.subStrand)
-    addText(data.subStrand || 'N/A')
-    
-    // Lesson Title
-    addSection(labels.lessonTitle)
-    addText(data.lessonTitle || 'N/A')
-    
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(59, 130, 246);
+    doc.text(isKiswahili ? "MPANGO WA SOMO" : "LESSON PLAN", pageWidth / 2, y, { align: "center" });
+    doc.setTextColor(0, 0, 0);
+    y += 10;
+
+    // Basic Information Table using jsPDF AutoTable
+    autoTable(doc, {
+      startY: y,
+      theme: "grid",
+      head: [
+        [
+          labels.school || "School",
+          labels.level || "Level",
+          labels.learningArea || "Learning Area",
+          labels.date || "Date",
+          labels.time || "Time",
+          labels.roll || "Roll"
+        ]
+      ],
+      body: [
+        [
+          data.school || "N/A",
+          data.grade || "N/A",
+          data.learningArea || "N/A",
+          data.date || "N/A",
+          data.time || "N/A",
+          data.roll?.total || 0
+        ]
+      ],
+      styles: { font: "helvetica", fontSize: 11, cellPadding: 2 },
+      margin: { left: margin, right: margin }
+    });
+    y = doc.lastAutoTable.finalY + 5;
+
+    // Strand / Sub-Strand / Lesson Title
+    addSection(labels.strand);
+    addText(data.strand || "N/A");
+    addSection(labels.subStrand);
+    addText(data.subStrand || "N/A");
+    addSection(labels.lessonTitle);
+    addText(data.lessonTitle || "N/A");
+
     // Specific Learning Outcomes
-    addSection(labels.specificLearningOutcomes)
-    addText(data.specificLearningOutcomes?.statement || labels.outcomeStatement, 10, true)
-    const outcomes = data.specificLearningOutcomes?.outcomes || []
+    addSection(labels.specificLearningOutcomes);
+    addText(data.specificLearningOutcomes?.statement || labels.outcomeStatement, 11, true);
+    const outcomes = data.specificLearningOutcomes?.outcomes || [];
     outcomes.forEach((outcome, i) => {
-      addText(`${outcome.id || String.fromCharCode(97 + i)}) ${outcome.outcome || outcome.text || 'N/A'}`)
-    })
-    
+      addText(`- ${outcome.outcome || outcome.text || "N/A"}`, 11, false, 5);
+    });
+
     // Key Inquiry Questions
-    addSection(labels.keyInquiryQuestions)
-    const questions = data.keyInquiryQuestions || []
+    addSection(labels.keyInquiryQuestions);
+    const questions = data.keyInquiryQuestions || [];
     questions.forEach((q, i) => {
-      addText(`${i + 1}) ${q}`)
-    })
-    
-    // Core Competencies
-    addSection(labels.coreCompetencies)
-    const competencies = data.coreCompetencies || []
-    competencies.forEach(c => {
-      addText(`• ${c}`)
-    })
-    
-    // Link to Values
-    addSection(labels.linkToValues)
-    const values = data.linkToValues || []
-    values.forEach(v => {
-      addText(`• ${v}`)
-    })
-    
-    // Links to PCI
-    addSection(labels.linksToPCI)
-    const pcis = data.linksToPCI || []
-    pcis.forEach(p => {
-      addText(`• ${p}`)
-    })
-    
+      addText(`- ${q}`, 11, false, 5);
+    });
+
     // Learning Resources
-    addSection(labels.learningResources)
-    const resources = Array.isArray(data.learningResources) 
-      ? data.learningResources 
-      : (typeof data.learningResources === 'string' ? data.learningResources.split(',') : [])
-    resources.forEach(r => {
-      if (r?.trim()) addText(`• ${r.trim()}`)
-    })
-    
-    // Suggested Learning Experiences
-    addSection(labels.suggestedLearningExperiences)
-    
-    // Introduction
-    addText(`i) ${labels.introduction}`, 11, true)
-    addText(data.suggestedLearningExperiences?.introduction || 'N/A')
-    
-    // Exploration
-    addText(`ii) ${labels.exploration}`, 11, true)
-    const exploration = data.suggestedLearningExperiences?.exploration || []
+    addSection(labels.learningResources);
+    const resources = Array.isArray(data.learningResources)
+      ? data.learningResources
+      : typeof data.learningResources === "string"
+      ? data.learningResources.split(",")
+      : [];
+    resources.forEach((r) => {
+      if (r?.trim()) addText(`- ${r.trim()}`, 11, false, 5);
+    });
+
+    // Organisation of Learning
+    addSection(labels.organisationOfLearning || "Organisation of Learning");
+
+    // Introduction (5 minutes)
+    addSection(`Introduction (5 minutes)`);
+    addText(data.suggestedLearningExperiences?.introduction || "N/A", 11, false, 5);
+
+    // Lesson Development (35 minutes)
+    addSection(`Lesson Development (35 minutes)`);
+    const exploration = data.suggestedLearningExperiences?.exploration || [];
     exploration.forEach((step, i) => {
-      const stepText = typeof step === 'string' ? step : (step?.description || step?.text || 'N/A')
-      addText(`${labels.step} ${i + 1}: ${stepText}`)
-    })
-    
-    // Reflection
-    addText(`iii) ${labels.reflection}`, 11, true)
-    addText(data.suggestedLearningExperiences?.reflection || 'N/A')
-    
-    // Extension
-    addText(`iv) ${labels.extension}`, 11, true)
-    addText(data.suggestedLearningExperiences?.extension || 'N/A')
-    
+      const stepText = typeof step === "string" ? step : step?.description || step?.text || "N/A";
+      addText(`Step ${i + 1}: ${stepText}`, 11, false, 5);
+    });
+
+    // Conclusion (5 minutes) – reflection & extension
+    addSection(`Conclusion (5 minutes)`);
+    addText(data.suggestedLearningExperiences?.reflection || "N/A", 11, false, 5);
+    addText(data.suggestedLearningExperiences?.extension || "N/A", 11, false, 5);
+
     // Parental Involvement
-    addSection(labels.parentalInvolvement)
-    addText(data.parentalInvolvement || 'N/A')
-    
+    addSection(labels.parentalInvolvement);
+    addText(data.parentalInvolvement || "N/A", 11, false, 5);
+
     // Self Evaluation
-    addSection(labels.selfEvaluation)
-    addText(data.selfEvaluation || 'N/A')
-    
-    // Generate filename
-    const fileName = `${data.learningArea || 'Lesson'}_Grade${data.grade || 'X'}_${data.date || 'plan'}.pdf`
-      .replace(/\s+/g, '_')
-      .replace(/[^a-zA-Z0-9_.-]/g, '')
-    
-    // Save the PDF
-    doc.save(fileName)
-    
-    return { success: true }
+    addSection(labels.selfEvaluation);
+    addText(data.selfEvaluation || "N/A", 11, false, 5);
+
+    // Save PDF
+    const fileName = `${data.learningArea || "Lesson"}_Grade${data.grade || "X"}_${data.date || "plan"}.pdf`
+      .replace(/\s+/g, "_")
+      .replace(/[^a-zA-Z0-9_.-]/g, "");
+
+    doc.save(fileName);
+    return { success: true };
   } catch (error) {
-    console.error('PDF generation error:', error)
-    return { success: false, error: error.message }
+    console.error("PDF generation error:", error);
+    return { success: false, error: error.message };
   }
 }

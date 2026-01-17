@@ -125,6 +125,15 @@ const formatBackendError = (errorData) => {
   return JSON.stringify(errorData)
 }
 
+const sanitizeTextInput = (value, maxLen = 200) => {
+  const s = String(value ?? "")
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
+    .replace(/[<>]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+  return s.length > maxLen ? s.slice(0, maxLen) : s
+}
+
 export const generateLessonPlan = async (formData) => {
   try {
     console.log('Sending form data to backend:', formData);
@@ -134,17 +143,17 @@ export const generateLessonPlan = async (formData) => {
     
     // Map frontend form fields to backend expected fields
     const requestBody = {
-      school: formData.schoolName,
-      subject: formData.subject,
-      class_name: `Grade ${formData.grade}`,
-      grade: parseInt(formData.grade) || 0,
-      date: formData.date,
-      start_time: formData.startTime,
-      end_time: formData.endTime,
-      boys: parseInt(formData.boys) || 0,
-      girls: parseInt(formData.girls) || 0,
-      strand: formData.strand,
-      sub_strand: formData.subStrand
+      school: sanitizeTextInput(formData.schoolName, 120),
+      subject: sanitizeTextInput(formData.subject, 80),
+      class_name: sanitizeTextInput(`Grade ${formData.grade}`, 20),
+      grade: parseInt(String(formData.grade ?? "").replace(/[^0-9]/g, ""), 10) || 0,
+      date: sanitizeTextInput(formData.date, 20),
+      start_time: sanitizeTextInput(formData.startTime, 10),
+      end_time: sanitizeTextInput(formData.endTime, 10),
+      boys: parseInt(String(formData.boys ?? "").replace(/[^0-9]/g, ""), 10) || 0,
+      girls: parseInt(String(formData.girls ?? "").replace(/[^0-9]/g, ""), 10) || 0,
+      strand: sanitizeTextInput(formData.strand, 120),
+      sub_strand: sanitizeTextInput(formData.subStrand, 120)
     };
     
     console.log('Request body:', requestBody);
