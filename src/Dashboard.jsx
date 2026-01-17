@@ -5,6 +5,7 @@ import "./Dashboard.css"
 import { getBilingualFields } from "./utils/bilingual"
 import { downloadAsPdf } from "./utils/pdf"
 import { styles } from "./styles/dashboardStyles"
+import { supabase } from "./supabaseClient"
 import {
   LayoutDashboard,
   Plus,
@@ -123,18 +124,18 @@ export default function LessonCreator() {
   }
   
   const handleGenerate = async () => {
-    // Validate required fields
+    // Validate required fields - FIXED for number inputs
     const errors = []
     
-    if (!formData.schoolName.trim()) errors.push("School")
-    if (!formData.subject.trim()) errors.push("Learning Area")
-    if (!formData.grade.trim()) errors.push("Grade")
-    if (!formData.date.trim()) errors.push("Date")
-    if (!formData.startTime.trim()) errors.push("Time")
-    if (!formData.boys.trim()) errors.push("Roll - Boys")
-    if (!formData.girls.trim()) errors.push("Roll - Girls")
-    if (!formData.strand.trim()) errors.push("Strand")
-    if (!formData.subStrand.trim()) errors.push("Sub-strand")
+    if (!formData.schoolName?.trim()) errors.push("School")
+    if (!formData.subject?.trim()) errors.push("Learning Area")
+    if (!formData.grade || formData.grade.toString().trim() === "") errors.push("Grade")
+    if (!formData.date?.trim()) errors.push("Date")
+    if (!formData.startTime?.trim()) errors.push("Time")
+    if (formData.boys === "" || formData.boys === null || formData.boys === undefined) errors.push("Roll - Boys")
+    if (formData.girls === "" || formData.girls === null || formData.girls === undefined) errors.push("Roll - Girls")
+    if (!formData.strand?.trim()) errors.push("Strand")
+    if (!formData.subStrand?.trim()) errors.push("Sub-strand")
     
     if (errors.length > 0) {
       alert(`Please fill in the following required fields:\n- ${errors.join('\n- ')}`)
@@ -904,7 +905,11 @@ export default function LessonCreator() {
                           onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                           style={{
                             ...styles.input,
-                            ...(field.required && !formData[field.key].trim() ? { borderColor: "#fca5a5" } : {})
+                            ...(field.required && (
+                              field.type === 'number' 
+                                ? (formData[field.key] === "" || formData[field.key] === null || formData[field.key] === undefined)
+                                : !formData[field.key]?.trim()
+                            ) ? { borderColor: "#fca5a5" } : {})
                           }}
                         />
                       </div>
@@ -1259,6 +1264,8 @@ export default function LessonCreator() {
                 >
                   {filteredLessons.map((lesson) => {
                     const fields = getBilingualFields(lesson)
+                    const { labels } = fields
+                    
                     return (
                       <div key={lesson.dbId} style={styles.lessonCard}>
                         <div style={styles.lessonCardHeader}>
