@@ -135,11 +135,12 @@ const sanitizeTextInput = (value, maxLen = 200) => {
 }
 
 export const generateLessonPlan = async (formData) => {
+  let timeoutId
   try {
     console.log('Sending form data to backend:', formData);
     
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 90_000)
+    timeoutId = setTimeout(() => controller.abort(), 180_000)
     
     // Map frontend form fields to backend expected fields
     const requestBody = {
@@ -166,8 +167,6 @@ export const generateLessonPlan = async (formData) => {
       signal: controller.signal,
       body: JSON.stringify(requestBody),
     })
-
-    clearTimeout(timeoutId)
 
     if (!response.ok) {
       const raw = await response.text()
@@ -196,5 +195,7 @@ export const generateLessonPlan = async (formData) => {
     }
     console.error('API Error:', error)
     throw error
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
   }
 }
