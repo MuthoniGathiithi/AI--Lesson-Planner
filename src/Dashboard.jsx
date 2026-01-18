@@ -117,6 +117,49 @@ export default function LessonCreator() {
       const plan = normalizedPlan?.lessonPlan || normalizedPlan
       if (!plan.suggestedLearningExperiences) plan.suggestedLearningExperiences = {}
 
+      const normalizeExplorationSteps = (exploration) => {
+        if (exploration == null) return []
+        if (Array.isArray(exploration)) {
+          if (exploration.length === 1 && exploration[0] && typeof exploration[0] === "object" && !Array.isArray(exploration[0])) {
+            const only = exploration[0]
+            const entries = Object.entries(only)
+              .map(([k, v]) => {
+                const key = String(k)
+                const m = key.match(/\d+/)
+                const num = m ? Number(m[0]) : Number.NaN
+                const value = typeof v === "string" ? v : v == null ? "" : String(v)
+                return { key, num, value }
+              })
+              .filter((e) => /^step\s*\d+$/i.test(e.key) && e.value.trim())
+              .sort((a, b) => (a.num || 0) - (b.num || 0))
+
+            if (entries.length > 0) return entries.map((e) => e.value)
+          }
+          return exploration
+        }
+
+        if (typeof exploration === "object") {
+          const entries = Object.entries(exploration)
+            .map(([k, v]) => {
+              const key = String(k)
+              const m = key.match(/\d+/)
+              const num = m ? Number(m[0]) : Number.NaN
+              const value = typeof v === "string" ? v : v == null ? "" : String(v)
+              return { key, num, value }
+            })
+            .filter((e) => /^step\s*\d+$/i.test(e.key) && e.value.trim())
+            .sort((a, b) => (a.num || 0) - (b.num || 0))
+          if (entries.length > 0) return entries.map((e) => e.value)
+          return [JSON.stringify(exploration)]
+        }
+
+        return [String(exploration)]
+      }
+
+      plan.suggestedLearningExperiences.exploration = normalizeExplorationSteps(
+        plan.suggestedLearningExperiences.exploration
+      )
+
       const coerceText = (v) => {
         if (v == null) return ""
         if (typeof v === "string") return v
