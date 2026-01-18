@@ -536,13 +536,14 @@ export async function downloadAsPdf(lessonPlan) {
     if (!Array.isArray(exploration) || exploration.length === 0) {
       addText('- N/A', 11, false)
     } else {
-      exploration.forEach((step, i) => {
-        const stepText = typeof step === 'string' ? step : 
-                         (step?.description || step?.text || step?.activity || step?.content || '')
+      exploration.forEach((stepObj, i) => {
+        // FIX: The API returns { step: "text" } so we need to check for 'step' field FIRST
+        const stepText = typeof stepObj === 'string' ? stepObj : 
+                         (stepObj?.step || stepObj?.description || stepObj?.text || stepObj?.activity || stepObj?.content || '')
         
         if (stepText.trim()) {
-          const title = (typeof step === 'object' && step?.title) ? step.title : `Activity ${i + 1}`
-          const duration = (typeof step === 'object' && step?.duration) ? step.duration : '10 minutes'
+          const title = (typeof stepObj === 'object' && stepObj?.title) ? stepObj.title : `Activity ${i + 1}`
+          const duration = (typeof stepObj === 'object' && stepObj?.duration) ? stepObj.duration : '10 minutes'
           
           addSectionHeader(`Step ${i + 1}: ${title} (${duration})`, 11)
           addText(stepText, 11, false)
