@@ -129,14 +129,14 @@ export default function LessonCreator() {
         return v.text || v.description || v.content || v.activity || ""
       }
 
-      const conclusionCandidate =
+      /*const conclusionCandidate =
         plan.suggestedLearningExperiences.conclusion ??
         plan.suggestedLearningExperiences.closure ??
         plan.suggestedLearningExperiences.plenary ??
         plan.suggestedLearningExperiences.summary
 
       const conclusionText = String(coerceText(conclusionCandidate)).trim()
-      plan.suggestedLearningExperiences.conclusion = conclusionText || "N/A"
+      plan.suggestedLearningExperiences.conclusion = conclusionText || "N/A"*/
 
       if (!plan.weekLesson) plan.weekLesson = "WEEK 1: LESSON 1"
 
