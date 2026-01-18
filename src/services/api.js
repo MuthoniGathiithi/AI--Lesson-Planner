@@ -97,6 +97,7 @@ export const getSubStrands = async (subject, strandName) => {  // ✅ FIXED: Acc
   const data = await response.json();
   return data.sub_strands;
 };*/
+
 const API_URL = process.env.REACT_APP_API_URL || 'https://ai-lesson-planner-backend-7rq9.onrender.com';
 
 const GENERATE_TIMEOUT_MS = 300_000

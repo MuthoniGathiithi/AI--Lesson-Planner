@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import "./Dashboard.css"
 import { getBilingualFields } from "./utils/bilingual"
 import { downloadAsPdf } from "./utils/pdf"
@@ -23,6 +23,7 @@ export default function LessonCreator() {
   const [editingField, setEditingField] = useState(null)
   const [editingValue, setEditingValue] = useState("")
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+  const gradeInputRef = useRef(null)
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -82,10 +83,7 @@ export default function LessonCreator() {
     if (!formData.subject?.trim()) errors.push("Learning Area")
 
     const gradeFromState = String(formData.grade ?? "").trim()
-    const gradeFromDom =
-      typeof document !== "undefined"
-        ? String(document.querySelector('input[name="grade"]')?.value ?? "").trim()
-        : ""
+    const gradeFromDom = String(gradeInputRef.current?.value ?? "").trim()
     const effectiveGrade = gradeFromState || gradeFromDom
     if (effectiveGrade === "") errors.push("Grade")
     if (!formData.date?.trim()) errors.push("Date")
@@ -101,10 +99,7 @@ export default function LessonCreator() {
     setIsGenerating(true)
     try {
       if (String(formData.grade ?? "").trim() === "") {
-        const gradeFromDomNow =
-          typeof document !== "undefined"
-            ? String(document.querySelector('input[name="grade"]')?.value ?? "").trim()
-            : ""
+        const gradeFromDomNow = String(gradeInputRef.current?.value ?? "").trim()
         if (gradeFromDomNow) {
           setFormData((prev) => ({ ...prev, grade: gradeFromDomNow }))
         }
@@ -604,6 +599,7 @@ export default function LessonCreator() {
                           type={field.type}
                           name={field.key}
                           placeholder={field.placeholder}
+                          ref={field.key === "grade" ? gradeInputRef : null}
                           value={formData[field.key] ?? ""}
                           onChange={(e) =>
                             setFormData((prev) => ({
