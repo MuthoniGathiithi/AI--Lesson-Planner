@@ -111,7 +111,22 @@ export default function LessonCreator() {
       if (!plan.suggestedLearningExperiences.introduction) plan.suggestedLearningExperiences.introduction = "N/A"
       if (!plan.suggestedLearningExperiences.reflection) plan.suggestedLearningExperiences.reflection = "N/A"
       if (!plan.suggestedLearningExperiences.extension) plan.suggestedLearningExperiences.extension = "N/A"
-      if (!plan.suggestedLearningExperiences.conclusion) plan.suggestedLearningExperiences.conclusion = "N/A"
+
+      const coerceText = (v) => {
+        if (v == null) return ""
+        if (typeof v === "string") return v
+        if (typeof v !== "object") return String(v)
+        return v.text || v.description || v.content || v.activity || ""
+      }
+
+      const conclusionCandidate =
+        plan.suggestedLearningExperiences.conclusion ??
+        plan.suggestedLearningExperiences.closure ??
+        plan.suggestedLearningExperiences.plenary ??
+        plan.suggestedLearningExperiences.summary
+
+      const conclusionText = String(coerceText(conclusionCandidate)).trim()
+      plan.suggestedLearningExperiences.conclusion = conclusionText || "N/A"
       if (!plan.weekLesson) plan.weekLesson = "WEEK 1: LESSON 1"
 
       setLessonPlan(normalizedPlan)
