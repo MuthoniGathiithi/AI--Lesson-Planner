@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import "./Dashboard.css"
 import { getBilingualFields } from "./utils/bilingual"
 import { downloadAsPdf } from "./utils/pdf"
@@ -23,6 +23,7 @@ export default function LessonCreator() {
   const [editingField, setEditingField] = useState(null)
   const [editingValue, setEditingValue] = useState("")
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+  const generateAbortControllerRef = useRef(null)
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -93,13 +94,16 @@ export default function LessonCreator() {
 
     setIsGenerating(true)
     try {
+      const controller = new AbortController()
+      generateAbortControllerRef.current = controller
+
       const normalizedFormData = {
         ...formData,
         subject: toSentenceCase(formData.subject),
         strand: toSentenceCase(formData.strand),
         subStrand: toSentenceCase(formData.subStrand),
       }
-      const generatedPlan = await generateLessonPlan(normalizedFormData)
+      const generatedPlan = await generateLessonPlan(normalizedFormData, { signal: controller.signal })
 
       const normalizedPlan = JSON.parse(JSON.stringify(generatedPlan))
       const plan = normalizedPlan?.lessonPlan || normalizedPlan
@@ -115,9 +119,18 @@ export default function LessonCreator() {
     } catch (error) {
       console.error("Error generating lesson plan:", error)
       const message = error?.message ? String(error.message) : String(error)
-      alert(`Failed to generate lesson plan:\n${message}`)
+      if (message !== "Request cancelled.") {
+        alert(`Failed to generate lesson plan:\n${message}`)
+      }
     } finally {
+      generateAbortControllerRef.current = null
       setIsGenerating(false)
+    }
+  }
+
+  const handleCancelGenerate = () => {
+    if (generateAbortControllerRef.current) {
+      generateAbortControllerRef.current.abort()
     }
   }
 
@@ -611,9 +624,16 @@ export default function LessonCreator() {
                     💡 <strong>Tip:</strong> For Kiswahili lessons, enter "Kiswahili" in the Learning Area field to get full Kiswahili output with subject-specific terminology!
                   </div>
                   
-                  <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
-                    {isGenerating ? "Generating Lesson Plan..." : "Generate Lesson Plan"}
-                  </button>
+                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                    <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
+                      {isGenerating ? "Generating Lesson Plan..." : "Generate Lesson Plan"}
+                    </button>
+                    {isGenerating && (
+                      <button onClick={handleCancelGenerate} style={styles.cancelButton}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div style={styles.documentContainer}>

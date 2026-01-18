@@ -432,6 +432,18 @@ export const styles = {
     transition: "all 0.2s ease",
     width: "100%",
   },
+  cancelButton: {
+    padding: "14px 32px",
+    backgroundColor: "#ffffff",
+    color: "#111827",
+    fontSize: "15px",
+    fontWeight: "600",
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    width: "100%",
+  },
   documentContainer: {
     backgroundColor: "transparent",
     padding: "20px 0",

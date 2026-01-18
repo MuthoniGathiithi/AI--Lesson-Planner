@@ -1,5 +1,9 @@
 /*const API_URL = process.env.REACT_APP_API_URL || 'https://ai-lesson-planner-backend-7rq9.onrender.com';
 
+const GENERATE_TIMEOUT_MS = 300_000
+
+const GENERATE_TIMEOUT_MS = 300_000
+
 const formatBackendError = (errorData) => {
   if (!errorData) return 'Failed to generate lesson plan'
   const detail = errorData.detail
@@ -95,6 +99,8 @@ export const getSubStrands = async (subject, strandName) => {  // ✅ FIXED: Acc
 };*/
 const API_URL = process.env.REACT_APP_API_URL || 'https://ai-lesson-planner-backend-7rq9.onrender.com';
 
+const GENERATE_TIMEOUT_MS = 300_000
+
 const formatBackendError = (errorData) => {
   if (!errorData) return 'Failed to generate lesson plan'
   
@@ -134,13 +140,22 @@ const sanitizeTextInput = (value, maxLen = 200) => {
   return s.length > maxLen ? s.slice(0, maxLen) : s
 }
 
-export const generateLessonPlan = async (formData) => {
+export const generateLessonPlan = async (formData, options = {}) => {
   let timeoutId
   try {
     console.log('Sending form data to backend:', formData);
     
     const controller = new AbortController()
-    timeoutId = setTimeout(() => controller.abort(), 180_000)
+    timeoutId = setTimeout(() => controller.abort(), GENERATE_TIMEOUT_MS)
+
+    const externalSignal = options?.signal
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        controller.abort()
+      } else {
+        externalSignal.addEventListener('abort', () => controller.abort(), { once: true })
+      }
+    }
     
     // Map frontend form fields to backend expected fields
     const requestBody = {
@@ -191,6 +206,9 @@ export const generateLessonPlan = async (formData) => {
     return data?.lesson_plan?.lessonPlan ?? data?.lesson_plan
   } catch (error) {
     if (error?.name === 'AbortError') {
+      if (options?.signal?.aborted) {
+        throw new Error('Request cancelled.')
+      }
       throw new Error('Request timed out. The server is taking too long to respond. Please try again.')
     }
     console.error('API Error:', error)
