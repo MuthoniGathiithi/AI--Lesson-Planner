@@ -529,44 +529,25 @@ export async function downloadAsPdf(lessonPlan) {
     }
     
     // Reflection
-    addSectionHeader('Reflection (5 minutes)', 11)
-    addText(
-      String(data.suggestedLearningExperiences?.reflection ?? '').trim() || '- N/A',
-      11,
-      false
-    )
-    y += 2
+    if (data.suggestedLearningExperiences?.reflection) {
+      addSectionHeader('Reflection (5 minutes)', 11)
+      addText(data.suggestedLearningExperiences.reflection, 11, false)
+      y += 2
+    }
     
     // Extension
-    addSectionHeader('Extension Activities', 11)
-    addText(
-      String(data.suggestedLearningExperiences?.extension ?? '').trim() || '- N/A',
-      11,
-      false
-    )
-    y += 2
-
-    // Conclusion
-    addSectionHeader('Conclusion (5 minutes)', 11)
-    const getConclusionText = (v) => {
-      if (v == null) return ''
-      if (typeof v === 'string') return v
-      if (typeof v !== 'object') return String(v)
-      return v.text || v.description || v.content || v.activity || ''
+    if (data.suggestedLearningExperiences?.extension) {
+      addSectionHeader('Extension Activities', 11)
+      addText(data.suggestedLearningExperiences.extension, 11, false)
+      y += 2
     }
 
-    const conclusionCandidate =
-      data.suggestedLearningExperiences?.conclusion ??
-      data.suggestedLearningExperiences?.closure ??
-      data.suggestedLearningExperiences?.plenary ??
-      data.suggestedLearningExperiences?.summary
-
-    addText(
-      String(getConclusionText(conclusionCandidate) ?? '').trim() || '- N/A',
-      11,
-      false
-    )
-    y += 2
+    // Conclusion
+    if (data.suggestedLearningExperiences?.conclusion) {
+      addSectionHeader('Conclusion (5 minutes)', 11)
+      addText(data.suggestedLearningExperiences.conclusion, 11, false)
+      y += 2
+    }
     
     // ============ PARENTAL INVOLVEMENT ============
     if (data.parentalInvolvement) {

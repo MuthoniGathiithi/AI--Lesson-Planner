@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import "./Dashboard.css"
 import { getBilingualFields } from "./utils/bilingual"
 import { downloadAsPdf } from "./utils/pdf"
@@ -23,7 +23,6 @@ export default function LessonCreator() {
   const [editingField, setEditingField] = useState(null)
   const [editingValue, setEditingValue] = useState("")
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
-  const generateAbortControllerRef = useRef(null)
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -94,58 +93,21 @@ export default function LessonCreator() {
 
     setIsGenerating(true)
     try {
-      const controller = new AbortController()
-      generateAbortControllerRef.current = controller
-
       const normalizedFormData = {
         ...formData,
         subject: toSentenceCase(formData.subject),
         strand: toSentenceCase(formData.strand),
         subStrand: toSentenceCase(formData.subStrand),
       }
-      const generatedPlan = await generateLessonPlan(normalizedFormData, { signal: controller.signal })
-
-      const normalizedPlan = JSON.parse(JSON.stringify(generatedPlan))
-      const plan = normalizedPlan?.lessonPlan || normalizedPlan
-      if (!plan.suggestedLearningExperiences) plan.suggestedLearningExperiences = {}
-      if (!plan.suggestedLearningExperiences.introduction) plan.suggestedLearningExperiences.introduction = "N/A"
-      if (!plan.suggestedLearningExperiences.reflection) plan.suggestedLearningExperiences.reflection = "N/A"
-      if (!plan.suggestedLearningExperiences.extension) plan.suggestedLearningExperiences.extension = "N/A"
-
-      const coerceText = (v) => {
-        if (v == null) return ""
-        if (typeof v === "string") return v
-        if (typeof v !== "object") return String(v)
-        return v.text || v.description || v.content || v.activity || ""
-      }
-
-      const conclusionCandidate =
-        plan.suggestedLearningExperiences.conclusion ??
-        plan.suggestedLearningExperiences.closure ??
-        plan.suggestedLearningExperiences.plenary ??
-        plan.suggestedLearningExperiences.summary
-
-      const conclusionText = String(coerceText(conclusionCandidate)).trim()
-      plan.suggestedLearningExperiences.conclusion = conclusionText || "N/A"
-      if (!plan.weekLesson) plan.weekLesson = "WEEK 1: LESSON 1"
-
-      setLessonPlan(normalizedPlan)
+      const generatedPlan = await generateLessonPlan(normalizedFormData)
+      setLessonPlan(generatedPlan)
       console.log("Generated lesson plan:", generatedPlan)
     } catch (error) {
       console.error("Error generating lesson plan:", error)
       const message = error?.message ? String(error.message) : String(error)
-      if (message !== "Request cancelled.") {
-        alert(`Failed to generate lesson plan:\n${message}`)
-      }
+      alert(`Failed to generate lesson plan:\n${message}`)
     } finally {
-      generateAbortControllerRef.current = null
       setIsGenerating(false)
-    }
-  }
-
-  const handleCancelGenerate = () => {
-    if (generateAbortControllerRef.current) {
-      generateAbortControllerRef.current.abort()
     }
   }
 
@@ -477,23 +439,6 @@ export default function LessonCreator() {
     setLessonPlan({...lessonPlan})
   }
 
-  const getExplorationStepText = (step) => {
-    if (step == null) return ""
-    if (typeof step === "string") return step
-    if (typeof step !== "object") return String(step)
-
-    return (
-      step.description ||
-      step.text ||
-      step.activity ||
-      step.content ||
-      step.task ||
-      step.teacherActivity ||
-      step.learnerActivity ||
-      ""
-    )
-  }
-
   const renderEditableField = (path, value, multiline = false, placeholder = "Click to edit") => {
     const fieldKey = path
     const isEditing = editingField === fieldKey
@@ -639,16 +584,9 @@ export default function LessonCreator() {
                     💡 <strong>Tip:</strong> For Kiswahili lessons, enter "Kiswahili" in the Learning Area field to get full Kiswahili output with subject-specific terminology!
                   </div>
                   
-                  <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                    <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
-                      {isGenerating ? "Generating Lesson Plan..." : "Generate Lesson Plan"}
-                    </button>
-                    {isGenerating && (
-                      <button onClick={handleCancelGenerate} style={styles.cancelButton}>
-                        Cancel
-                      </button>
-                    )}
-                  </div>
+                  <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
+                    {isGenerating ? "Generating Lesson Plan..." : "Generate Lesson Plan"}
+                  </button>
                 </div>
               ) : (
                 <div style={styles.documentContainer}>
@@ -968,12 +906,7 @@ export default function LessonCreator() {
                                     </button>
                                   </div>
                                   <div style={styles.stepField}>
-                                    {renderEditableField(
-                                      `lessonPlan.suggestedLearningExperiences.exploration.${index}`,
-                                      getExplorationStepText(step),
-                                      true,
-                                      "Enter step description"
-                                    )}
+                                    {renderEditableField(`lessonPlan.suggestedLearningExperiences.exploration.${index}`, typeof step === "string" ? step : step?.description || step?.text, true, "Enter step description")}
                                   </div>
                                 </div>
                               ))}
@@ -992,12 +925,7 @@ export default function LessonCreator() {
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField(
-                                "lessonPlan.suggestedLearningExperiences.reflection",
-                                String(data.suggestedLearningExperiences?.reflection ?? "").trim() || "N/A",
-                                true,
-                                "Enter reflection"
-                              )}
+                              {renderEditableField("lessonPlan.suggestedLearningExperiences.reflection", data.suggestedLearningExperiences?.reflection, true, "Enter reflection")}
                             </div>
 
                             {/* iv) Extension */}
@@ -1013,12 +941,7 @@ export default function LessonCreator() {
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField(
-                                "lessonPlan.suggestedLearningExperiences.extension",
-                                String(data.suggestedLearningExperiences?.extension ?? "").trim() || "N/A",
-                                true,
-                                "Enter extension"
-                              )}
+                              {renderEditableField("lessonPlan.suggestedLearningExperiences.extension", data.suggestedLearningExperiences?.extension, true, "Enter extension")}
                             </div>
 
                             {/* v) Conclusion */}
@@ -1036,7 +959,7 @@ export default function LessonCreator() {
                               </div>
                               {renderEditableField(
                                 "lessonPlan.suggestedLearningExperiences.conclusion",
-                                String(data.suggestedLearningExperiences?.conclusion ?? "").trim() || "N/A",
+                                data.suggestedLearningExperiences?.conclusion,
                                 true,
                                 "Enter conclusion"
                               )}
