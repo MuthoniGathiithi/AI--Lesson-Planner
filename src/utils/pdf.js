@@ -584,7 +584,7 @@ if (!Array.isArray(exploration) || exploration.length === 0) {
       const title = (typeof stepObj === 'object' && stepObj?.title) ? stepObj.title : `Activity ${i + 1}`
       const duration = (typeof stepObj === 'object' && stepObj?.duration) ? stepObj.duration : '10 minutes'
       
-      addSectionHeader(`Step ${i + 1}: ${title} (${duration})`, 11)
+     addSectionHeader(`Step ${i + 1}: ${title} (${duration})`, 11)
       addText(stepText, 11, false)
       y += 1
     }
