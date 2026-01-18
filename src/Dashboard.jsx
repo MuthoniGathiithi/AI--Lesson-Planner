@@ -146,20 +146,29 @@ export default function LessonCreator() {
     }
   }
 
-  const getExplorationStepText = (step) => {
+  const getExplorationStepText = (step, index) => {
     if (step == null) return ""
     if (typeof step === "string") return step
     if (typeof step !== "object") return String(step)
 
+    const stepKey = `Step ${Number(index) + 1}`
+    const keyed = typeof stepKey === "string" ? step?.[stepKey] : undefined
+    if (typeof keyed === "string" && keyed.trim()) return keyed
+
+    const stepEntries = Object.entries(step || {})
+    const anyStepKey = stepEntries.find(([k, v]) => /^step\s*\d+$/i.test(String(k)) && typeof v === "string" && v.trim())
+    if (anyStepKey) return anyStepKey[1]
+
     return (
       step.description ||
       step.text ||
+      step.step ||
       step.activity ||
       step.content ||
       step.task ||
       step.teacherActivity ||
       step.learnerActivity ||
-      ""
+      JSON.stringify(step)
     )
   }
 
@@ -962,7 +971,7 @@ export default function LessonCreator() {
                                   <div style={styles.stepField}>
                                     {renderEditableField(
                                       `lessonPlan.suggestedLearningExperiences.exploration.${index}`,
-                                      getExplorationStepText(step),
+                                      getExplorationStepText(step, index),
                                       true,
                                       "Enter step description"
                                     )}
