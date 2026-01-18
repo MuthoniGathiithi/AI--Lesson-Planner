@@ -449,6 +449,23 @@ export default function LessonCreator() {
     setLessonPlan({...lessonPlan})
   }
 
+  const getExplorationStepText = (step) => {
+    if (step == null) return ""
+    if (typeof step === "string") return step
+    if (typeof step !== "object") return String(step)
+
+    return (
+      step.description ||
+      step.text ||
+      step.activity ||
+      step.content ||
+      step.task ||
+      step.teacherActivity ||
+      step.learnerActivity ||
+      ""
+    )
+  }
+
   const renderEditableField = (path, value, multiline = false, placeholder = "Click to edit") => {
     const fieldKey = path
     const isEditing = editingField === fieldKey
@@ -916,7 +933,12 @@ export default function LessonCreator() {
                                     </button>
                                   </div>
                                   <div style={styles.stepField}>
-                                    {renderEditableField(`lessonPlan.suggestedLearningExperiences.exploration.${index}`, typeof step === "string" ? step : step?.description || step?.text, true, "Enter step description")}
+                                    {renderEditableField(
+                                      `lessonPlan.suggestedLearningExperiences.exploration.${index}`,
+                                      getExplorationStepText(step),
+                                      true,
+                                      "Enter step description"
+                                    )}
                                   </div>
                                 </div>
                               ))}
