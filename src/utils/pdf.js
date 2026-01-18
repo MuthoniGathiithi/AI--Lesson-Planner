@@ -531,7 +531,7 @@ export async function downloadAsPdf(lessonPlan) {
     */
     
     // ========== NEW EXPLORATION CODE (FIXED) ==========
-    const exploration = data.suggestedLearningExperiences?.exploration || []
+    /*const exploration = data.suggestedLearningExperiences?.exploration || []
 
     if (!Array.isArray(exploration) || exploration.length === 0) {
       addText('- N/A', 11, false)
@@ -550,7 +550,63 @@ export async function downloadAsPdf(lessonPlan) {
           y += 1
         }
       })
+    }*/
+
+
+
+
+
+// ========== NEW EXPLORATION CODE (FIXED FOR ALL FORMATS) ==========
+const exploration = data.suggestedLearningExperiences?.exploration || []
+
+if (!Array.isArray(exploration) || exploration.length === 0) {
+  addText('- N/A', 11, false)
+} else {
+  exploration.forEach((stepObj, i) => {
+    let stepText = ''
+    
+    // Handle different formats
+    if (typeof stepObj === 'string') {
+      stepText = stepObj
+    } else if (typeof stepObj === 'object' && stepObj !== null) {
+      // Check for "Step 1", "Step 2", etc. keys
+      const stepKey = `Step ${i + 1}`
+      if (stepObj[stepKey]) {
+        stepText = stepObj[stepKey]
+      } else {
+        // Fallback to other possible fields
+        stepText = stepObj.step || stepObj.description || stepObj.text || 
+                   stepObj.activity || stepObj.content || ''
+      }
     }
+    
+    if (stepText.trim()) {
+      const title = (typeof stepObj === 'object' && stepObj?.title) ? stepObj.title : `Activity ${i + 1}`
+      const duration = (typeof stepObj === 'object' && stepObj?.duration) ? stepObj.duration : '10 minutes'
+      
+      addSectionHeader(`Step ${i + 1}: ${title} (${duration})`, 11)
+      addText(stepText, 11, false)
+      y += 1
+    }
+  })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     // Reflection
     if (data.suggestedLearningExperiences?.reflection) {
