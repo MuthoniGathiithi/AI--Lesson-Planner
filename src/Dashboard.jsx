@@ -100,7 +100,30 @@ export default function LessonCreator() {
         subStrand: toSentenceCase(formData.subStrand),
       }
       const generatedPlan = await generateLessonPlan(normalizedFormData)
-      setLessonPlan(generatedPlan)
+
+      const normalizedPlan = JSON.parse(JSON.stringify(generatedPlan))
+      const plan = normalizedPlan?.lessonPlan || normalizedPlan
+      if (!plan.suggestedLearningExperiences) plan.suggestedLearningExperiences = {}
+
+      const coerceText = (v) => {
+        if (v == null) return ""
+        if (typeof v === "string") return v
+        if (typeof v !== "object") return String(v)
+        return v.text || v.description || v.content || v.activity || ""
+      }
+
+      const conclusionCandidate =
+        plan.suggestedLearningExperiences.conclusion ??
+        plan.suggestedLearningExperiences.closure ??
+        plan.suggestedLearningExperiences.plenary ??
+        plan.suggestedLearningExperiences.summary
+
+      const conclusionText = String(coerceText(conclusionCandidate)).trim()
+      plan.suggestedLearningExperiences.conclusion = conclusionText || "N/A"
+
+      if (!plan.weekLesson) plan.weekLesson = "WEEK 1: LESSON 1"
+
+      setLessonPlan(normalizedPlan)
       console.log("Generated lesson plan:", generatedPlan)
     } catch (error) {
       console.error("Error generating lesson plan:", error)
@@ -109,6 +132,23 @@ export default function LessonCreator() {
     } finally {
       setIsGenerating(false)
     }
+  }
+
+  const getExplorationStepText = (step) => {
+    if (step == null) return ""
+    if (typeof step === "string") return step
+    if (typeof step !== "object") return String(step)
+
+    return (
+      step.description ||
+      step.text ||
+      step.activity ||
+      step.content ||
+      step.task ||
+      step.teacherActivity ||
+      step.learnerActivity ||
+      ""
+    )
   }
 
   const normalizeToStringArray = (value) => {
@@ -906,7 +946,12 @@ export default function LessonCreator() {
                                     </button>
                                   </div>
                                   <div style={styles.stepField}>
-                                    {renderEditableField(`lessonPlan.suggestedLearningExperiences.exploration.${index}`, typeof step === "string" ? step : step?.description || step?.text, true, "Enter step description")}
+                                    {renderEditableField(
+                                      `lessonPlan.suggestedLearningExperiences.exploration.${index}`,
+                                      getExplorationStepText(step),
+                                      true,
+                                      "Enter step description"
+                                    )}
                                   </div>
                                 </div>
                               ))}

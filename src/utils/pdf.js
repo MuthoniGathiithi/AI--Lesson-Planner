@@ -543,11 +543,26 @@ export async function downloadAsPdf(lessonPlan) {
     }
 
     // Conclusion
-    if (data.suggestedLearningExperiences?.conclusion) {
-      addSectionHeader('Conclusion (5 minutes)', 11)
-      addText(data.suggestedLearningExperiences.conclusion, 11, false)
-      y += 2
+    addSectionHeader('Conclusion (5 minutes)', 11)
+    const getConclusionText = (v) => {
+      if (v == null) return ''
+      if (typeof v === 'string') return v
+      if (typeof v !== 'object') return String(v)
+      return v.text || v.description || v.content || v.activity || ''
     }
+
+    const conclusionCandidate =
+      data.suggestedLearningExperiences?.conclusion ??
+      data.suggestedLearningExperiences?.closure ??
+      data.suggestedLearningExperiences?.plenary ??
+      data.suggestedLearningExperiences?.summary
+
+    addText(
+      String(getConclusionText(conclusionCandidate) ?? '').trim() || '- N/A',
+      11,
+      false
+    )
+    y += 2
     
     // ============ PARENTAL INVOLVEMENT ============
     if (data.parentalInvolvement) {
