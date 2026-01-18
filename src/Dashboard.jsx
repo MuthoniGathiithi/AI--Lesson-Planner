@@ -32,6 +32,7 @@ export default function LessonCreator() {
     date: new Date().toISOString().split("T")[0],
     startTime: "08:00",
     endTime: "08:40",
+    timeRange: "08:00-08:40",
     boys: "",
     girls: "",
     strand: "",
@@ -115,6 +116,10 @@ export default function LessonCreator() {
   }, [])
   
   const handleGenerate = async () => {
+    const parsed = parseTimeRange(formData.timeRange)
+    const effectiveStartTime = parsed.start || String(formData.startTime ?? "").trim()
+    const effectiveEndTime = parsed.end || String(formData.endTime ?? "").trim()
+
     // Validate required fields - FIXED for number inputs
     const errors = []
     
@@ -126,7 +131,7 @@ export default function LessonCreator() {
     const effectiveGrade = gradeFromState || gradeFromDom
     if (effectiveGrade === "") errors.push("Grade")
     if (!formData.date?.trim()) errors.push("Date")
-    if (!(formData.startTime?.trim() && formData.endTime?.trim())) errors.push("Time")
+    if (!(effectiveStartTime && effectiveEndTime)) errors.push("Time")
     if (!formData.strand?.trim()) errors.push("Strand")
     if (!formData.subStrand?.trim()) errors.push("Sub-strand")
     
@@ -144,12 +149,19 @@ export default function LessonCreator() {
         }
       }
 
-      const normalizedFormData = {
+      const requestFormData = {
         ...formData,
-        subject: toSentenceCase(formData.subject),
-        strand: toSentenceCase(formData.strand),
-        subStrand: toSentenceCase(formData.subStrand),
+        startTime: effectiveStartTime,
+        endTime: effectiveEndTime,
       }
+
+      const normalizedFormData = {
+        ...requestFormData,
+        subject: toSentenceCase(requestFormData.subject),
+        strand: toSentenceCase(requestFormData.strand),
+        subStrand: toSentenceCase(requestFormData.subStrand),
+      }
+
       const generatedPlan = await generateLessonPlan(normalizedFormData)
 
       const normalizedPlan = JSON.parse(JSON.stringify(generatedPlan))
@@ -340,6 +352,7 @@ export default function LessonCreator() {
       date: new Date().toISOString().split("T")[0],
       startTime: "08:00",
       endTime: "08:40",
+      timeRange: "08:00-08:40",
       boys: "",
       girls: "",
       strand: "",
@@ -693,20 +706,16 @@ export default function LessonCreator() {
                           ref={field.key === "grade" ? gradeInputRef : null}
                           value={
                             field.key === "timeRange"
-                              ? `${formData.startTime || ""}-${formData.endTime || ""}`.replace(/^-|-$/g, "")
+                              ? (formData.timeRange ?? "")
                               : (formData[field.key] ?? "")
                           }
                           onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
                               ...(field.key === "timeRange"
-                                ? (() => {
-                                    const { start, end } = parseTimeRange(e.target.value)
-                                    return {
-                                      startTime: start,
-                                      endTime: end,
-                                    }
-                                  })()
+                                ? {
+                                    timeRange: e.target.value,
+                                  }
                                 : {
                                     [field.key]: (() => {
                                       const raw = e.target.value
@@ -726,13 +735,23 @@ export default function LessonCreator() {
                                   })
                             }))
                           }
+                          onBlur={(e) => {
+                            if (field.key !== "timeRange") return
+                            const { start, end } = parseTimeRange(e.target.value)
+                            setFormData((prev) => ({
+                              ...prev,
+                              startTime: start,
+                              endTime: end,
+                              timeRange: start && end ? `${start}-${end}` : prev.timeRange,
+                            }))
+                          }}
                           style={{
                             ...styles.input,
                             ...(field.required && (
                               field.type === 'number' 
                                 ? (formData[field.key] === "" || formData[field.key] === null || formData[field.key] === undefined)
                                 : field.key === "timeRange"
-                                  ? !(formData.startTime && formData.endTime)
+                                  ? !((parseTimeRange(formData.timeRange).start || formData.startTime) && (parseTimeRange(formData.timeRange).end || formData.endTime))
                                   : !formData[field.key]?.trim()
                             ) ? { borderColor: "#fca5a5" } : {})
                           }}
