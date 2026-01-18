@@ -30,8 +30,9 @@ export default function LessonCreator() {
     subject: "",
     grade: "",
     date: new Date().toISOString().split("T")[0],
-    startTime: "08:00",
-    endTime: "08:40",
+    startTime: "",
+    endTime: "",
+    timeRange: "",
     boys: "",
     girls: "",
     strand: "",
@@ -59,6 +60,44 @@ export default function LessonCreator() {
     return /^\d{2}:\d{2}$/.test(s) ? s : ""
   }
 
+  const normalizeHHMM = (raw) => {
+    const s = String(raw ?? "").trim()
+    if (!s) return ""
+
+    const m1 = s.match(/^\s*(\d{1,2})\s*:\s*(\d{2})\s*$/)
+    if (m1) {
+      const hh = Number(m1[1])
+      const mm = Number(m1[2])
+      if (Number.isFinite(hh) && Number.isFinite(mm) && hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59) {
+        return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0")
+      }
+      return ""
+    }
+
+    const m2 = s.match(/^\s*(\d{1,2})(\d{2})\s*$/)
+    if (m2) {
+      const hh = Number(m2[1])
+      const mm = Number(m2[2])
+      if (Number.isFinite(hh) && Number.isFinite(mm) && hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59) {
+        return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0")
+      }
+    }
+
+    return ""
+  }
+
+  const parseTimeRange = (raw) => {
+    const s = String(raw ?? "").trim()
+    if (!s) return { start: "", end: "" }
+
+    const parts = s.split(/-|–|—/)
+    if (parts.length !== 2) return { start: "", end: "" }
+
+    const start = normalizeHHMM(parts[0])
+    const end = normalizeHHMM(parts[1])
+    return { start, end }
+  }
+
   const sanitizeDateInput = (value) => {
     const s = String(value ?? "").trim()
     return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : ""
@@ -76,6 +115,10 @@ export default function LessonCreator() {
   }, [])
   
   const handleGenerate = async () => {
+    const parsed = parseTimeRange(formData.timeRange)
+    const effectiveStartTime = parsed.start || String(formData.startTime ?? "").trim()
+    const effectiveEndTime = parsed.end || String(formData.endTime ?? "").trim()
+
     // Validate required fields - FIXED for number inputs
     const errors = []
     
@@ -87,7 +130,7 @@ export default function LessonCreator() {
     const effectiveGrade = gradeFromState || gradeFromDom
     if (effectiveGrade === "") errors.push("Grade")
     if (!formData.date?.trim()) errors.push("Date")
-    if (!formData.startTime?.trim()) errors.push("Time")
+    if (!(effectiveStartTime && effectiveEndTime)) errors.push("Time")
     if (!formData.strand?.trim()) errors.push("Strand")
     if (!formData.subStrand?.trim()) errors.push("Sub-strand")
     
@@ -105,11 +148,17 @@ export default function LessonCreator() {
         }
       }
 
-      const normalizedFormData = {
+      const requestFormData = {
         ...formData,
-        subject: toSentenceCase(formData.subject),
-        strand: toSentenceCase(formData.strand),
-        subStrand: toSentenceCase(formData.subStrand),
+        startTime: effectiveStartTime,
+        endTime: effectiveEndTime,
+      }
+
+      const normalizedFormData = {
+        ...requestFormData,
+        subject: toSentenceCase(requestFormData.subject),
+        strand: toSentenceCase(requestFormData.strand),
+        subStrand: toSentenceCase(requestFormData.subStrand),
       }
       const generatedPlan = await generateLessonPlan(normalizedFormData)
 
@@ -299,8 +348,9 @@ export default function LessonCreator() {
       subject: "",
       grade: "",
       date: new Date().toISOString().split("T")[0],
-      startTime: "08:00",
-      endTime: "08:40",
+      startTime: "",
+      endTime: "",
+      timeRange: "",
       boys: "",
       girls: "",
       strand: "",
@@ -630,15 +680,15 @@ export default function LessonCreator() {
                   <h2 style={styles.formTitle}>Create New Lesson Plan</h2>
                   <div style={styles.formGrid}>
                     {[
-                      { label: "School", key: "schoolName", placeholder: "Enter school name", type: "text", required: true },
-                      { label: "Learning Area", key: "subject", placeholder: "e.g. Biology, Geography, Mathematics", type: "text", required: true },
-                      { label: "Grade", key: "grade", placeholder: "e.g. 10", type: "number", required: true },
+                      { label: "School", key: "schoolName", placeholder: "", type: "text", required: true },
+                      { label: "Learning Area", key: "subject", placeholder: "", type: "text", required: true },
+                      { label: "Grade", key: "grade", placeholder: "", type: "number", required: true },
                       { label: "Date", key: "date", placeholder: "", type: "date", required: true },
-                      { label: "Time", key: "startTime", placeholder: "e.g. 08:00", type: "time", required: true },
-                      { label: "Roll - Boys", key: "boys", placeholder: "0", type: "number", required: true },
-                      { label: "Roll - Girls", key: "girls", placeholder: "0", type: "number", required: true },
-                      { label: "Strand", key: "strand", placeholder: "e.g. Biodiversity", type: "text", required: true },
-                      { label: "Sub-strand", key: "subStrand", placeholder: "e.g. Classification", type: "text", required: true },
+                      { label: "Time", key: "timeRange", placeholder: "", type: "text", required: true },
+                      { label: "Roll - Boys", key: "boys", placeholder: "", type: "number", required: true },
+                      { label: "Roll - Girls", key: "girls", placeholder: "", type: "number", required: true },
+                      { label: "Strand", key: "strand", placeholder: "", type: "text", required: true },
+                      { label: "Sub-strand", key: "subStrand", placeholder: "", type: "text", required: true },
                     ].map((field) => (
                       <div key={field.key} style={styles.fieldWrapper}>
                         <label style={styles.label}>
@@ -663,6 +713,7 @@ export default function LessonCreator() {
                                   if (field.key === "boys" || field.key === "girls") return sanitizeNumberInput(raw, 3)
                                   return sanitizeNumberInput(raw, 6)
                                 }
+                                if (field.key === "timeRange") return raw
                                 if (field.type === "time") return sanitizeTimeInput(raw)
                                 if (field.type === "date") return sanitizeDateInput(raw)
                                 if (field.key === "schoolName") return sanitizeTextInput(raw, 120)
@@ -673,12 +724,24 @@ export default function LessonCreator() {
                               })(),
                             }))
                           }
+                          onBlur={(e) => {
+                            if (field.key !== "timeRange") return
+                            const { start, end } = parseTimeRange(e.target.value)
+                            setFormData((prev) => ({
+                              ...prev,
+                              startTime: start,
+                              endTime: end,
+                              timeRange: start && end ? `${start} - ${end}` : prev.timeRange,
+                            }))
+                          }}
                           style={{
                             ...styles.input,
                             ...(field.required && (
                               field.type === 'number' 
                                 ? (formData[field.key] === "" || formData[field.key] === null || formData[field.key] === undefined)
-                                : !formData[field.key]?.trim()
+                                : field.key === "timeRange"
+                                  ? !((parseTimeRange(formData.timeRange).start || formData.startTime) && (parseTimeRange(formData.timeRange).end || formData.endTime))
+                                  : !formData[field.key]?.trim()
                             ) ? { borderColor: "#fca5a5" } : {})
                           }}
                         />
