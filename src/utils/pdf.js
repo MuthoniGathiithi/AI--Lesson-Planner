@@ -255,7 +255,7 @@ export const downloadAsPdf = async (lesson) => {
   }
 } */
 
-  import { jsPDF } from "jspdf"
+import { jsPDF } from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
 /**
@@ -489,7 +489,8 @@ export async function downloadAsPdf(lessonPlan) {
     addSectionHeader('Lesson Development (30 minutes)', 11)
     y += 1
     
-    // Exploration steps
+    // ========== OLD EXPLORATION CODE (COMMENTED OUT) ==========
+    /*
     const exploration = data.suggestedLearningExperiences?.exploration || []
     const getExplorationText = (step) => {
       if (step == null) return ""
@@ -527,6 +528,28 @@ export async function downloadAsPdf(lessonPlan) {
         y += 1
       })
     }
+    */
+    
+    // ========== NEW EXPLORATION CODE (FIXED) ==========
+    const exploration = data.suggestedLearningExperiences?.exploration || []
+
+    if (!Array.isArray(exploration) || exploration.length === 0) {
+      addText('- N/A', 11, false)
+    } else {
+      exploration.forEach((step, i) => {
+        const stepText = typeof step === 'string' ? step : 
+                         (step?.description || step?.text || step?.activity || step?.content || '')
+        
+        if (stepText.trim()) {
+          const title = (typeof step === 'object' && step?.title) ? step.title : `Activity ${i + 1}`
+          const duration = (typeof step === 'object' && step?.duration) ? step.duration : '10 minutes'
+          
+          addSectionHeader(`Step ${i + 1}: ${title} (${duration})`, 11)
+          addText(stepText, 11, false)
+          y += 1
+        }
+      })
+    }
     
     // Reflection
     if (data.suggestedLearningExperiences?.reflection) {
@@ -542,7 +565,8 @@ export async function downloadAsPdf(lessonPlan) {
       y += 2
     }
 
-    // Conclusion
+    // ========== OLD CONCLUSION CODE (COMMENTED OUT) ==========
+    /*
     addSectionHeader('Conclusion (5 minutes)', 11)
     const getConclusionText = (v) => {
       if (v == null) return ''
@@ -562,6 +586,17 @@ export async function downloadAsPdf(lessonPlan) {
       11,
       false
     )
+    y += 2
+    */
+
+    // ========== NEW CONCLUSION CODE (FIXED) ==========
+    addSectionHeader('Conclusion (5 minutes)', 11)
+    const conclusionText = data.suggestedLearningExperiences?.conclusion || 
+                           data.suggestedLearningExperiences?.closure || 
+                           data.suggestedLearningExperiences?.plenary || 
+                           data.suggestedLearningExperiences?.summary || 
+                           'N/A'
+    addText(conclusionText, 11, false)
     y += 2
     
     // ============ PARENTAL INVOLVEMENT ============
