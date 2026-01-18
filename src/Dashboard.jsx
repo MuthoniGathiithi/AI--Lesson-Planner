@@ -80,7 +80,14 @@ export default function LessonCreator() {
     
     if (!formData.schoolName?.trim()) errors.push("School")
     if (!formData.subject?.trim()) errors.push("Learning Area")
-    if (String(formData.grade ?? "").trim() === "") errors.push("Grade")
+
+    const gradeFromState = String(formData.grade ?? "").trim()
+    const gradeFromDom =
+      typeof document !== "undefined"
+        ? String(document.querySelector('input[name="grade"]')?.value ?? "").trim()
+        : ""
+    const effectiveGrade = gradeFromState || gradeFromDom
+    if (effectiveGrade === "") errors.push("Grade")
     if (!formData.date?.trim()) errors.push("Date")
     if (!formData.startTime?.trim()) errors.push("Time")
     if (!formData.strand?.trim()) errors.push("Strand")
@@ -93,6 +100,16 @@ export default function LessonCreator() {
 
     setIsGenerating(true)
     try {
+      if (String(formData.grade ?? "").trim() === "") {
+        const gradeFromDomNow =
+          typeof document !== "undefined"
+            ? String(document.querySelector('input[name="grade"]')?.value ?? "").trim()
+            : ""
+        if (gradeFromDomNow) {
+          setFormData((prev) => ({ ...prev, grade: gradeFromDomNow }))
+        }
+      }
+
       const normalizedFormData = {
         ...formData,
         subject: toSentenceCase(formData.subject),
@@ -585,6 +602,7 @@ export default function LessonCreator() {
                         </label>
                         <input
                           type={field.type}
+                          name={field.key}
                           placeholder={field.placeholder}
                           value={formData[field.key] ?? ""}
                           onChange={(e) =>
