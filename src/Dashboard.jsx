@@ -40,13 +40,20 @@ export default function LessonCreator() {
   })
 
   // ✅ FIX #1: Allow normal spacing - REMOVED .replace(/\s+/g, " ")
-  const sanitizeTextInput = (value, maxLen = 120) => {
+ /* const sanitizeTextInput = (value, maxLen = 120) => {
     const s = String(value ?? "")
       .replace(/[\u0000-\u001F\u007F]/g, " ")
       .replace(/[<>]/g, "")
       // REMOVED: .replace(/\s+/g, " ")
     return s.length > maxLen ? s.slice(0, maxLen).trim() : s.trim()
-  }
+  }*/
+ const sanitizeTextInput = (value, maxLen = 120) => {
+  const s = String(value ?? "")
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
+    .replace(/[<>]/g, "")
+    // REMOVED: .replace(/\s+/g, " ") and .trim()
+  return s.length > maxLen ? s.slice(0, maxLen) : s
+}
 
   const sanitizeNumberInput = (value, maxLen = 4) => {
     const s = String(value ?? "")
