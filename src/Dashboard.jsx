@@ -629,6 +629,7 @@ export default function LessonCreator() {
             )}
             <div style={styles.editButtonGroup}>
               <button 
+                type="button"
                 onClick={() => saveEdit(path)} 
                 style={styles.saveEditBtn}
                 title="Save (Enter)"
@@ -636,6 +637,7 @@ export default function LessonCreator() {
                 <Check size={16} />
               </button>
               <button 
+                type="button"
                 onClick={cancelEditing} 
                 style={styles.cancelEditBtn}
                 title="Cancel (Esc)"
@@ -753,7 +755,7 @@ export default function LessonCreator() {
                     💡 <strong>Tip:</strong> For Kiswahili lessons, enter "Kiswahili" in the Learning Area field to get full Kiswahili output with subject-specific terminology!
                   </div>
                   
-                  <button onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
+                  <button type="button" onClick={handleGenerate} disabled={isGenerating} style={styles.generateButton}>
                     {isGenerating ? "Generating Lesson Plan..." : "Generate Lesson Plan"}
                   </button>
                 </div>
@@ -763,7 +765,7 @@ export default function LessonCreator() {
                     className={isMobile ? 'action-bar-mobile' : ''}
                     style={styles.actionBar}
                   >
-                    <button onClick={handleCreateNew} style={styles.backButton}>
+                    <button type="button" onClick={handleCreateNew} style={styles.backButton}>
                       <ArrowLeft size={16} />
                       <span>New Plan</span>
                     </button>
@@ -772,6 +774,7 @@ export default function LessonCreator() {
                       style={styles.actionBarRight}
                     >
                       <button 
+                        type="button"
                         onClick={() => handleDownload(lessonPlan, 'pdf')} 
                         disabled={isDownloading}
                         style={styles.pdfButton}
@@ -870,7 +873,7 @@ export default function LessonCreator() {
                           <div style={styles.section}>
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.specificLearningOutcomes}</div>
-                              <button onClick={addLearningOutcome} style={styles.addButton} title="Add outcome">
+                              <button type="button" onClick={addLearningOutcome} style={styles.addButton} title="Add outcome">
                                 <Plus size={16} />
                                 <span>Add</span>
                               </button>
@@ -885,6 +888,7 @@ export default function LessonCreator() {
                                   {renderEditableField(`lessonPlan.specificLearningOutcomes.outcomes.${index}.outcome`, outcome.outcome || outcome.text, true, "Enter outcome")}
                                 </div>
                                 <button 
+                                  type="button"
                                   onClick={() => deleteLearningOutcome(index)} 
                                   style={styles.deleteButton}
                                   title="Delete outcome"
@@ -899,7 +903,7 @@ export default function LessonCreator() {
                           <div style={styles.section}>
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.keyInquiryQuestions}</div>
-                              <button onClick={addInquiryQuestion} style={styles.addButton} title="Add question">
+                              <button type="button" onClick={addInquiryQuestion} style={styles.addButton} title="Add question">
                                 <Plus size={16} />
                                 <span>Add</span>
                               </button>
@@ -911,6 +915,7 @@ export default function LessonCreator() {
                                   {renderEditableField(`lessonPlan.keyInquiryQuestions.${index}`, question, false, "Enter question")}
                                 </div>
                                 <button 
+                                  type="button"
                                   onClick={() => deleteInquiryQuestion(index)} 
                                   style={styles.deleteButton}
                                   title="Delete question"
@@ -925,7 +930,7 @@ export default function LessonCreator() {
                           <div style={styles.section}>
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.coreCompetencies}</div>
-                              <button onClick={addCoreCompetency} style={styles.addButton} title="Add competency">
+                              <button type="button" onClick={addCoreCompetency} style={styles.addButton} title="Add competency">
                                 <Plus size={16} />
                                 <span>Add</span>
                               </button>
@@ -937,6 +942,7 @@ export default function LessonCreator() {
                                   {renderEditableField(`lessonPlan.coreCompetenciesToBeDeveloped.${index}`, competency, false, "Enter competency")}
                                 </div>
                                 <button 
+                                  type="button"
                                   onClick={() => deleteCoreCompetency(index)} 
                                   style={styles.deleteButton}
                                   title="Delete"
@@ -951,7 +957,7 @@ export default function LessonCreator() {
                           <div style={styles.section}>
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.linkToValues}</div>
-                              <button onClick={addValue} style={styles.addButton} title="Add value">
+                              <button type="button" onClick={addValue} style={styles.addButton} title="Add value">
                                 <Plus size={16} />
                                 <span>Add</span>
                               </button>
@@ -963,6 +969,7 @@ export default function LessonCreator() {
                                   {renderEditableField(`lessonPlan.linkToValues.${index}`, value, false, "Enter value")}
                                 </div>
                                 <button 
+                                  type="button"
                                   onClick={() => deleteValue(index)} 
                                   style={styles.deleteButton}
                                   title="Delete"
@@ -977,7 +984,7 @@ export default function LessonCreator() {
                           <div style={styles.section}>
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.linksToPCI}</div>
-                              <button onClick={addPCI} style={styles.addButton} title="Add PCI">
+                              <button type="button" onClick={addPCI} style={styles.addButton} title="Add PCI">
                                 <Plus size={16} />
                                 <span>Add</span>
                               </button>
@@ -989,6 +996,7 @@ export default function LessonCreator() {
                                   {renderEditableField(`lessonPlan.linksToPCI.${index}`, pci, false, "Enter PCI")}
                                 </div>
                                 <button 
+                                  type="button"
                                   onClick={() => deletePCI(index)} 
                                   style={styles.deleteButton}
                                   title="Delete"
@@ -1004,6 +1012,7 @@ export default function LessonCreator() {
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.learningResources}</div>
                               <button
+                                type="button"
                                 onClick={() => clearSection("lessonPlan.learningResources", [])}
                                 style={styles.clearSectionButton}
                                 title="Remove section"
@@ -1020,6 +1029,7 @@ export default function LessonCreator() {
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.suggestedLearningExperiences}</div>
                               <button
+                                type="button"
                                 onClick={() => clearSection("lessonPlan.suggestedLearningExperiences", {})}
                                 style={styles.clearSectionButton}
                                 title="Remove section"
