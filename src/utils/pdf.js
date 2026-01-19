@@ -428,25 +428,25 @@ export async function downloadAsPdf(lessonPlan) {
     doc.text(weekLesson, weekX, y)
     y += 10
     
-    // ============ INFORMATION TABLE (5 COLUMNS: SCHOOL, LEVEL, LEARNING AREA, TIME, ROLL) ============
-    // Note: Combining DATE into the table structure as needed
-    const tableHeaders = ['SCHOOL', 'LEVEL', 'LEARNING AREA', 'TIME', 'ROLL']
+    // ============ INFORMATION TABLE (6 COLUMNS: SCHOOL, LEARNING AREA, GRADE, DATE, TIME, ROLL) ============
+    const tableHeaders = ['SCHOOL', 'LEARNING AREA', 'GRADE', 'DATE', 'TIME', 'ROLL']
     const tableValues = [
       data.school || '',
-      data.grade || '10',
       data.learningArea || 'Geography',
+      data.grade || '10',
+      data.date || '',
       data.time || '',
       `B: ${data.roll?.boys || 0} G: ${data.roll?.girls || 0} T: ${data.roll?.total || 0}`
     ]
     
     // Calculate column widths - adjust for better fit
     const tableWidth = contentWidth
-    const colWidths = [35, 15, 40, 35, 35] // Total = 160mm
+    const colWidths = [30, 35, 15, 20, 25, 35] // Total = 160mm
     const rowHeight = 8
     
     // Draw table
     doc.setLineWidth(0.3)
-    doc.setFont("times", "normal")
+    doc.setFont("times", "bold") // BOLD for headers
     doc.setFontSize(10)
     
     const tableY = y
@@ -470,7 +470,8 @@ export async function downloadAsPdf(lessonPlan) {
     // Draw horizontal line between header and data
     doc.line(margin, tableY + rowHeight, margin + tableWidth, tableY + rowHeight)
     
-    // Draw data row
+    // Draw data row (normal font)
+    doc.setFont("times", "normal")
     currentX = margin
     for (let i = 0; i < tableValues.length; i++) {
       doc.text(tableValues[i], currentX + 2, tableY + rowHeight + 5.5)
@@ -484,7 +485,7 @@ export async function downloadAsPdf(lessonPlan) {
     
     // ============ SUB-STRAND (NOT BOLDED) ============
     addNormalLabel(`SUB-STRAND: ${data.subStrand || 'Types of soil'}`)
-    y += 1
+    y += 2
     
     // ============ SPECIFIC LEARNING OUTCOMES (BOLDED TITLE) ============
     addBoldHeader('SPECIFIC LEARNING OUTCOMES:')
@@ -494,9 +495,22 @@ export async function downloadAsPdf(lessonPlan) {
     outcomes.forEach((outcome, i) => {
       const outcomeText = outcome.outcome || outcome.text || 'N/A'
       const letter = outcome.id || String.fromCharCode(97 + i)
-      addText(`${letter}) ${outcomeText}`, 11, 0)
+      
+      checkNewPage()
+      doc.setFontSize(11)
+      
+      // Bold the letter
+      doc.setFont("times", "bold")
+      const letterText = `${letter})`
+      const letterWidth = doc.getTextWidth(letterText)
+      doc.text(letterText, margin, y)
+      
+      // Normal text for outcome
+      doc.setFont("times", "normal")
+      doc.text(` ${outcomeText}`, margin + letterWidth, y)
+      y += 5
     })
-    y += 2
+    y += 3
     
     // ============ KEY INQUIRY QUESTIONS (BOLDED TITLE) ============
     addBoldHeader('KEY INQUIRY QUESTIONS:')
@@ -505,22 +519,20 @@ export async function downloadAsPdf(lessonPlan) {
       addText('N/A', 11, 0)
     } else {
       questions.forEach((q, i) => {
-        addText(`${i + 1}) ${q}`, 11, 0)
+        checkNewPage()
+        doc.setFontSize(11)
+        
+        // Bold the number
+        doc.setFont("times", "bold")
+        const numberText = `${i + 1})`
+        const numberWidth = doc.getTextWidth(numberText)
+        doc.text(numberText, margin, y)
+        
+        // Normal text for question
+        doc.setFont("times", "normal")
+        doc.text(` ${q}`, margin + numberWidth, y)
+        y += 5
       })
-    }
-    y += 2
-    
-    // ============ LEARNING RESOURCES (BOLDED TITLE) ============
-    addBoldHeader('LEARNING RESOURCES:')
-    const resources = Array.isArray(data.learningResources) 
-      ? data.learningResources 
-      : (typeof data.learningResources === 'string' ? data.learningResources.split(',') : [])
-    
-    if (resources.length === 0 || !resources.some(r => r?.trim())) {
-      addText('N/A', 11, 0)
-    } else {
-      const resourceText = resources.filter(r => r?.trim()).map(r => r.trim()).join(', ')
-      addText(resourceText, 11, 0)
     }
     y += 2
     
@@ -560,20 +572,44 @@ export async function downloadAsPdf(lessonPlan) {
     }
     y += 2
     
+    // ============ LEARNING RESOURCES (BOLDED TITLE) ============
+    addBoldHeader('LEARNING RESOURCES:')
+    const resources = Array.isArray(data.learningResources) 
+      ? data.learningResources 
+      : (typeof data.learningResources === 'string' ? data.learningResources.split(',') : [])
+    
+    if (resources.length === 0 || !resources.some(r => r?.trim())) {
+      addText('N/A', 11, 0)
+    } else {
+      const resourceText = resources.filter(r => r?.trim()).map(r => r.trim()).join(', ')
+      addText(resourceText, 11, 0)
+    }
+    y += 2
+    
     // ============ SUGGESTED LEARNING EXPERIENCES (BOLDED TITLE) ============
     addBoldHeader('SUGGESTED LEARNING EXPERIENCES:')
     
+    const indent = 5 // Indent for roman numerals
+    
     // i) Introduction (NOT bolded sub-section label)
     if (data.suggestedLearningExperiences?.introduction) {
-      addText('i) Introduction/Getting Started (5 mins)', 11, 0)
-      addText(data.suggestedLearningExperiences.introduction, 11, 0)
+      checkNewPage()
+      doc.setFontSize(11)
+      doc.setFont("times", "normal")
+      doc.text('i) Introduction/Getting Started (5 mins)', margin + indent, y)
+      y += 6
+      addText(data.suggestedLearningExperiences.introduction, 11, indent)
       y += 2
     }
     
     // ii) Exploration (NOT bolded sub-section label)
     const exploration = data.suggestedLearningExperiences?.exploration || []
     if (exploration.length > 0) {
-      addText('ii) Exploration/Lesson Development (35 mins)', 11, 0)
+      checkNewPage()
+      doc.setFontSize(11)
+      doc.setFont("times", "normal")
+      doc.text('ii) Exploration/Lesson Development (35 mins)', margin + indent, y)
+      y += 6
       
       exploration.forEach((stepObj, i) => {
         let stepText = ''
@@ -591,8 +627,21 @@ export async function downloadAsPdf(lessonPlan) {
         }
         
         if (stepText.trim()) {
-          addText(`Step ${i + 1}`, 11, 0)
-          addText(stepText, 11, 0)
+          // First step uses "Step: 1", subsequent ones just show the number
+          if (i === 0) {
+            checkNewPage()
+            doc.setFontSize(11)
+            doc.setFont("times", "normal")
+            doc.text(`Step: ${i + 1}`, margin + indent, y)
+            y += 6
+          } else {
+            checkNewPage()
+            doc.setFontSize(11)
+            doc.setFont("times", "normal")
+            doc.text(`${i + 1}`, margin + indent, y)
+            y += 6
+          }
+          addText(stepText, 11, indent)
           y += 1
         }
       })
@@ -601,15 +650,23 @@ export async function downloadAsPdf(lessonPlan) {
     
     // iii) Reflection (NOT bolded sub-section label)
     if (data.suggestedLearningExperiences?.reflection) {
-      addText('iii) Reflection', 11, 0)
-      addText(data.suggestedLearningExperiences.reflection, 11, 0)
+      checkNewPage()
+      doc.setFontSize(11)
+      doc.setFont("times", "normal")
+      doc.text('iii) Reflection', margin + indent, y)
+      y += 6
+      addText(data.suggestedLearningExperiences.reflection, 11, indent)
       y += 2
     }
     
     // iv) Extension (NOT bolded sub-section label)
     if (data.suggestedLearningExperiences?.extension) {
-      addText('iv) Extension', 11, 0)
-      addText(data.suggestedLearningExperiences.extension, 11, 0)
+      checkNewPage()
+      doc.setFontSize(11)
+      doc.setFont("times", "normal")
+      doc.text('iv) Extension', margin + indent, y)
+      y += 6
+      addText(data.suggestedLearningExperiences.extension, 11, indent)
       y += 2
     }
     
@@ -620,8 +677,12 @@ export async function downloadAsPdf(lessonPlan) {
                            data.suggestedLearningExperiences?.summary || ''
     
     if (conclusionText) {
-      addText('v) Conclusion (5 mins)', 11, 0)
-      addText(conclusionText, 11, 0)
+      checkNewPage()
+      doc.setFontSize(11)
+      doc.setFont("times", "normal")
+      doc.text('v) Conclusion (5 mins)', margin + indent, y)
+      y += 6
+      addText(conclusionText, 11, indent)
       y += 2
     }
     
