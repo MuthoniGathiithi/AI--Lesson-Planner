@@ -121,13 +121,6 @@ export default function LessonCreator() {
       return () => window.removeEventListener('resize', handleResize)
     }
   }, [])
-
-  
-  logEvent("lesson_generate_started", {
-  subject: formData.subject,
-  grade: formData.grade
-})
-
   
   const handleGenerate = async () => {
     const parsed = parseTimeRange(formData.timeRange)
