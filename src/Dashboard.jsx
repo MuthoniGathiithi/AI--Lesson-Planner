@@ -132,15 +132,20 @@ export default function LessonCreator() {
     if (!formData.schoolName?.trim()) errors.push("School")
     if (!formData.subject?.trim()) errors.push("Learning Area")
 
-    const gradeFromState = String(formData.grade ?? "").trim()
+    /*const gradeFromState = String(formData.grade ?? "").trim()
     const gradeFromDom = String(gradeInputRef.current?.value ?? "").trim()
     const effectiveGrade = gradeFromState || gradeFromDom
     if (effectiveGrade === "") errors.push("Grade")
     if (!formData.date?.trim()) errors.push("Date")
     if (!(effectiveStartTime && effectiveEndTime)) errors.push("Time")
     if (!formData.strand?.trim()) errors.push("Strand")
-    if (!formData.subStrand?.trim()) errors.push("Sub-strand")
+    if (!formData.subStrand?.trim()) errors.push("Sub-strand")*/
     
+
+
+    const gradeValue = String(formData.grade ?? "").replace(/[^0-9]/g, "")  // Only keep numbers
+if (gradeValue === "") errors.push("Grade")
+  
     if (errors.length > 0) {
       alert(`Please fill in the following required fields:\n- ${errors.join('\n- ')}`)
       return
