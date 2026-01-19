@@ -39,13 +39,13 @@ export default function LessonCreator() {
     subStrand: "",
   })
 
+  // ✅ FIX #1: Allow normal spacing - REMOVED .replace(/\s+/g, " ")
   const sanitizeTextInput = (value, maxLen = 120) => {
     const s = String(value ?? "")
       .replace(/[\u0000-\u001F\u007F]/g, " ")
       .replace(/[<>]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-    return s.length > maxLen ? s.slice(0, maxLen) : s
+      // REMOVED: .replace(/\s+/g, " ")
+    return s.length > maxLen ? s.slice(0, maxLen).trim() : s.trim()
   }
 
   const sanitizeNumberInput = (value, maxLen = 4) => {
@@ -381,8 +381,16 @@ export default function LessonCreator() {
     const newPlan = JSON.parse(JSON.stringify(lessonPlan))
     const keys = path.split('.')
 
+    // ✅ Handle lessonPlan.lessonPlan structure
     let current = newPlan
-    for (let i = 0; i < keys.length - 1; i++) {
+    let startIndex = 0
+    
+    if (keys[0] === 'lessonPlan' && (newPlan.lessonPlan || newPlan)) {
+      current = newPlan.lessonPlan || newPlan
+      startIndex = 1
+    }
+
+    for (let i = startIndex; i < keys.length - 1; i++) {
       const key = keys[i]
       const nextKey = keys[i + 1]
 
@@ -404,14 +412,25 @@ export default function LessonCreator() {
     setPathValue(path, emptyValue)
   }
 
+  // ✅ FIX #2: Fixed saveEdit to handle the correct data structure
   const saveEdit = (path) => {
     if (!lessonPlan) return
     
     const newPlan = JSON.parse(JSON.stringify(lessonPlan))
     const keys = path.split('.')
     
+    // Handle the lessonPlan.lessonPlan structure
     let current = newPlan
-    for (let i = 0; i < keys.length - 1; i++) {
+    let startIndex = 0
+    
+    // If path starts with "lessonPlan", navigate into the nested structure if it exists
+    if (keys[0] === 'lessonPlan' && (newPlan.lessonPlan || newPlan)) {
+      current = newPlan.lessonPlan || newPlan
+      startIndex = 1
+    }
+    
+    // Navigate to the parent of the field we want to edit
+    for (let i = startIndex; i < keys.length - 1; i++) {
       const key = keys[i]
       const nextKey = keys[i + 1]
       
