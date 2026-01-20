@@ -313,8 +313,7 @@ export default function HomePage() {
               <div
                 style={{
                   display: "flex ",
-                    /*display: "inline-block ",*/
-
+                  
                   padding: "8px 20px",
                   backgroundColor: "#4F46E5",
                   color: "#FFFFFF",
