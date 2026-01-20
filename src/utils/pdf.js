@@ -394,6 +394,18 @@ export async function downloadAsPdf(lessonPlan) {
       }
     }
 
+    const assertPathFn = (obj, path) => {
+      const parts = String(path).split(".").filter(Boolean)
+      let cur = obj
+      for (let i = 0; i < parts.length; i++) {
+        cur = cur?.[parts[i]]
+      }
+      if (typeof cur !== "function") {
+        throw new Error(`PDF generator error: expected ${path} to be a function`)
+      }
+      return cur
+    }
+
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
@@ -409,6 +421,12 @@ export async function downloadAsPdf(lessonPlan) {
     assertFn(doc, "save")
     assertFn(doc, "splitTextToSize")
     assertFn(doc, "addPage")
+    assertFn(doc, "getTextWidth")
+    assertFn(doc, "setLineWidth")
+    assertFn(doc, "rect")
+    assertFn(doc, "line")
+    assertPathFn(doc, "internal.pageSize.getWidth")
+    assertPathFn(doc, "internal.pageSize.getHeight")
     
     let y = 20
     const margin = 20
