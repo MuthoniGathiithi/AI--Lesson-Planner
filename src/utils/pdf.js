@@ -6,15 +6,10 @@ import { getBilingualFields } from "./bilingual"
  */
 /*export async function downloadAsPdf(lessonPlan) {
   try {
-    const JsPDF = jsPDFModule?.jsPDF || jsPDFModule?.default
-    if (typeof JsPDF !== "function") {
-      throw new Error("PDF generator unavailable: invalid jspdf export")
-    }
- 
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
-    const doc = new JsPDF({
+    const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
@@ -383,7 +378,6 @@ import { getBilingualFields } from "./bilingual"
     return { success: false, error: error.message }
   }
 }*/
-
 import * as jsPDFModule from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
@@ -394,6 +388,12 @@ export async function downloadAsPdf(lessonPlan) {
       throw new Error("PDF generator unavailable: invalid jspdf export")
     }
 
+    const assertFn = (obj, key) => {
+      if (typeof obj?.[key] !== "function") {
+        throw new Error(`PDF generator error: expected doc.${key} to be a function`)
+      }
+    }
+
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
@@ -402,6 +402,13 @@ export async function downloadAsPdf(lessonPlan) {
       unit: 'mm',
       format: 'a4'
     })
+
+    assertFn(doc, "text")
+    assertFn(doc, "setFont")
+    assertFn(doc, "setFontSize")
+    assertFn(doc, "save")
+    assertFn(doc, "splitTextToSize")
+    assertFn(doc, "addPage")
     
     let y = 20
     const margin = 20
