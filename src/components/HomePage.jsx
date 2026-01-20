@@ -349,7 +349,7 @@ export default function HomePage() {
                   padding: "14px 32px",
                   backgroundColor: "#4F46E5",
                   color: "#FFFFFF",
-                  border: "none",
+                  Oborder: "none",
                   borderRadius: "8px",
                   fontSize: "1rem",
                   fontWeight: 600,
@@ -374,88 +374,85 @@ export default function HomePage() {
 
       {/* How It Works Section */}
       <section
-        className="how-it-works-section"
-        id="how-it-works"
-        style={{ padding: "100px 40px", backgroundColor: "#FFFFFF" }}
-      >
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "80px" }}>
-            <h2
-              className="how-it-works-title"
-              style={{
-                fontSize: "2.5rem",
-                fontWeight: 700,
-                color: "#000",
-                margin: "0 0 16px 0",
-                letterSpacing: "-1px",
-              }}
-            >
-              How It Works
-            </h2>
-            <p className="how-it-works-subtitle" style={{ fontSize: "1.1rem", color: "#6B7280", margin: 0 }}>
-              Create a CBE-aligned lesson plan in minutes.
-            </p>
-          </div>
-
-          <div
-            className="how-it-works-grid"
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}
-          >
-            {/* Steps */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "56px" }}>
-              {[
-                {
-                  num: "01",
-                  title: "Enter Your Administrative and Class Details",
-                  desc: "Select grade, subject, strand, sub-strand,.",
-                },
-                {
-                  num: "02",
-                  title: "Generate Your Lesson Plan",
-                  desc: " AI instantly creates a structured, CBE-aligned lesson plan, including learning outcomes, activities, and assessment.",
-                },
-                {
-                  num: "03",
-                  title: " Edit & Download",
-                  desc: "Customize the lesson to suit your teaching style.",
-                },
-              ].map((step, i) => (
-                <div key={i} className="step-item" style={{ display: "flex", gap: "24px" }}>
-                  <div
-                    className="steps-num"
-                    style={{ fontSize: "2.5rem", fontWeight: 700, color: "#E5E7EB", minWidth: "80px" }}
-                  >
-                    {step.num}
-                  </div>
-                  <div>
-                    <h3
-                      className="step-title"
-                      style={{
-                        fontSize: "1.35rem",
-                        fontWeight: 600,
-                        color: "#111827",
-                        margin: "0 0 12px 0",
-                        letterSpacing: "-0.3px",
-                      }}
-                    >
-                      {step.title}
-                    </h3>
-                    <p
-                      className="step-desc"
-                      style={{ fontSize: "1rem", color: "#6B7280", margin: 0, lineHeight: "1.7" }}
-                    >
-                      {step.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
+      id="about"
+      className="relative bg-gradient-to-b from-indigo-50 to-white py-20 md:py-32"
+    >
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* Container */}
+        <div className="flex justify-center">
+          {/* Left Content */}
+          <div className="space-y-8 w-full max-w-2xl">
+            {/* Badge */}
+            <div className="inline-flex items-center rounded-full bg-indigo-600 px-4 py-2">
+              <span className="text-sm font-semibold text-white">About Funzo Hub</span>
             </div>
 
-            {/* Visual mockup */}
-            
+            {/* Heading */}
+            <div className="space-y-4">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight tracking-tight">
+                Helping Teachers Plan Faster and Teach Better
+              </h2>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                Funzo Hub helps CBE teachers reduce planning time and create structured, curriculum-aligned lesson plans in minutes, letting teachers focus on what matters most: teaching.
+              </p>
+            </div>
+
+            {/* Features List */}
+            <div className="space-y-4 pt-4">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
+                    <svg className="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Save Hours on Lesson Planning</p>
+                  <p className="text-sm text-gray-600">Create detailed plans in minutes instead of hours</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
+                    <svg className="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Curriculum Aligned Content</p>
+                  <p className="text-sm text-gray-600">Stay aligned with CBE standards and requirements</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
+                    <svg className="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">More Time to Teach</p>
+                  <p className="text-sm text-gray-600">Spend more time engaging with students</p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="pt-4">
+              <button className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-8 py-4 font-semibold text-white transition-all duration-200 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                Watch Demo
+                <ArrowRight className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
 {/* Contact Section */}
 
