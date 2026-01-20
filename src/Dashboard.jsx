@@ -1591,7 +1591,12 @@ if (gradeValue === "") errors.push("Grade")
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField("lessonPlan.reflection", data.reflection || (lessonPlan?.lessonPlan || lessonPlan)?.reflection, true, "Enter reflection")}
+                              {renderEditableField(
+                                "lessonPlan.reflection", 
+                                data.suggestedLearningExperiences?.reflection || data.reflection || (lessonPlan?.lessonPlan || lessonPlan)?.reflection || (lessonPlan?.lessonPlan || lessonPlan)?.suggestedLearningExperiences?.reflection, 
+                                true, 
+                                "Enter reflection"
+                              )}
                             </div>
 
                             {/* iv) Extension */}
@@ -1607,7 +1612,12 @@ if (gradeValue === "") errors.push("Grade")
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField("lessonPlan.extension", data.extension || (lessonPlan?.lessonPlan || lessonPlan)?.extension, true, "Enter extension")}
+                              {renderEditableField(
+                                "lessonPlan.extension", 
+                                data.suggestedLearningExperiences?.extension || data.extension || (lessonPlan?.lessonPlan || lessonPlan)?.extension || (lessonPlan?.lessonPlan || lessonPlan)?.suggestedLearningExperiences?.extension, 
+                                true, 
+                                "Enter extension"
+                              )}
                             </div>
 
                             {/* v) Conclusion */}
@@ -1625,7 +1635,7 @@ if (gradeValue === "") errors.push("Grade")
                               </div>
                               {renderEditableField(
                                 "lessonPlan.conclusion",
-                                data.conclusion || (lessonPlan?.lessonPlan || lessonPlan)?.conclusion,
+                                data.suggestedLearningExperiences?.conclusion || data.conclusion || (lessonPlan?.lessonPlan || lessonPlan)?.conclusion || (lessonPlan?.lessonPlan || lessonPlan)?.suggestedLearningExperiences?.conclusion,
                                 true,
                                 "Enter conclusion"
                               )}
