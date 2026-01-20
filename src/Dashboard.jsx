@@ -685,569 +685,643 @@ if (gradeValue === "") errors.push("Grade")
           className={isMobile ? 'content-mobile' : ''}
           style={styles.content}
         >
-              {!lessonPlan ? (
-                <div style={{
-                  maxWidth: "900px",
-                  margin: "0 auto",
-                  padding: "40px 20px"
-                }}>
-                  {/* Form Header */}
-                  <div style={{
-                    textAlign: "center",
-                    marginBottom: "48px"
-                  }}>
-                    {/* Funzo Hub Branding */}
-                    <div style={{
-                      fontSize: "3rem",
-                      fontWeight: 900,
-                      background: "linear-gradient(135deg, #4338CA 0%, #6366F1 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                      marginBottom: "16px",
-                      letterSpacing: "-2px"
-                    }}>
-                      Funzo Hub
-                    </div>
-                    
-                    <h2 style={{
-                      fontSize: "2.5rem",
-                      fontWeight: 800,
-                      color: "#111827",
-                      margin: "0 0 12px 0",
-                      letterSpacing: "-1px"
-                    }}>
-                      Create New Lesson Plan
-                    </h2>
-                    <p style={{
-                      fontSize: "1.05rem",
-                      color: "#6B7280",
-                      margin: 0,
-                      lineHeight: 1.6
-                    }}>
-                      Fill in the details below to generate your CBE-aligned lesson plan
-                    </p>
-                  </div>
 
-                  {/* Main Form Card */}
-                  <div style={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: "20px",
-                    border: "2px solid #4338CA",
-                    boxShadow: "0 20px 60px rgba(67, 56, 202, 0.15)",
-                    padding: "48px 40px",
-                    marginBottom: "24px"
-                  }}>
-                    <div style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                      gap: "24px"
-                    }}>
-                      {/* School Name */}
-                      <div style={{
-                        gridColumn: "1 / -1"
-                      }}>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          School Name <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="schoolName"
-                          placeholder="e.g., Nairobi Primary School"
-                          value={formData.schoolName ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              schoolName: sanitizeTextInput(e.target.value, 120)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...((!formData.schoolName?.trim()) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = formData.schoolName?.trim() ? "#E5E7EB" : "#fca5a5"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
+              // Enhanced Form Component with Dropdowns - Replace your form section
 
-                      {/* Learning Area */}
-                      <div>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Learning Area <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="subject"
-                          placeholder="e.g., Mathematics, Kiswahili, Science"
-                          value={formData.subject ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              subject: sanitizeTextInput(e.target.value, 80)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...((!formData.subject?.trim()) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = formData.subject?.trim() ? "#E5E7EB" : "#fca5a5"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
+{!lessonPlan ? (
+  <div style={{
+    maxWidth: "900px",
+    margin: "0 auto",
+    padding: "40px 20px"
+  }}>
+    {/* Form Header */}
+    <div style={{
+      textAlign: "center",
+      marginBottom: "48px"
+    }}>
+      {/* Funzo Hub Branding */}
+      <div style={{
+        fontSize: "3rem",
+        fontWeight: 900,
+        background: "linear-gradient(135deg, #4338CA 0%, #6366F1 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+        marginBottom: "16px",
+        letterSpacing: "-2px"
+      }}>
+        Funzo Hub
+      </div>
+      
+      <h2 style={{
+        fontSize: "2.5rem",
+        fontWeight: 800,
+        color: "#111827",
+        margin: "0 0 12px 0",
+        letterSpacing: "-1px"
+      }}>
+        Create New Lesson Plan
+      </h2>
+      <p style={{
+        fontSize: "1.05rem",
+        color: "#6B7280",
+        margin: 0,
+        lineHeight: 1.6
+      }}>
+        Fill in the details below to generate your CBE-aligned lesson plan
+      </p>
+    </div>
 
-                      {/* Grade */}
-                      <div>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Grade <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="number"
-                          name="grade"
-                          placeholder="e.g., 5"
-                          ref={gradeInputRef}
-                          value={formData.grade ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              grade: sanitizeNumberInput(e.target.value, 2)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...((formData.grade === "" || formData.grade === null || formData.grade === undefined) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            const hasValue = formData.grade !== "" && formData.grade !== null && formData.grade !== undefined
-                            e.target.style.borderColor = hasValue ? "#E5E7EB" : "#fca5a5"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
+    {/* Main Form Card */}
+    <div style={{
+      backgroundColor: "#FFFFFF",
+      borderRadius: "20px",
+      border: "2px solid #4338CA",
+      boxShadow: "0 20px 60px rgba(67, 56, 202, 0.15)",
+      padding: "48px 40px",
+      marginBottom: "24px"
+    }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "24px"
+      }}>
+        {/* School Name */}
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            School Name <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="text"
+            name="schoolName"
+            placeholder="e.g., Nairobi Primary School"
+            value={formData.schoolName ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                schoolName: sanitizeTextInput(e.target.value, 120)
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              ...((!formData.schoolName?.trim()) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = formData.schoolName?.trim() ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
 
-                      {/* Date */}
-                      <div>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Date <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="date"
-                          name="date"
-                          value={formData.date ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              date: sanitizeDateInput(e.target.value)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF"
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = "#E5E7EB"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
+        {/* Learning Area - SELECT DROPDOWN */}
+        <div>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Learning Area <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <select
+            name="subject"
+            value={formData.subject ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                subject: e.target.value
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              cursor: "pointer",
+              ...((!formData.subject?.trim()) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = formData.subject?.trim() ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          >
+            <option value="">-- Select Learning Area --</option>
+            
+            {/* Compulsory Subjects */}
+            <optgroup label="Compulsory Subjects">
+              <option value="English">English</option>
+              <option value="Kiswahili">Kiswahili/KSL</option>
+              <option value="Core Mathematics">Core Mathematics</option>
+              <option value="Essential Mathematics">Essential Mathematics</option>
+              <option value="Community Service Learning">Community Service Learning (CSL)</option>
+            </optgroup>
+            
+            {/* Arts & Sports */}
+            <optgroup label="Arts & Sports">
+              <option value="Sports and Recreation">Sports and Recreation</option>
+              <option value="Music and Dance">Music and Dance</option>
+              <option value="Theatre and Film">Theatre and Film</option>
+              <option value="Fine Arts">Fine Arts</option>
+            </optgroup>
+            
+            {/* Social Sciences */}
+            <optgroup label="Social Sciences">
+              <option value="Literature in English">Literature in English</option>
+              <option value="Indigenous Languages">Indigenous Languages</option>
+              <option value="Fasihi ya Kiswahili">Fasihi ya Kiswahili</option>
+              <option value="Sign Language">Sign Language</option>
+              <option value="Arabic">Arabic</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+              <option value="Mandarin Chinese">Mandarin Chinese</option>
+              <option value="Christian Religious Education">Christian Religious Education</option>
+              <option value="Islamic Religious Education">Islamic Religious Education</option>
+              <option value="Hindu Religious Education">Hindu Religious Education</option>
+              <option value="Business Studies">Business Studies</option>
+              <option value="History and Citizenship">History and Citizenship</option>
+              <option value="Geography">Geography</option>
+            </optgroup>
+            
+            {/* STEM */}
+            <optgroup label="Science, Technology, Engineering & Mathematics (STEM)">
+              <option value="Biology">Biology</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Physics">Physics</option>
+              <option value="General Science">General Science</option>
+              <option value="Agriculture">Agriculture</option>
+              <option value="Computer Studies">Computer Studies</option>
+              <option value="Home Science">Home Science</option>
+              <option value="Aviation">Aviation</option>
+              <option value="Building Construction">Building Construction</option>
+              <option value="Electricity">Electricity</option>
+              <option value="Metalwork">Metalwork</option>
+              <option value="Power Mechanics">Power Mechanics</option>
+              <option value="Woodwork">Woodwork</option>
+              <option value="Media Technology">Media Technology</option>
+              <option value="Marine and Fisheries Technology">Marine and Fisheries Technology</option>
+            </optgroup>
+          </select>
+        </div>
 
-                      {/* Time Range */}
-                      <div>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Time <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="timeRange"
-                          placeholder="e.g., 08:00 - 08:45"
-                          value={formData.timeRange ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              timeRange: e.target.value
-                            }))
-                          }
-                          onBlur={(e) => {
-                            const { start, end } = parseTimeRange(e.target.value)
-                            setFormData((prev) => ({
-                              ...prev,
-                              startTime: start,
-                              endTime: end,
-                              timeRange: start && end ? `${start} - ${end}` : prev.timeRange,
-                            }))
-                          }}
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...(!((parseTimeRange(formData.timeRange).start || formData.startTime) && (parseTimeRange(formData.timeRange).end || formData.endTime)) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                        />
-                      </div>
+        {/* Grade */}
+        <div>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Grade <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="number"
+            name="grade"
+            placeholder="e.g., 5"
+            ref={gradeInputRef}
+            value={formData.grade ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                grade: sanitizeNumberInput(e.target.value, 2)
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              ...((formData.grade === "" || formData.grade === null || formData.grade === undefined) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              const hasValue = formData.grade !== "" && formData.grade !== null && formData.grade !== undefined
+              e.target.style.borderColor = hasValue ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
 
-                      {/* Boys */}
-                      <div>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Roll - Boys <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="number"
-                          name="boys"
-                          placeholder="e.g., 15"
-                          value={formData.boys ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              boys: sanitizeNumberInput(e.target.value, 3)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...((formData.boys === "" || formData.boys === null || formData.boys === undefined) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            const hasValue = formData.boys !== "" && formData.boys !== null && formData.boys !== undefined
-                            e.target.style.borderColor = hasValue ? "#E5E7EB" : "#fca5a5"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
+        {/* Date */}
+        <div>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Date <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                date: sanitizeDateInput(e.target.value)
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF"
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#E5E7EB"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
 
-                      {/* Girls */}
-                      <div>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Roll - Girls <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="number"
-                          name="girls"
-                          placeholder="e.g., 18"
-                          value={formData.girls ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              girls: sanitizeNumberInput(e.target.value, 3)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...((formData.girls === "" || formData.girls === null || formData.girls === undefined) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            const hasValue = formData.girls !== "" && formData.girls !== null && formData.girls !== undefined
-                            e.target.style.borderColor = hasValue ? "#E5E7EB" : "#fca5a5"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
+        {/* Time Range */}
+        <div>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Time <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="text"
+            name="timeRange"
+            placeholder="e.g., 08:00 - 08:45"
+            value={formData.timeRange ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                timeRange: e.target.value
+              }))
+            }
+            onBlur={(e) => {
+              const { start, end } = parseTimeRange(e.target.value)
+              setFormData((prev) => ({
+                ...prev,
+                startTime: start,
+                endTime: end,
+                timeRange: start && end ? `${start} - ${end}` : prev.timeRange,
+              }))
+            }}
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              ...(!((parseTimeRange(formData.timeRange).start || formData.startTime) && (parseTimeRange(formData.timeRange).end || formData.endTime)) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              const { start, end } = parseTimeRange(e.target.value)
+              setFormData((prev) => ({
+                ...prev,
+                startTime: start,
+                endTime: end,
+                timeRange: start && end ? `${start} - ${end}` : prev.timeRange,
+              }))
+              const hasTimeRange = start && end
+              e.target.style.borderColor = hasTimeRange ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+          <p style={{ 
+            fontSize: "0.85rem", 
+            color: "#6B7280", 
+            margin: "6px 0 0 0",
+            fontStyle: "italic"
+          }}>
+            Format: HH:MM - HH:MM (e.g., 08:00 - 08:45)
+          </p>
+        </div>
 
-                      {/* Strand */}
-                      <div style={{
-                        gridColumn: "1 / -1"
-                      }}>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Strand <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="strand"
-                          placeholder="e.g., Numbers, Algebra, Geometry"
-                          value={formData.strand ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              strand: sanitizeTextInput(e.target.value, 120)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...((!formData.strand?.trim()) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = formData.strand?.trim() ? "#E5E7EB" : "#fca5a5"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
+        {/* Boys */}
+        <div>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Roll - Boys <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="number"
+            name="boys"
+            placeholder="e.g., 15"
+            value={formData.boys ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                boys: sanitizeNumberInput(e.target.value, 3)
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              ...((formData.boys === "" || formData.boys === null || formData.boys === undefined) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              const hasValue = formData.boys !== "" && formData.boys !== null && formData.boys !== undefined
+              e.target.style.borderColor = hasValue ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
 
-                      {/* Sub-strand */}
-                      <div style={{
-                        gridColumn: "1 / -1"
-                      }}>
-                        <label style={{
-                          display: "block",
-                          fontSize: "0.95rem",
-                          fontWeight: 600,
-                          color: "#111827",
-                          marginBottom: "10px"
-                        }}>
-                          Sub-strand <span style={{ color: "#ef4444" }}>*</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="subStrand"
-                          placeholder="e.g., Addition and Subtraction, Linear Equations"
-                          value={formData.subStrand ?? ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              subStrand: sanitizeTextInput(e.target.value, 120)
-                            }))
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "14px 16px",
-                            borderRadius: "12px",
-                            border: "2px solid #E5E7EB",
-                            fontSize: "1rem",
-                            fontFamily: "'Inter', sans-serif",
-                            transition: "all 0.3s ease",
-                            outline: "none",
-                            backgroundColor: "#FFFFFF",
-                            ...((!formData.subStrand?.trim()) ? { borderColor: "#fca5a5" } : {})
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#4338CA"
-                            e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = formData.subStrand?.trim() ? "#E5E7EB" : "#fca5a5"
-                            e.target.style.boxShadow = "none"
-                          }}
-                        />
-                      </div>
-                    </div>
+        {/* Girls */}
+        <div>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Roll - Girls <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="number"
+            name="girls"
+            placeholder="e.g., 18"
+            value={formData.girls ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                girls: sanitizeNumberInput(e.target.value, 3)
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              ...((formData.girls === "" || formData.girls === null || formData.girls === undefined) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              const hasValue = formData.girls !== "" && formData.girls !== null && formData.girls !== undefined
+              e.target.style.borderColor = hasValue ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
 
-                    {/* Generate Button */}
-                    <button 
-                      type="button" 
-                      onClick={handleGenerate} 
-                      disabled={isGenerating}
-                      style={{
-                        width: "100%",
-                        marginTop: "32px",
-                        backgroundColor: "#4338CA",
-                        color: "#FFFFFF",
-                        border: "none",
-                        padding: "16px 24px",
-                        borderRadius: "12px",
-                        fontWeight: 700,
-                        fontSize: "1.05rem",
-                        cursor: isGenerating ? "not-allowed" : "pointer",
-                        transition: "all 0.3s ease",
-                        boxShadow: "0 4px 14px rgba(67, 56, 202, 0.3)",
-                        fontFamily: "'Inter', sans-serif",
-                        letterSpacing: "0.3px",
-                        opacity: isGenerating ? 0.7 : 1
-                      }}
-                      onMouseOver={(e) => {
-                        if (!isGenerating) {
-                          e.target.style.backgroundColor = "#3730A3"
-                          e.target.style.transform = "translateY(-2px)"
-                          e.target.style.boxShadow = "0 8px 20px rgba(67, 56, 202, 0.4)"
-                        }
-                      }}
-                      onMouseOut={(e) => {
-                        e.target.style.backgroundColor = "#4338CA"
-                        e.target.style.transform = "translateY(0)"
-                        e.target.style.boxShadow = "0 4px 14px rgba(67, 56, 202, 0.3)"
-                      }}
-                    >
-                      {isGenerating ? (
-                        <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
-                          <span style={{
-                            display: "inline-block",
-                            width: "16px",
-                            height: "16px",
-                            border: "3px solid rgba(255,255,255,0.3)",
-                            borderTopColor: "#FFFFFF",
-                            borderRadius: "50%",
-                            animation: "spin 0.8s linear infinite"
-                          }}></span>
-                          Generating Lesson Plan...
-                        </span>
-                      ) : (
-                        "Generate Lesson Plan"
-                      )}
-                    </button>
-                  </div>
+        {/* Strand */}
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Strand <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="text"
+            name="strand"
+            placeholder="e.g., Numbers, Algebra, Geometry"
+            value={formData.strand ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                strand: sanitizeTextInput(e.target.value, 120)
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              ...((!formData.strand?.trim()) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = formData.strand?.trim() ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
 
-                  {/* Info Tip */}
-                  <div style={{
-                    padding: "16px 20px",
-                    backgroundColor: "#EEF2FF",
-                    border: "2px solid #C7D2FE",
-                    borderRadius: "12px",
-                    display: "flex",
-                    gap: "12px",
-                    alignItems: "start"
-                  }}>
-                    <span style={{ fontSize: "1.5rem" }}>💡</span>
-                    <div style={{ flex: 1 }}>
-                      <strong style={{ color: "#4338CA", fontSize: "0.95rem" }}>Pro Tip:</strong>
-                      <p style={{ 
-                        margin: "4px 0 0 0", 
-                        fontSize: "0.9rem", 
-                        color: "#4338CA",
-                        lineHeight: 1.6 
-                      }}>
-                        For Kiswahili lessons, enter "Kiswahili" in the Learning Area field to get full Kiswahili output with subject-specific terminology!
-                      </p>
-                    </div>
-                  </div>
+        {/* Sub-strand */}
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label style={{
+            display: "block",
+            fontSize: "0.95rem",
+            fontWeight: 600,
+            color: "#111827",
+            marginBottom: "10px"
+          }}>
+            Sub-strand <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="text"
+            name="subStrand"
+            placeholder="e.g., Addition and Subtraction, Linear Equations"
+            value={formData.subStrand ?? ""}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                subStrand: sanitizeTextInput(e.target.value, 120)
+              }))
+            }
+            style={{
+              width: "100%",
+              padding: "14px 16px",
+              borderRadius: "12px",
+              border: "2px solid #E5E7EB",
+              fontSize: "1rem",
+              fontFamily: "'Inter', sans-serif",
+              transition: "all 0.3s ease",
+              outline: "none",
+              backgroundColor: "#FFFFFF",
+              ...((!formData.subStrand?.trim()) ? { borderColor: "#fca5a5" } : {})
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#4338CA"
+              e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = formData.subStrand?.trim() ? "#E5E7EB" : "#fca5a5"
+              e.target.style.boxShadow = "none"
+            }}
+          />
+        </div>
+      </div>
 
-                  {/* Add spinning animation */}
-                  <style>{`
-                    @keyframes spin {
-                      to { transform: rotate(360deg); }
-                    }
-                  `}</style>
-                </div>
-              ) : (
+      {/* Generate Button */}
+      <button 
+        type="button" 
+        onClick={handleGenerate} 
+        disabled={isGenerating}
+        style={{
+          width: "100%",
+          marginTop: "32px",
+          backgroundColor: "#4338CA",
+          color: "#FFFFFF",
+          border: "none",
+          padding: "16px 24px",
+          borderRadius: "12px",
+          fontWeight: 700,
+          fontSize: "1.05rem",
+          cursor: isGenerating ? "not-allowed" : "pointer",
+          transition: "all 0.3s ease",
+          boxShadow: "0 4px 14px rgba(67, 56, 202, 0.3)",
+          fontFamily: "'Inter', sans-serif",
+          letterSpacing: "0.3px",
+          opacity: isGenerating ? 0.7 : 1
+        }}
+        onMouseOver={(e) => {
+          if (!isGenerating) {
+            e.target.style.backgroundColor = "#3730A3"
+            e.target.style.transform = "translateY(-2px)"
+            e.target.style.boxShadow = "0 8px 20px rgba(67, 56, 202, 0.4)"
+          }
+        }}
+        onMouseOut={(e) => {
+          e.target.style.backgroundColor = "#4338CA"
+          e.target.style.transform = "translateY(0)"
+          e.target.style.boxShadow = "0 4px 14px rgba(67, 56, 202, 0.3)"
+        }}
+      >
+        {isGenerating ? (
+          <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+            <span style={{
+              display: "inline-block",
+              width: "16px",
+              height: "16px",
+              border: "3px solid rgba(255,255,255,0.3)",
+              borderTopColor: "#FFFFFF",
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite"
+            }}></span>
+            Generating Lesson Plan...
+          </span>
+        ) : (
+          "Generate Lesson Plan"
+        )}
+      </button>
+    </div>
+
+    {/* Info Tip */}
+    <div style={{
+      padding: "16px 20px",
+      backgroundColor: "#EEF2FF",
+      border: "2px solid #C7D2FE",
+      borderRadius: "12px",
+      display: "flex",
+      gap: "12px",
+      alignItems: "start"
+    }}>
+      <span style={{ fontSize: "1.5rem" }}>💡</span>
+      <div style={{ flex: 1 }}>
+        <strong style={{ color: "#4338CA", fontSize: "0.95rem" }}>Pro Tip:</strong>
+        <p style={{ 
+          margin: "4px 0 0 0", 
+          fontSize: "0.9rem", 
+          color: "#4338CA",
+          lineHeight: 1.6 
+        }}>
+          For Kiswahili lessons, select "Kiswahili" or "Fasihi ya Kiswahili" from the Learning Area dropdown to get full Kiswahili output with subject-specific terminology!
+        </p>
+      </div>
+    </div>
+
+    {/* Add spinning animation */}
+    <style>{`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+) : (    
+              
+              
                 <div style={styles.documentContainer}>
                   <div 
                     className={isMobile ? 'action-bar-mobile' : ''}
