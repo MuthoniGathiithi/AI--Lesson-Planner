@@ -1,5 +1,4 @@
-
-/*import { jsPDF } from "jspdf"
+/* import * as jsPDFModule from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
 /**
@@ -7,10 +6,15 @@ import { getBilingualFields } from "./bilingual"
  */
 /*export async function downloadAsPdf(lessonPlan) {
   try {
+    const JsPDF = jsPDFModule?.jsPDF || jsPDFModule?.default
+    if (typeof JsPDF !== "function") {
+      throw new Error("PDF generator unavailable: invalid jspdf export")
+    }
+ 
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
-    const doc = new jsPDF({
+    const doc = new JsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
@@ -379,15 +383,21 @@ import { getBilingualFields } from "./bilingual"
     return { success: false, error: error.message }
   }
 }*/
-import { jsPDF } from "jspdf"
+
+import * as jsPDFModule from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
 export async function downloadAsPdf(lessonPlan) {
   try {
+    const JsPDF = jsPDFModule?.jsPDF || jsPDFModule?.default
+    if (typeof JsPDF !== "function") {
+      throw new Error("PDF generator unavailable: invalid jspdf export")
+    }
+
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
-    const doc = new jsPDF({
+    const doc = new JsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
