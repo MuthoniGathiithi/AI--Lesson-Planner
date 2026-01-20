@@ -1351,12 +1351,6 @@ if (gradeValue === "") errors.push("Grade")
                             {renderEditableField("lessonPlan.subStrand", data.subStrand, false, "Enter sub-strand")}
                           </div>
 
-                          {/* LESSON TITLE */}
-                          <div style={styles.section}>
-                            <div style={styles.sectionTitle}>{labels.lessonTitle}</div>
-                            {renderEditableField("lessonPlan.lessonTitle", data.lessonTitle, false, "Enter lesson title")}
-                          </div>
-
                           {/* SPECIFIC LEARNING OUTCOMES */}
                           <div style={styles.section}>
                             <div style={styles.sectionHeaderWithButton}>
@@ -1589,7 +1583,7 @@ if (gradeValue === "") errors.push("Grade")
                               <div style={styles.sectionHeaderWithButton}>
                                 <div style={styles.subsectionTitle}>iii) {labels.reflection}</div>
                                 <button
-                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.reflection", "")}
+                                  onClick={() => clearSection("lessonPlan.reflection", "")}
                                   style={styles.clearSectionButton}
                                   title="Remove section"
                                 >
@@ -1597,7 +1591,7 @@ if (gradeValue === "") errors.push("Grade")
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField("lessonPlan.suggestedLearningExperiences.reflection", data.suggestedLearningExperiences?.reflection, true, "Enter reflection")}
+                              {renderEditableField("lessonPlan.reflection", data.reflection || (lessonPlan?.lessonPlan || lessonPlan)?.reflection, true, "Enter reflection")}
                             </div>
 
                             {/* iv) Extension */}
@@ -1605,7 +1599,7 @@ if (gradeValue === "") errors.push("Grade")
                               <div style={styles.sectionHeaderWithButton}>
                                 <div style={styles.subsectionTitle}>iv) {labels.extension}</div>
                                 <button
-                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.extension", "")}
+                                  onClick={() => clearSection("lessonPlan.extension", "")}
                                   style={styles.clearSectionButton}
                                   title="Remove section"
                                 >
@@ -1613,7 +1607,7 @@ if (gradeValue === "") errors.push("Grade")
                                   <span>Remove</span>
                                 </button>
                               </div>
-                              {renderEditableField("lessonPlan.suggestedLearningExperiences.extension", data.suggestedLearningExperiences?.extension, true, "Enter extension")}
+                              {renderEditableField("lessonPlan.extension", data.extension || (lessonPlan?.lessonPlan || lessonPlan)?.extension, true, "Enter extension")}
                             </div>
 
                             {/* v) Conclusion */}
@@ -1621,7 +1615,7 @@ if (gradeValue === "") errors.push("Grade")
                               <div style={styles.sectionHeaderWithButton}>
                                 <div style={styles.subsectionTitle}>v) Conclusion (5 mins)</div>
                                 <button
-                                  onClick={() => clearSection("lessonPlan.suggestedLearningExperiences.conclusion", "")}
+                                  onClick={() => clearSection("lessonPlan.conclusion", "")}
                                   style={styles.clearSectionButton}
                                   title="Remove section"
                                 >
@@ -1630,8 +1624,8 @@ if (gradeValue === "") errors.push("Grade")
                                 </button>
                               </div>
                               {renderEditableField(
-                                "lessonPlan.suggestedLearningExperiences.conclusion",
-                                data.suggestedLearningExperiences?.conclusion,
+                                "lessonPlan.conclusion",
+                                data.conclusion || (lessonPlan?.lessonPlan || lessonPlan)?.conclusion,
                                 true,
                                 "Enter conclusion"
                               )}
@@ -1651,7 +1645,7 @@ if (gradeValue === "") errors.push("Grade")
                                 <span>Remove</span>
                               </button>
                             </div>
-                            {renderEditableField("lessonPlan.suggestedParentalInvolvement", data.parentalInvolvement, true, "Enter parental involvement/community service learning")}
+                            {renderEditableField("lessonPlan.suggestedParentalInvolvement", data.parentalInvolvement || (lessonPlan?.lessonPlan || lessonPlan)?.suggestedParentalInvolvement, true, "Enter parental involvement/community service learning")}
                           </div>
 
                           {/* SELF EVALUATION */}
@@ -1667,7 +1661,7 @@ if (gradeValue === "") errors.push("Grade")
                                 <span>Remove</span>
                               </button>
                             </div>
-                            {renderEditableField("lessonPlan.selfEvaluationMarks", data.selfEvaluation, true, "Enter self-evaluation criteria")}
+                            {renderEditableField("lessonPlan.selfEvaluationMarks", data.selfEvaluation || (lessonPlan?.lessonPlan || lessonPlan)?.selfEvaluationMarks, true, "Enter self-evaluation criteria")}
                           </div>
                         </>
                       )
