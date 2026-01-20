@@ -289,13 +289,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About Us Section */}
+  {/* About Us Section */}
       <section
         className="about-section"
         id="about"
         style={{ padding: "100px 40px", backgroundColor: "#4F46E5" }}
       >
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <div
             className="about-grid"
             style={{
@@ -304,68 +304,152 @@ export default function HomePage() {
               gap: "60px",
               alignItems: "center",
               backgroundColor: "#FFFFFF",
-              borderRadius: "16px",
+              borderRadius: "20px",
               padding: "60px",
-              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.06)",
+              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.1)",
             }}
           >
+            {/* Left Content */}
             <div>
               <div
                 style={{
-                  display: "flex ",
-                  
-                  padding: "8px 20px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "10px 24px",
                   backgroundColor: "#4F46E5",
                   color: "#FFFFFF",
-                  borderRadius: "6px",
-                  fontSize: "0.85rem",
+                  borderRadius: "30px",
+                  fontSize: "0.9rem",
                   fontWeight: 600,
-                  marginBottom: "24px",
+                  marginBottom: "28px",
+                  letterSpacing: "0.5px",
                 }}
               >
-                About Us
+                ABOUT US
               </div>
               <h2
                 style={{
                   fontSize: "2.75rem",
-                  fontWeight: 700,
-                  color: "#000",
+                  fontWeight: 800,
+                  color: "#111827",
                   margin: "0 0 24px 0",
-                  letterSpacing: "-1px",
-                  lineHeight: "1.2",
+                  letterSpacing: "-1.5px",
+                  lineHeight: "1.15",
                 }}
               >
                 Helping Teachers Plan Faster and Teach Better
               </h2>
               <p
                 className="about-description"
-                style={{ fontSize: "1.05rem", color: "#6B7280", lineHeight: "1.8", margin: "0 0 32px 0" }}
+                style={{ 
+                  fontSize: "1.1rem", 
+                  color: "#6B7280", 
+                  lineHeight: "1.8", 
+                  margin: "0 0 36px 0" 
+                }}
               >
-                Funzo Hub helps CBE teachers reduce planning time ,create structured, curriculum-aligned lesson plans in minutes,  and letting teachers focus on teaching.
+                Funzo Hub helps CBE teachers reduce planning time, create structured, curriculum-aligned lesson plans in minutes, and lets teachers focus on what matters most — teaching.
               </p>
+              
+              {/* Features List */}
+              <div style={{ marginBottom: "36px" }}>
+                {[
+                  "✓ CBE curriculum aligned",
+                  "✓ Kiswahili & English support",
+                  "✓ Instant PDF download"
+                ].map((feature, i) => (
+                  <div 
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      marginBottom: "12px",
+                      fontSize: "1rem",
+                      color: "#374151",
+                      fontWeight: 500
+                    }}
+                  >
+                    <span style={{ color: "#4F46E5", fontSize: "1.2rem" }}>{feature.charAt(0)}</span>
+                    <span>{feature.slice(2)}</span>
+                  </div>
+                ))}
+              </div>
+
               <button
                 style={{
-                  padding: "14px 32px",
+                  padding: "16px 40px",
                   backgroundColor: "#4F46E5",
                   color: "#FFFFFF",
                   border: "none",
-                  borderRadius: "8px",
-                  fontSize: "1rem",
+                  borderRadius: "12px",
+                  fontSize: "1.05rem",
                   fontWeight: 600,
                   cursor: "pointer",
-                  transition: "all 0.2s",
+                  transition: "all 0.3s ease",
+                  boxShadow: "0 4px 14px rgba(79, 70, 229, 0.3)",
                 }}
                 onMouseOver={(e) => {
                   e.target.style.backgroundColor = "#4338CA"
                   e.target.style.transform = "translateY(-2px)"
+                  e.target.style.boxShadow = "0 8px 20px rgba(79, 70, 229, 0.4)"
                 }}
                 onMouseOut={(e) => {
                   e.target.style.backgroundColor = "#4F46E5"
                   e.target.style.transform = "translateY(0)"
+                  e.target.style.boxShadow = "0 4px 14px rgba(79, 70, 229, 0.3)"
                 }}
               >
-                Watch  Demo
+                Watch Demo →
               </button>
+            </div>
+
+            {/* Right Visual */}
+            <div
+              style={{
+                backgroundColor: "#F9FAFB",
+                borderRadius: "16px",
+                padding: "40px",
+                minHeight: "400px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {/* Decorative elements */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  right: "20px",
+                  width: "80px",
+                  height: "80px",
+                  backgroundColor: "#4F46E5",
+                  opacity: 0.1,
+                  borderRadius: "50%",
+                }}
+              />
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "40px",
+                  left: "40px",
+                  width: "60px",
+                  height: "60px",
+                  backgroundColor: "#4F46E5",
+                  opacity: 0.1,
+                  borderRadius: "50%",
+                }}
+              />
+              
+              <div style={{ textAlign: "center", position: "relative", zIndex: 1 }}>
+                <div style={{ fontSize: "4rem", marginBottom: "16px" }}>📚</div>
+                <p style={{ fontSize: "1.1rem", color: "#6B7280", fontWeight: 500 }}>
+                  AI-Powered Lesson Planning
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -378,240 +462,275 @@ export default function HomePage() {
         style={{ padding: "100px 40px", backgroundColor: "#FFFFFF" }}
       >
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          {/* Section Header */}
           <div style={{ textAlign: "center", marginBottom: "80px" }}>
             <h2
               className="how-it-works-title"
               style={{
-                fontSize: "2.5rem",
-                fontWeight: 700,
-                color: "#000",
+                fontSize: "2.75rem",
+                fontWeight: 800,
+                color: "#111827",
                 margin: "0 0 16px 0",
-                letterSpacing: "-1px",
+                letterSpacing: "-1.5px",
               }}
             >
               How It Works
             </h2>
-            <p className="how-it-works-subtitle" style={{ fontSize: "1.1rem", color: "#6B7280", margin: 0 }}>
-              Create a CBE-aligned lesson plan in minutes.
+            <p 
+              className="how-it-works-subtitle" 
+              style={{ 
+                fontSize: "1.15rem", 
+                color: "#6B7280", 
+                margin: 0,
+                maxWidth: "600px",
+                marginLeft: "auto",
+                marginRight: "auto"
+              }}
+            >
+              Create a CBE-aligned lesson plan in just 3 simple steps.
             </p>
           </div>
 
+          {/* Steps Grid */}
           <div
             className="how-it-works-grid"
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}
+            style={{ 
+              display: "grid", 
+              gridTemplateColumns: "1fr", 
+              gap: "40px",
+              maxWidth: "900px",
+              margin: "0 auto"
+            }}
           >
-            {/* Steps */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "56px" }}>
-              {[
-                {
-                  num: "01",
-                  title: "Enter Your Administrative and Class Details",
-                  desc: "Select grade, subject, strand, sub-strand,.",
-                },
-                {
-                  num: "02",
-                  title: "Generate Your Lesson Plan",
-                  desc: " AI instantly creates a structured, CBE-aligned lesson plan, including learning outcomes, activities, and assessment.",
-                },
-                {
-                  num: "03",
-                  title: " Edit & Download",
-                  desc: "Customize the lesson to suit your teaching style.",
-                },
-              ].map((step, i) => (
-                <div key={i} className="step-item" style={{ display: "flex", gap: "24px" }}>
-                  <div
-                    className="steps-num"
-                    style={{ fontSize: "2.5rem", fontWeight: 700, color: "#E5E7EB", minWidth: "80px" }}
-                  >
-                    {step.num}
-                  </div>
-                  <div>
+            {[
+              {
+                num: "01",
+                title: "Enter Your Administrative and Class Details",
+                desc: "Select grade, subject, strand, sub-strand, and other class information to get started.",
+                icon: "📝"
+              },
+              {
+                num: "02",
+                title: "Generate Your Lesson Plan",
+                desc: "AI instantly creates a structured, CBE-aligned lesson plan, including learning outcomes, activities, and assessments.",
+                icon: "⚡"
+              },
+              {
+                num: "03",
+                title: "Edit & Download",
+                desc: "Customize the lesson to suit your teaching style, then download as a professional PDF.",
+                icon: "💾"
+              },
+            ].map((step, i) => (
+              <div 
+                key={i} 
+                className="step-item" 
+                style={{ 
+                  display: "flex", 
+                  gap: "32px",
+                  padding: "32px",
+                  backgroundColor: i % 2 === 0 ? "#F9FAFB" : "#FFFFFF",
+                  borderRadius: "16px",
+                  border: "2px solid #E5E7EB",
+                  transition: "all 0.3s ease",
+                  position: "relative",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "translateY(-4px)"
+                  e.currentTarget.style.boxShadow = "0 12px 30px rgba(0, 0, 0, 0.08)"
+                  e.currentTarget.style.borderColor = "#4F46E5"
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)"
+                  e.currentTarget.style.boxShadow = "none"
+                  e.currentTarget.style.borderColor = "#E5E7EB"
+                }}
+              >
+                {/* Step Number Circle */}
+                <div
+                  style={{
+                    flexShrink: 0,
+                    width: "80px",
+                    height: "80px",
+                    borderRadius: "50%",
+                    backgroundColor: "#4F46E5",
+                    color: "#FFFFFF",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "1.75rem",
+                    fontWeight: 800,
+                  }}
+                >
+                  {step.num}
+                </div>
+
+                {/* Step Content */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+                    <span style={{ fontSize: "1.75rem" }}>{step.icon}</span>
                     <h3
                       className="step-title"
                       style={{
-                        fontSize: "1.35rem",
-                        fontWeight: 600,
+                        fontSize: "1.5rem",
+                        fontWeight: 700,
                         color: "#111827",
-                        margin: "0 0 12px 0",
-                        letterSpacing: "-0.3px",
+                        margin: 0,
+                        letterSpacing: "-0.5px",
                       }}
                     >
                       {step.title}
                     </h3>
-                    <p
-                      className="step-desc"
-                      style={{ fontSize: "1rem", color: "#6B7280", margin: 0, lineHeight: "1.7" }}
-                    >
-                      {step.desc}
-                    </p>
                   </div>
+                  <p
+                    className="step-desc"
+                    style={{ 
+                      fontSize: "1.05rem", 
+                      color: "#6B7280", 
+                      margin: 0, 
+                      lineHeight: "1.7" 
+                    }}
+                  >
+                    {step.desc}
+                  </p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
-            {/* Visual mockup */}
-            
+          {/* CTA Button */}
+          <div style={{ textAlign: "center", marginTop: "60px" }}>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              style={{
+                padding: "18px 48px",
+                backgroundColor: "#4F46E5",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "1.1rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                boxShadow: "0 4px 14px rgba(79, 70, 229, 0.3)",
+              }}
+              onMouseOver={(e) => {
+                e.target.style.backgroundColor = "#4338CA"
+                e.target.style.transform = "translateY(-2px)"
+                e.target.style.boxShadow = "0 8px 20px rgba(79, 70, 229, 0.4)"
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = "#4F46E5"
+                e.target.style.transform = "translateY(0)"
+                e.target.style.boxShadow = "0 4px 14px rgba(79, 70, 229, 0.3)"
+              }}
+            >
+              Get Started Now →
+            </button>
           </div>
         </div>
       </section>
 
-{/* Contact Section */}
+      {/* Responsive Styles */}
+      <style>{`
+        /* Tablet */
+        @media (max-width: 1024px) {
+          .about-grid {
+            grid-template-columns: 1fr !important;
+            padding: 40px !important;
+            gap: 40px !important;
+          }
+          .how-it-works-title {
+            font-size: 2.25rem !important;
+          }
+          .step-item {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+        }
 
-/*     /* <section
-        className="contact-section"
-        id="contact"
-        style={{ padding: "100px 40px", backgroundColor: "#4F46E5" }}
-      >
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "56px" }}>
-            <h2
-              className="contact-title"
-              style={{ fontSize: "2.5rem", fontWeight: 800, color: "#111827", margin: "0 0 12px 0", letterSpacing: "-1px" }}
-            >
-              Contact
-            </h2>
-            <p style={{ margin: 0, color: "#6B7280", fontSize: "1.05rem", lineHeight: 1.7 }}>
-              Reach us via WhatsApp, email, or send a message.
-            </p>
-          </div>
+        /* Mobile */
+        @media (max-width: 768px) {
+          .about-section {
+            padding: 60px 20px !important;
+          }
+          .about-grid {
+            padding: 32px 24px !important;
+            gap: 32px !important;
+            border-radius: 16px !important;
+          }
+          .about-grid h2 {
+            font-size: 2rem !important;
+            line-height: 1.2 !important;
+          }
+          .about-description {
+            font-size: 1rem !important;
+          }
+          .about-grid button {
+            width: 100%;
+            padding: 14px 32px !important;
+          }
+          
+          .how-it-works-section {
+            padding: 60px 20px !important;
+          }
+          .how-it-works-title {
+            font-size: 2rem !important;
+          }
+          .how-it-works-subtitle {
+            font-size: 1rem !important;
+          }
+          .how-it-works-grid {
+            gap: 24px !important;
+          }
+          .step-item {
+            padding: 24px !important;
+            gap: 20px !important;
+          }
+          .step-item > div:first-child {
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 1.5rem !important;
+          }
+          .step-title {
+            font-size: 1.25rem !important;
+          }
+          .step-desc {
+            font-size: 0.95rem !important;
+          }
+        }
 
-          <div
-            className="contact-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "32px",
-              alignItems: "start",
-              backgroundColor: "#FFFFFF",
-              borderRadius: "16px",
-              border: "1px solid #E5E7EB",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
-              padding: "40px",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div
-                className="contact-card"
-                style={{
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "14px",
-                  padding: "22px",
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
-                <div style={{ fontWeight: 800, color: "#111827", marginBottom: "10px" }}>WhatsApp</div>
-                <div style={{ fontSize: "1.1rem", fontWeight: 800, color: "#16A34A", marginBottom: "8px" }}>{whatsappNumber}</div>
-                <div style={{ color: "#6B7280", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: "14px" }}>Fast support for teachers.</div>
-                <a
-                  href={`https://wa.me/${whatsappNumber.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: "inline-block",
-                    backgroundColor: "#16A34A",
-                    color: "#FFFFFF",
-                    padding: "10px 14px",
-                    borderRadius: "10px",
-                    textDecoration: "none",
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                  }}
-                >
-                  Chat on WhatsApp
-                </a>
-              </div>
-
-              <div
-                className="contact-card"
-                style={{
-                  border: "1px solid #E5E7EB",
-                  borderRadius: "14px",
-                  padding: "22px",
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
-                <div style={{ fontWeight: 800, color: "#111827", marginBottom: "10px" }}>Email</div>
-                <div style={{ color: "#6B7280", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: "12px" }}>
-                  For feedback, partnerships, or support:
-                </div>
-                <a
-                  href={`mailto:${contactEmail}`}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "10px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid #E5E7EB",
-                    backgroundColor: "#F9FAFB",
-                    color: "#111827",
-                    textDecoration: "none",
-                    fontWeight: 700,
-                    fontSize: "0.95rem",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {contactEmail}
-                </a>
-              </div>
-            </div>
-
-            <div
-              className="contact-card"
-              style={{
-                border: "1px solid #E5E7EB",
-                borderRadius: "14px",
-                padding: "22px",
-                backgroundColor: "#FFFFFF",
-              }}
-            >
-              <div style={{ fontWeight: 800, color: "#111827", marginBottom: "12px" }}>Send a message</div>
-              <form onSubmit={handleContactSubmit}>
-                <div className="contact-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                  <input
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm((p) => ({ ...p, name: e.target.value }))}
-                    placeholder="Your name"
-                    style={{ padding: "12px 12px", borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: "0.95rem" }}
-                  />
-                  <input
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm((p) => ({ ...p, email: e.target.value }))}
-                    placeholder="Your email"
-                    type="email"
-                    style={{ padding: "12px 12px", borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: "0.95rem" }}
-                  />
-                </div>
-                <textarea
-                  value={contactForm.message}
-                  onChange={(e) => setContactForm((p) => ({ ...p, message: e.target.value }))}
-                  placeholder="Message"
-                  rows={5}
-                  style={{ marginTop: "12px", width: "100%", padding: "12px 12px", borderRadius: "10px", border: "1px solid #E5E7EB", fontSize: "0.95rem", resize: "vertical" }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    marginTop: "12px",
-                    width: "100%",
-                    backgroundColor: "#111827",
-                    color: "#FFFFFF",
-                    border: "none",
-                    padding: "12px 14px",
-                    borderRadius: "10px",
-                    fontWeight: 800,
-                    fontSize: "1rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  Send
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section> */
+        /* Small Mobile */
+        @media (max-width: 480px) {
+          .about-section {
+            padding: 40px 16px !important;
+          }
+          .about-grid {
+            padding: 24px 20px !important;
+            border-radius: 12px !important;
+          }
+          .about-grid h2 {
+            font-size: 1.75rem !important;
+          }
+          .about-description {
+            font-size: 0.95rem !important;
+          }
+          
+          .how-it-works-section {
+            padding: 40px 16px !important;
+          }
+          .how-it-works-title {
+            font-size: 1.75rem !important;
+          }
+          .step-item {
+            padding: 20px !important;
+            gap: 16px !important;
+          }
+          .step-title {
+            font-size: 1.1rem !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
