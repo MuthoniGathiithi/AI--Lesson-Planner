@@ -379,7 +379,6 @@ import { getBilingualFields } from "./bilingual"
     return { success: false, error: error.message }
   }
 }*/
-
 import { jsPDF } from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
@@ -414,22 +413,21 @@ export async function downloadAsPdf(lessonPlan) {
       checkNewPage()
       doc.setFontSize(fontSize)
       doc.setFont("helvetica", "normal")
-      
+
       let lines = []
       if (addSpacing) {
-        // Split sentences and add spacing
         text.split('. ').forEach((sentence) => {
-          if (sentence.trim()) lines.push(sentence.trim() + '.')
-          lines.push('') // empty line for spacing
+          sentence = sentence.trim()
+          if (sentence) lines.push(sentence + '.')
         })
       } else {
         lines = doc.splitTextToSize(text, contentWidth - indent)
       }
-      
+
       lines.forEach((line) => {
         checkNewPage()
         doc.text(line, margin + indent, y)
-        y += 5
+        y += addSpacing ? 7 : 5
       })
       y += 1
     }
@@ -608,4 +606,3 @@ export async function downloadAsPdf(lessonPlan) {
     return { success: false, error: error.message }
   }
 }
-
