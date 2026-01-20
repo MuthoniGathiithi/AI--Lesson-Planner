@@ -1,6 +1,4 @@
 "use client"
-
-import { logEvent } from "./logEvent"
 import { useState, useEffect, useRef } from "react"
 import "./Dashboard.css"
 import { getBilingualFields } from "./utils/bilingual"
@@ -40,14 +38,7 @@ export default function LessonCreator() {
     subStrand: "",
   })
 
-  // ✅ FIX #1: Allow normal spacing - REMOVED .replace(/\s+/g, " ")
- /* const sanitizeTextInput = (value, maxLen = 120) => {
-    const s = String(value ?? "")
-      .replace(/[\u0000-\u001F\u007F]/g, " ")
-      .replace(/[<>]/g, "")
-      // REMOVED: .replace(/\s+/g, " ")
-    return s.length > maxLen ? s.slice(0, maxLen).trim() : s.trim()
-  }*/
+
  const sanitizeTextInput = (value, maxLen = 120) => {
   const s = String(value ?? "")
     .replace(/[\u0000-\u001F\u007F]/g, " ")
@@ -133,14 +124,6 @@ export default function LessonCreator() {
     if (!formData.schoolName?.trim()) errors.push("School")
     if (!formData.subject?.trim()) errors.push("Learning Area")
 
-    /*const gradeFromState = String(formData.grade ?? "").trim()
-    const gradeFromDom = String(gradeInputRef.current?.value ?? "").trim()
-    const effectiveGrade = gradeFromState || gradeFromDom
-    if (effectiveGrade === "") errors.push("Grade")
-    if (!formData.date?.trim()) errors.push("Date")
-    if (!(effectiveStartTime && effectiveEndTime)) errors.push("Time")
-    if (!formData.strand?.trim()) errors.push("Strand")
-    if (!formData.subStrand?.trim()) errors.push("Sub-strand")*/
     
 
 
@@ -229,14 +212,7 @@ if (gradeValue === "") errors.push("Grade")
         return v.text || v.description || v.content || v.activity || ""
       }
 
-      /*const conclusionCandidate =
-        plan.suggestedLearningExperiences.conclusion ??
-        plan.suggestedLearningExperiences.closure ??
-        plan.suggestedLearningExperiences.plenary ??
-        plan.suggestedLearningExperiences.summary
-
-      const conclusionText = String(coerceText(conclusionCandidate)).trim()
-      plan.suggestedLearningExperiences.conclusion = conclusionText || "N/A"*/
+    
 
       if (!plan.weekLesson) plan.weekLesson = "WEEK 1: LESSON 1"
 

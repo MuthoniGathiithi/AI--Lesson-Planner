@@ -1,8 +1,6 @@
 "use client"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import PhoneMockup from "./Staticphonemockup.jsx"
-import DashboardMockup from "./Dashboardmockup.jsx"
 
 
 
@@ -297,7 +295,7 @@ export default function HomePage() {
         id="about"
         style={{ padding: "100px 40px", backgroundColor: "#4F46E5" }}
       >
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
           <div
             className="about-grid"
             style={{
@@ -314,7 +312,9 @@ export default function HomePage() {
             <div>
               <div
                 style={{
-                  display: "inline-block",
+                  display: "flex ",
+                    /*display: "inline-block ",*/
+
                   padding: "8px 20px",
                   backgroundColor: "#4F46E5",
                   color: "#FFFFFF",
@@ -342,8 +342,7 @@ export default function HomePage() {
                 className="about-description"
                 style={{ fontSize: "1.05rem", color: "#6B7280", lineHeight: "1.8", margin: "0 0 32px 0" }}
               >
-                Funzo Hub helps CBE teachers create structured, curriculum-aligned lesson plans in minutes, reducing
-                planning time and letting teachers focus on teaching.
+                Funzo Hub helps CBE teachers reduce planning time ,create structured, curriculum-aligned lesson plans in minutes,  and letting teachers focus on teaching.
               </p>
               <button
                 style={{
@@ -458,8 +457,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section
+{/* Contact Section */}
+
+/*     /* <section
         className="contact-section"
         id="contact"
         style={{ padding: "100px 40px", backgroundColor: "#4F46E5" }}
@@ -612,7 +612,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */
     </div>
   )
 }
