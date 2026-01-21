@@ -124,11 +124,8 @@ export default function LessonCreator() {
     if (!formData.schoolName?.trim()) errors.push("School")
     if (!formData.subject?.trim()) errors.push("Learning Area")
 
-    
-
-
     const gradeValue = String(formData.grade ?? "").replace(/[^0-9]/g, "")  // Only keep numbers
-if (gradeValue === "") errors.push("Grade")
+    if (gradeValue === "") errors.push("Grade")
   
     if (errors.length > 0) {
       alert(`Please fill in the following required fields:\n- ${errors.join('\n- ')}`)
@@ -211,8 +208,6 @@ if (gradeValue === "") errors.push("Grade")
         if (typeof v !== "object") return String(v)
         return v.text || v.description || v.content || v.activity || ""
       }
-
-    
 
       if (!plan.weekLesson) plan.weekLesson = "WEEK 1: LESSON 1"
 
@@ -401,7 +396,7 @@ if (gradeValue === "") errors.push("Grade")
     setPathValue(path, emptyValue)
   }
 
-  // ✅ FIX #2: Fixed saveEdit to handle the correct data structure
+  // ✅ IMPROVED saveEdit function with selfEvaluationMarks support
   const saveEdit = (path) => {
     if (!lessonPlan) return
     
@@ -432,11 +427,20 @@ if (gradeValue === "") errors.push("Grade")
     }
     
     const finalKey = keys[keys.length - 1]
-    current[finalKey] = editingValue
+    
+    // ✅ SPECIAL HANDLING for selfEvaluationMarks
+    if (finalKey === 'selfEvaluationMarks' || finalKey === 'selfEvaluation') {
+      current.selfEvaluationMarks = editingValue
+      current.selfEvaluation = editingValue
+    } else {
+      current[finalKey] = editingValue
+    }
     
     setLessonPlan(newPlan)
     setEditingField(null)
     setEditingValue("")
+    
+    console.log('Field updated successfully:', path)
   }
 
   // ============ NEW STRUCTURE HELPER FUNCTIONS ============
@@ -685,8 +689,6 @@ if (gradeValue === "") errors.push("Grade")
           className={isMobile ? 'content-mobile' : ''}
           style={styles.content}
         >
-
-              // Enhanced Form Component with Dropdowns - Replace your form section
 
 {!lessonPlan ? (
   <div style={{
@@ -1027,18 +1029,6 @@ if (gradeValue === "") errors.push("Grade")
             onFocus={(e) => {
               e.target.style.borderColor = "#4338CA"
               e.target.style.boxShadow = "0 0 0 4px rgba(67, 56, 202, 0.1)"
-            }}
-            onBlur={(e) => {
-              const { start, end } = parseTimeRange(e.target.value)
-              setFormData((prev) => ({
-                ...prev,
-                startTime: start,
-                endTime: end,
-                timeRange: start && end ? `${start} - ${end}` : prev.timeRange,
-              }))
-              const hasTimeRange = start && end
-              e.target.style.borderColor = hasTimeRange ? "#E5E7EB" : "#fca5a5"
-              e.target.style.boxShadow = "none"
             }}
           />
           <p style={{ 
@@ -1732,7 +1722,7 @@ if (gradeValue === "") errors.push("Grade")
                             {renderEditableField("lessonPlan.suggestedParentalInvolvement", data.parentalInvolvement || (lessonPlan?.lessonPlan || lessonPlan)?.suggestedParentalInvolvement, true, "Enter parental involvement/community service learning")}
                           </div>
 
-                          {/* SELF EVALUATION */}
+                          {/* ✅ SELF EVALUATION MARKS - IMPROVED SECTION */}
                           <div style={styles.section}>
                             <div style={styles.sectionHeaderWithButton}>
                               <div style={styles.sectionTitle}>{labels.selfEvaluation}</div>
@@ -1745,7 +1735,12 @@ if (gradeValue === "") errors.push("Grade")
                                 <span>Remove</span>
                               </button>
                             </div>
-                            {renderEditableField("lessonPlan.selfEvaluationMarks", data.selfEvaluation || (lessonPlan?.lessonPlan || lessonPlan)?.selfEvaluationMarks, true, "Enter self-evaluation criteria")}
+                            {renderEditableField(
+                              "lessonPlan.selfEvaluationMarks", 
+                              data.selfEvaluation || (lessonPlan?.lessonPlan || lessonPlan)?.selfEvaluationMarks || (lessonPlan?.lessonPlan || lessonPlan)?.selfEvaluation, 
+                              true, 
+                              "Enter self-evaluation criteria"
+                            )}
                           </div>
                         </>
                       )

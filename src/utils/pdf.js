@@ -378,63 +378,20 @@ import { getBilingualFields } from "./bilingual"
     return { success: false, error: error.message }
   }
 }*/
-import * as jsPDFModule from "jspdf"
+import jsPDF from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
 export async function downloadAsPdf(lessonPlan) {
   try {
-    const JsPDF = jsPDFModule?.jsPDF || jsPDFModule?.default
-    if (typeof JsPDF !== "function") {
-      throw new Error("PDF generator unavailable: invalid jspdf export")
-    }
-
-    const assertFn = (obj, key) => {
-      if (typeof obj?.[key] !== "function") {
-        throw new Error(`PDF generator error: expected doc.${key} to be a function`)
-      }
-    }
-
-    const assertPathFn = (obj, path) => {
-      const parts = String(path).split(".").filter(Boolean)
-      let cur = obj
-      for (let i = 0; i < parts.length; i++) {
-        cur = cur?.[parts[i]]
-      }
-      if (typeof cur !== "function") {
-        throw new Error(`PDF generator error: expected ${path} to be a function`)
-      }
-      return cur
-    }
-
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
-    let doc
-    try {
-      doc = new JsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      })
-    } catch (e) {
-      const exportKeys = jsPDFModule && typeof jsPDFModule === "object" ? Object.keys(jsPDFModule).slice(0, 20).join(",") : ""
-      throw new Error(
-        `jsPDF initialization failed: ${e?.message || String(e)} (jspdf exports: ${exportKeys})`
-      )
-    }
-
-    assertFn(doc, "text")
-    assertFn(doc, "setFont")
-    assertFn(doc, "setFontSize")
-    assertFn(doc, "save")
-    assertFn(doc, "splitTextToSize")
-    assertFn(doc, "addPage")
-    assertFn(doc, "getTextWidth")
-    assertFn(doc, "setLineWidth")
-    assertFn(doc, "rect")
-    assertFn(doc, "line")
-    assertPathFn(doc, "internal.pageSize.getWidth")
-    assertPathFn(doc, "internal.pageSize.getHeight")
+    // Simple, direct jsPDF initialization
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    })
     
     let y = 20
     const margin = 20
@@ -552,7 +509,7 @@ export async function downloadAsPdf(lessonPlan) {
 
     const outcomes = data.specificLearningOutcomes?.outcomes || []
     outcomes.forEach((outcome, i) => {
-      const outcomeText = outcome.outcome || outcome.text || 'N/A'
+      const outcomeText = outcome.outcome || outcome.text || outcome || 'N/A'
       addText(`${String.fromCharCode(97 + i)}) ${outcomeText}`, 11, 0, true)
     })
     y += 3
@@ -565,7 +522,8 @@ export async function downloadAsPdf(lessonPlan) {
 
     y += 2
     addBoldHeader('CORE COMPETENCIES TO BE DEVELOPED:')
-    (data.coreCompetencies || []).forEach(c => addText(`• ${c}`, 11, 0))
+    const competencies = data.coreCompetenciesToBeDeveloped || data.coreCompetencies || []
+    competencies.forEach(c => addText(`• ${c}`, 11, 0))
 
     y += 2
     addBoldHeader('LINK TO VALUES:')
@@ -589,6 +547,7 @@ export async function downloadAsPdf(lessonPlan) {
     const indent = 5
 
     if (sle.introduction) {
+      checkNewPage()
       doc.setFont("helvetica", "normal")
       doc.text('Introduction/Getting Started (5 mins)', margin + indent, y)
       y += 6
@@ -596,21 +555,27 @@ export async function downloadAsPdf(lessonPlan) {
     }
 
     if (sle.exploration?.length) {
+      checkNewPage()
+      doc.setFont("helvetica", "normal")
       doc.text('Exploration/Lesson Development (35 mins)', margin + indent, y)
       y += 6
       sle.exploration.forEach(step => {
-        let text = typeof step === 'string' ? step : step.step || step.description || step.text || ''
+        let text = typeof step === 'string' ? step : step.description || step.step || step.text || ''
         if (text.trim()) addText(text, 11, indent)
       })
     }
 
     if (sle.reflection) {
+      checkNewPage()
+      doc.setFont("helvetica", "normal")
       doc.text('Reflection', margin + indent, y)
       y += 6
       addText(sle.reflection, 11, indent)
     }
 
     if (sle.extension) {
+      checkNewPage()
+      doc.setFont("helvetica", "normal")
       doc.text('Extension', margin + indent, y)
       y += 6
       addText(sle.extension, 11, indent)
@@ -618,24 +583,34 @@ export async function downloadAsPdf(lessonPlan) {
 
     const conclusionText = sle.conclusion || sle.closure || sle.plenary || sle.summary || ''
     if (conclusionText) {
+      checkNewPage()
+      doc.setFont("helvetica", "normal")
       doc.text('Conclusion (5 mins)', margin + indent, y)
       y += 6
       addText(conclusionText, 11, indent)
     }
 
-    if (data.parentalInvolvement) {
+    // PARENTAL INVOLVEMENT
+    const parentalInvolvement = data.suggestedParentalInvolvement || data.parentalInvolvement || ''
+    if (parentalInvolvement) {
+      y += 2
       addBoldHeader('SUGGESTED PARENTAL INVOLVEMENT/COMMUNITY SERVICE LEARNING:')
-      addText(data.parentalInvolvement, 11, 0)
+      addText(parentalInvolvement, 11, 0)
     }
 
+    // ASSESSMENT
     if (data.assessment) {
+      y += 2
       addBoldHeader('ASSESSMENT:')
       addText(data.assessment, 11, 0)
     }
 
-    if (data.selfEvaluation) {
+    // SELF-EVALUATION MARKS - Fixed to check both possible field names
+    const selfEvaluation = data.selfEvaluationMarks || data.selfEvaluation || ''
+    if (selfEvaluation) {
+      y += 2
       addBoldHeader('SELF-EVALUATION MARKS:')
-      addText(data.selfEvaluation, 11, 0)
+      addText(selfEvaluation, 11, 0)
     }
 
     const fileName = `${data.learningArea || 'Lesson'}_Grade${data.grade || 'X'}_${data.date || 'plan'}.pdf`
