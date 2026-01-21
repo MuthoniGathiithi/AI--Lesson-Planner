@@ -1,4 +1,4 @@
-import * as jsPDFModule from "jspdf"
+import { jsPDF } from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
 /**
