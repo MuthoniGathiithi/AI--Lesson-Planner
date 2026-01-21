@@ -378,15 +378,25 @@ import { getBilingualFields } from "./bilingual"
     return { success: false, error: error.message }
   }
 }*/
-import jsPDF from "jspdf"
 import { getBilingualFields } from "./bilingual"
 
 export async function downloadAsPdf(lessonPlan) {
   try {
+    // ✅ DYNAMIC IMPORT - Fixes the "y(...) is not a function" error
+    const jsPDFModule = await import('jspdf')
+    
+    // ✅ Try all possible export patterns
+    const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule
+    
+    if (typeof jsPDF !== 'function') {
+      console.error('jsPDF module:', jsPDFModule)
+      throw new Error('jsPDF constructor not found. Available exports: ' + Object.keys(jsPDFModule).join(', '))
+    }
+
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
-    // Simple, direct jsPDF initialization
+    // ✅ Create PDF instance
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -453,7 +463,7 @@ export async function downloadAsPdf(lessonPlan) {
     // ============ MAIN TITLE ============
     doc.setFontSize(12)
     doc.setFont("helvetica", "bold")
-    const mainTitle = `${data.grade || '10'} ${(data.learningArea || 'GEOGRAPHY').toUpperCase()} LESSON PLAN`
+    const mainTitle = `GRADE ${data.grade || '10'} ${(data.learningArea || 'GEOGRAPHY').toUpperCase()} LESSON PLAN`
     const titleWidth = doc.getTextWidth(mainTitle)
     doc.text(mainTitle, (pageWidth - titleWidth) / 2, y)
     y += 8
@@ -509,7 +519,7 @@ export async function downloadAsPdf(lessonPlan) {
 
     const outcomes = data.specificLearningOutcomes?.outcomes || []
     outcomes.forEach((outcome, i) => {
-      const outcomeText = outcome.outcome || outcome.text || outcome || 'N/A'
+      const outcomeText = typeof outcome === 'string' ? outcome : outcome.outcome || outcome.text || outcome || 'N/A'
       addText(`${String.fromCharCode(97 + i)}) ${outcomeText}`, 11, 0, true)
     })
     y += 3
@@ -605,9 +615,9 @@ export async function downloadAsPdf(lessonPlan) {
       addText(data.assessment, 11, 0)
     }
 
-    // SELF-EVALUATION MARKS - Fixed to check both possible field names
+    // ✅ SELF-EVALUATION MARKS - Check both fields
     const selfEvaluation = data.selfEvaluationMarks || data.selfEvaluation || ''
-    if (selfEvaluation) {
+    if (selfEvaluation && selfEvaluation.trim()) {  // Only add if not empty
       y += 2
       addBoldHeader('SELF-EVALUATION MARKS:')
       addText(selfEvaluation, 11, 0)
@@ -621,6 +631,7 @@ export async function downloadAsPdf(lessonPlan) {
     return { success: true }
   } catch (error) {
     console.error('PDF generation error:', error)
+    console.error('Error stack:', error.stack)
     return { success: false, error: error.message }
   }
 }
