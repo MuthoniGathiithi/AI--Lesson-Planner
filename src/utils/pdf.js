@@ -409,11 +409,19 @@ export async function downloadAsPdf(lessonPlan) {
     const fields = getBilingualFields(lessonPlan)
     const { isKiswahili, labels, data } = fields
     
-    const doc = new JsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    })
+    let doc
+    try {
+      doc = new JsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+    } catch (e) {
+      const exportKeys = jsPDFModule && typeof jsPDFModule === "object" ? Object.keys(jsPDFModule).slice(0, 20).join(",") : ""
+      throw new Error(
+        `jsPDF initialization failed: ${e?.message || String(e)} (jspdf exports: ${exportKeys})`
+      )
+    }
 
     assertFn(doc, "text")
     assertFn(doc, "setFont")
